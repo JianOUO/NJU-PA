@@ -1,5 +1,5 @@
-STUID = 231220000
-STUNAME = 张三
+STUID = SA25225171
+STUNAME = Jin An
 
 # DO NOT modify the following code!!!
 

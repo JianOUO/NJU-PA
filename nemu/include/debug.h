@@ -20,6 +20,9 @@
 #include <stdio.h>
 #include <utils.h>
 
+// 当 ## 用在 __VA_ARGS__ 前面时：
+// 如果 __VA_ARGS__ 为空，## 会删除前面的逗号
+// 如果 __VA_ARGS__ 不为空，## 正常连接
 #define Log(format, ...) \
     _Log(ANSI_FMT("[%s:%d %s] " format, ANSI_FG_BLUE) "\n", \
         __FILE__, __LINE__, __func__, ## __VA_ARGS__)

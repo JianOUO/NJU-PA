@@ -1,8 +1,14 @@
 mainmenu "NEMU Configuration Menu"
 
+# choice 定义了一个选择组，用户只能选择其中一个选项
+# prompt 设置选择提示文本，显示为 "Base ISA"
+# default 指定默认选择为 ISA_riscv
 choice
   prompt "Base ISA"
   default ISA_riscv
+# 每个 config 定义一个配置选项
+# bool 表示这是一个布尔类型（开/关）
+# 引号内的文本是用户界面显示的选项名称
 config ISA_x86
   bool "x86"
 config ISA_mips32
@@ -11,8 +17,13 @@ config ISA_riscv
   bool "riscv"
 config ISA_loongarch32r
   bool "loongarch32r"
+# 结束 choice 块
 endchoice
 
+# 定义一个名为 ISA 的配置项
+# string 表示这是一个字符串类型的配置
+# 用户只需要选择架构类型（如 ISA_riscv）
+# 统自动根据其他条件设置正确的 ISA 字符串
 config ISA
   string
   default "x86" if ISA_x86
@@ -23,12 +34,18 @@ config ISA
   default "none"
 
 config ISA64
+# 只有当 ISA_riscv 和 RV64 都被选中时，ISA64 配置项才会在配置界面中显示
+# 如果依赖条件不满足，这个配置项会被隐藏
   depends on ISA_riscv && RV64
   bool
+# 当依赖条件满足时，ISA64 会自动被设置为 y
+# 用户通常不需要手动选择这个选项
   default y
 
-
+# 当用户选择RISC-V时，会显示src/isa/riscv32/Kconfig 中的配置选项
+# 如RV64、RVE等
 if ISA_riscv
+# source 用于包含其他 Kconfig 文件
 source "src/isa/riscv32/Kconfig"
 endif
 
@@ -133,11 +150,13 @@ config TRACE
 
 config TRACE_START
   depends on TRACE
+# 当执行多少条指令后启用tracing
   int "When tracing is enabled (unit: number of instructions)"
   default 0
 
 config TRACE_END
   depends on TRACE
+# 当执行多少条指令后禁用tracing
   int "When tracing is disabled (unit: number of instructions)"
   default 10000
 

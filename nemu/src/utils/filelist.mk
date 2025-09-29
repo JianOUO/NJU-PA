@@ -14,11 +14,19 @@
 #**************************************************************************************/
 
 ifeq ($(CONFIG_ITRACE)$(CONFIG_IQUEUE),)
+# $(CONFIG_ITRACE)$(CONFIG_IQUEUE) 将两个配置变量连接成一个字符串
+# 如果两个配置都未设置（为空），则条件为真
 SRCS-BLACKLIST-y += src/utils/disasm.c
 else
+# 定义 Capstone 库的路径
 LIBCAPSTONE = tools/capstone/repo/libcapstone.so.5
+# 添加 Capstone 头文件路径到编译标志
 CFLAGS += -I tools/capstone/repo/include
+# src/utils/disasm.c 依赖于 $(LIBCAPSTONE)
+# 编译 disasm.c 前会先确保库文件存在
 src/utils/disasm.c: $(LIBCAPSTONE)
+# 如果库文件不存在，执行构建规则
+# -C tools/capstone 切换到 capstone 目录执行 make
 $(LIBCAPSTONE):
 	$(MAKE) -C tools/capstone
 endif

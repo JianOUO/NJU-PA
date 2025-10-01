@@ -126,9 +126,9 @@ static int cmd_x(char *args) {
       printf("\n");
     } else {
       if (!in_pmem(EXPR + 4 * i)) {
-        printf("x: " FMT_PADDR "out of memory\n", EXPR + 4 * i); 
+        printf("x: " FMT_PADDR " + %d " "out of memory\n", EXPR, 4 * i); 
       } else {
-        printf("x: " FMT_PADDR " + 3 out of memory\n", EXPR + 4 * i); 
+        printf("x: " FMT_PADDR " + %d " "out of memory\n", EXPR, 4 * i + 3); 
       }
       break;
     }

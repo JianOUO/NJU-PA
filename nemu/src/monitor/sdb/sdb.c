@@ -53,13 +53,36 @@ static int cmd_c(char *args) {
   return 0;
 }
 
-
 static int cmd_q(char *args) {
   nemu_state.state = NEMU_QUIT;
   return -1;
 }
 
 static int cmd_help(char *args);
+
+static int cmd_si(char *args) {
+  return 0;
+}
+
+static int cmd_info(char *args) {
+  return 0;
+}
+
+static int cmd_x(char *args) {
+  return 0;
+}
+
+static int cmd_p(char *args) {
+  return 0;
+}
+
+static int cmd_w(char *args) {
+  return 0;
+}
+
+static int cmd_d(char *args) {
+  return 0;
+}
 
 static struct {
   const char *name;
@@ -69,9 +92,13 @@ static struct {
   { "help", "Display information about all supported commands", cmd_help },
   { "c", "Continue the execution of the program", cmd_c },
   { "q", "Exit NEMU", cmd_q },
-
+  { "si", "Steo execution. Usage: si [N]", cmd_si},
+  { "info", "Print the program status. Usage: info SUBCMD", cmd_info},
+  { "x", "Scan memory. Usage: x N EXPR", cmd_x},
+  { "p", "Expression evaluation. Usage: p EXPR", cmd_p},
+  { "w", "Set watch point. Usage: w EXPR", cmd_w},
+  { "d", "Delete watch point. Usage: d N", cmd_d},
   /* TODO: Add more commands */
-
 };
 
 #define NR_CMD ARRLEN(cmd_table)

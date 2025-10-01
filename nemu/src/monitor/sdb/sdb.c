@@ -77,6 +77,20 @@ static int cmd_si(char *args) {
 }
 
 static int cmd_info(char *args) {
+  char *arg = strtok(NULL, " ");
+  if (arg == NULL) {
+    printf("info: No SUBCMD\n");
+    return 0;
+  } else {
+    if (*arg == 'r') {
+      isa_reg_display();
+    } else if (*arg == 'w') {
+
+    } else {
+      printf("info: Unkowned SUBCMD: '%c'\n", *arg);
+      return 0;
+    }
+  }
   return 0;
 }
 

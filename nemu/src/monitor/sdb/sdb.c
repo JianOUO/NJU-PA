@@ -125,11 +125,15 @@ static int cmd_x(char *args) {
       printf("%08x", *(byte + i));
       printf("\n");
     } else {
-      if (!in_pmem(EXPR + 4 * i)) {
-        printf("x: " FMT_PADDR " + %d " "out of memory\n", EXPR, 4 * i); 
-      } else {
-        printf("x: " FMT_PADDR " + %d " "out of memory\n", EXPR, 4 * i + 3); 
+      if (in_pmem(EXPR + 4 * i)) {
+        printf(FMT_PADDR ": ", EXPR + 4 * i);
+        printf("%02x", *((uint8_t *)(byte + i)));
+      } else break;
+      for (int j = 1; j < 3; j++) {
+        if (in_pmem(EXPR + 4 * i + j)) printf("%02x", *((uint8_t *)(byte + i) + j));
+        else break;
       }
+      printf("\n");
       break;
     }
   }

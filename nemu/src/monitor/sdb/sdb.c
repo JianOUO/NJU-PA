@@ -17,6 +17,7 @@
 #include <cpu/cpu.h>
 #include <readline/readline.h>
 #include <readline/history.h>
+#include <memory/paddr.h>
 #include "sdb.h"
 
 static int is_batch_mode = false;
@@ -67,7 +68,7 @@ static int cmd_si(char *args) {
     cpu_exec(num);
   } else {
     int ret = sscanf(arg, "%d", &num);
-    if (ret < 1) {
+    if (ret != 1) {
       printf("si: sscanf failed\n");
       return 0;
     }
@@ -95,6 +96,38 @@ static int cmd_info(char *args) {
 }
 
 static int cmd_x(char *args) {
+  char *arg = strtok(NULL, " ");
+  int N;
+  paddr_t EXPR;
+  if (arg == NULL) {
+    printf("x: no N\n");
+    return 0;
+  } else {
+    if (sscanf(arg, "%d", &N) != 1) {
+      printf("x: sscanf failed\n");
+      return 0;
+    }
+  }
+  arg = strtok(NULL, " ");
+  if (arg == NULL) {
+    printf("x: no EXPR\n");
+    return 0;
+  } else {
+    if (sscanf(arg, MUXDEF(PMEM64, "0x%" PRIx64, "0x%" PRIx32), &EXPR) != 1) {
+      printf("x: sscanf failed\n");
+      return 0;
+    }
+  }
+  uint32_t *byte = (uint32_t *)guest_to_host(EXPR);
+  for (int i = 0; i < N; i++) {
+    if (in_pmem(EXPR + 4 * i) && in_pmem(EXPR + 4 * i + 3)) {
+      printf(FMT_PADDR ": ", EXPR + 4 * i);
+      printf("%08x", *(byte + i));
+      printf("\n");
+    } else {
+      break;
+    }
+  }
   return 0;
 }
 

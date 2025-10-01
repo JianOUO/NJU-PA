@@ -26,8 +26,10 @@ void init_wp_pool();
 
 /* We use the `readline' library to provide more flexibility to read from stdin. */
 static char* rl_gets() {
+  // static：在函数调用间保持值
   static char *line_read = NULL;
 
+  // 释放之前分配的内存(readline会自动分配内存),避免内存泄漏
   if (line_read) {
     free(line_read);
     line_read = NULL;
@@ -35,6 +37,10 @@ static char* rl_gets() {
 
   line_read = readline("(nemu) ");
 
+  // 正常输入 - 返回新分配的字符串
+  // 空输入（直接按回车） - 返回空字符串
+  // EOF（Ctrl+D） - 返回 NULL
+  // 错误情况 - 返回 NULL
   if (line_read && *line_read) {
     add_history(line_read);
   }

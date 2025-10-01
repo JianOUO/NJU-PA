@@ -37,12 +37,13 @@ static struct rule {
    */
 
   {" +", TK_NOTYPE},    // spaces
-  {"\\+", '+'},         // plus
+  {"\\+", '+'},         // plus \在C语言中是转义字符, \\+在编译后变为\+，匹配"+"的正则表达式
   {"==", TK_EQ},        // equal
 };
 
 #define NR_REGEX ARRLEN(rules)
 
+// 编译后的正则表示式
 static regex_t re[NR_REGEX] = {};
 
 /* Rules are used for many times.
@@ -83,7 +84,10 @@ static bool make_token(char *e) {
       if (regexec(&re[i], e + position, 1, &pmatch, 0) == 0 && pmatch.rm_so == 0) {
         char *substr_start = e + position;
         int substr_len = pmatch.rm_eo;
-
+        // %.*s .* 表示精度由参数指定
+        // 限制输出的字符数量
+        // 如果精度大于字符串长度，输出整个字符串
+        // 如果精度小于字符串长度，只输出前 N 个字符
         Log("match rules[%d] = \"%s\" at position %d with len %d: %.*s",
             i, rules[i].regex, position, substr_len, substr_len, substr_start);
 
@@ -103,6 +107,9 @@ static bool make_token(char *e) {
     }
 
     if (i == NR_REGEX) {
+      // %*,s * 表示字段宽度由参数指定
+      // 如果字符串长度小于指定宽度，会在左侧填充空格
+      // 如果字符串长度大于等于指定宽度，直接输出字符串
       printf("no match at position %d\n%s\n%*.s^\n", position, e, position, "");
       return false;
     }

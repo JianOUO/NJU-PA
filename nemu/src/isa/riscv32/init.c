@@ -18,6 +18,7 @@
 
 // this is not consistent with uint8_t
 // but it is ok since we do not access the array directly
+// 预期结果是0xdeadbeef被改为0xdeadbe00，a0为0
 static const uint32_t img [] = {
   0x00000297,  // auipc t0,0
   0x00028823,  // sb  zero,16(t0)

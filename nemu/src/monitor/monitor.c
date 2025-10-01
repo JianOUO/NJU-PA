@@ -32,8 +32,8 @@ static void welcome() {
   Log("Build time: %s, %s", __TIME__, __DATE__);
   printf("Welcome to %s-NEMU!\n", ANSI_FMT(str(__GUEST_ISA__), ANSI_FG_YELLOW ANSI_BG_RED));
   printf("For help, type \"help\"\n");
-  Log("Exercise: Please remove me in the source code and compile NEMU again.");
-  assert(0);
+  //Log("Exercise: Please remove me in the source code and compile NEMU again.");
+  //assert(0);
 }
 
 #ifndef CONFIG_TARGET_AM
@@ -52,6 +52,12 @@ static long load_img() {
     return 4096; // built-in image size
   }
 
+  // "r" - 文本模式
+  // 在 Windows 系统上：\r\n (CRLF) ↔ \n (LF) 自动转换,在 Linux/macOS 系统上：通常没有区别
+  // 适合读取：文本文件、配置文件、源代码等
+  // "rb" - 二进制模式
+  // 所有系统：原样读取，不做任何转换,保持文件的原始字节序列
+  // 适合读取：图片、音频、视频、压缩文件、二进制数据
   FILE *fp = fopen(img_file, "rb");
   Assert(fp, "Can not open '%s'", img_file);
 
@@ -61,6 +67,7 @@ static long load_img() {
   Log("The image is %s, size = %ld", img_file, size);
 
   fseek(fp, 0, SEEK_SET);
+  // 将整个image-file读入到nemu模拟的物理内存(字节数组)中
   int ret = fread(guest_to_host(RESET_VECTOR), size, 1, fp);
   assert(ret == 1);
 
@@ -78,6 +85,7 @@ static int parse_args(int argc, char *argv[]) {
     {0          , 0                , NULL,  0 },
   };
   int o;
+  // argc, argv: 命令行参数 "-bhl:d:p:": 短选项字符串 table: 长选项表 NULL: 不需要返回长选项索引
   while ( (o = getopt_long(argc, argv, "-bhl:d:p:", table, NULL)) != -1) {
     switch (o) {
       case 'b': sdb_set_batch_mode(); break;

@@ -61,6 +61,18 @@ static int cmd_q(char *args) {
 static int cmd_help(char *args);
 
 static int cmd_si(char *args) {
+  int num = 1;
+  char *arg = strtok(NULL, " ");
+  if (arg == NULL) {
+    cpu_exec(num);
+  } else {
+    int ret = sscanf(arg, "%d", &num);
+    if (ret < 1) {
+      printf("si: sscanf failed\n");
+      return 0;
+    }
+    cpu_exec(num);
+  }
   return 0;
 }
 

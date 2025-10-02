@@ -176,37 +176,31 @@ static word_t string2number(char *str) {
   for (int i = 0; i < len; i++) {
     if (str[i] == '-')  minus_num++;
   }
+  bool flag = false;
   if (len - minus_num > 10) {
+    flag = true;
+  } else if (len - minus_num == 10) {
+    const char *max_uint = "4294967295";
+    for (int i = 0; i < 10; i++) {
+      if (str[i] < max_uint[i]) break;
+      if (str[i] > max_uint[i]) {
+        flag = true;
+        break;
+      }
+    }
+  }
+  if (flag) {
     Log("Expr error");
     error = true;
     printf("%s out of uint32 max\n", str);
-    return 0;
-  } else if (len == 10) {
-    const char *max_uint = "4294967295";
-      for (int i = 0; i < 10; i++) {
-        if (str[i] < max_uint[i]) break;
-        if (str[i] > max_uint[i]) {
-          Log("Expr error");
-          error = true;
-          printf("%s out of uint32 max\n", str);
-          return 0; 
-        }
-      }
+    return 0; 
   }
   if (sscanf(str + minus_num, "%u", &val) != 1) {
     Log("sscanf failed");
     error = true;
     return 0;
   }
-  if (minus_num % 2) {
-    if (val >= 0x80000000) {
-      printf("%u can't be converted to negative number", val);
-      error = true;
-      return 0;
-    } else {
-      val = (word_t)(-1 * (int)val);
-    }
-  }
+  if (minus_num % 2) val = (word_t)(-1 * (int)val);
   return val;
 }
 

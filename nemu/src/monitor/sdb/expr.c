@@ -214,7 +214,7 @@ static word_t string2number(char *str) {
 static bool check_parentheses(int p, int q) {
   int top = 0;
   if (tokens[p].type == '(' && tokens[q].type == ')') {
-    for (int i = p + 1; i < q; i++) {
+    for (int i = p; i <= q; i++) {
       if (tokens[i].type == '(') {
         top++;
       } else if (tokens[i].type == ')') {

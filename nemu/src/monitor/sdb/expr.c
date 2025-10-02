@@ -284,6 +284,7 @@ static int find_mainop(int p, int q) {
         main_op = i;
         break;
       };
+      default: break;
     }
   }
   if (main_op == p) {
@@ -296,7 +297,7 @@ static int find_mainop(int p, int q) {
 
 static word_t eval(int p, int q) {
   while (p <= q && tokens[p].type == TK_NOTYPE) p++;
-  while (q >= p && tokens[q].type == TK_NOTYPE) q++;
+  while (q >= p && tokens[q].type == TK_NOTYPE) q--;
   if (p > q) {
     printf("Bad Expression\n");
     Log("Expr error");

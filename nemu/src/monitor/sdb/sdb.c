@@ -67,8 +67,7 @@ static int cmd_si(char *args) {
   if (arg == NULL) {
     cpu_exec(num);
   } else {
-    int ret = sscanf(arg, "%d", &num);
-    if (ret != 1) {
+    if (sscanf(arg, "%d", &num) != 1) {
       printf("si: sscanf failed\n");
       return 0;
     }
@@ -141,6 +140,19 @@ static int cmd_x(char *args) {
 }
 
 static int cmd_p(char *args) {
+  char *arg = strtok(NULL, " ");
+  if (arg == NULL) {
+    printf("p: no EXPR\n");
+    return 0;
+  } else {
+    bool success;
+    word_t val = expr(arg, &success);
+    if (success) {
+      printf(FMT_WORD_U "\n", val);
+    } else {
+      printf("Expr computing failed\n");
+    }
+  }
   return 0;
 }
 

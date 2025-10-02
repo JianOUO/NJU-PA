@@ -21,7 +21,7 @@
 #include <regex.h>
 
 enum {
-  TK_NOTYPE = 256, TK_EQ,
+  TK_NOTYPE = 256, TK_EQ, TK_NUMBER,
 
   /* TODO: Add more token types */
 
@@ -39,6 +39,12 @@ static struct rule {
   {" +", TK_NOTYPE},    // spaces
   {"\\+", '+'},         // plus \在C语言中是转义字符, \\+在编译后变为\+，匹配"+"的正则表达式
   {"==", TK_EQ},        // equal
+  {"-*\\d+", TK_NUMBER},  // decimal number
+  {"-", '-'},           // minus
+  {"\\*", '*'},         // multiply
+  {"/", '/'},           // divide
+  {"\\(", '('},          // left parenthesis
+  {"\\)", ')'},         // right parenthesis
 };
 
 #define NR_REGEX ARRLEN(rules)
@@ -75,7 +81,6 @@ static bool make_token(char *e) {
   int position = 0;
   int i;
   regmatch_t pmatch;
-
   nr_token = 0;
 
   while (e[position] != '\0') {
@@ -98,14 +103,57 @@ static bool make_token(char *e) {
          * of tokens, some extra actions should be performed.
          */
 
+        Assert(nr_token < 32,"token number should less than 32");
         switch (rules[i].token_type) {
-          default: TODO();
+          case TK_NOTYPE: break;
+          case '+': {
+            tokens[nr_token++].type = '+';
+            break;
+          };
+          case TK_EQ: {
+            tokens[nr_token++].type = TK_EQ;
+            break;
+          };
+          case '-': {
+            tokens[nr_token++].type = '-';
+            break;
+          };
+          case '*': {
+            tokens[nr_token++].type = '*';
+            break;
+          };
+          case '/': {
+            tokens[nr_token++].type = '/';
+            break;
+          };
+          case '(': {
+            tokens[nr_token++].type = '(';
+            break;
+          };
+          case ')': {
+            tokens[nr_token++].type = ')';
+            break;
+          }
+          case TK_NUMBER: { 
+            if (tokens[nr_token].str[0] == '-' && nr_token > 0) {
+              int type = tokens[nr_token - 1].type;
+              if (type == TK_NUMBER || type == ')') {
+                  tokens[nr_token++].type = '-';
+                  substr_len--;
+                  substr_start++;
+              }
+            }
+            tokens[nr_token].type = TK_NUMBER;
+            Assert(substr_len < 32, "number lens should less than 32");
+            strncpy(tokens[nr_token].str, substr_start, substr_len);
+            tokens[nr_token++].str[substr_len] = '\0';
+            break;
+          }
+          default: panic("Unkowned Token Type");
         }
-
         break;
       }
     }
-
     if (i == NR_REGEX) {
       // %*,s * 表示字段宽度由参数指定
       // 如果字符串长度小于指定宽度，会在左侧填充空格
@@ -118,6 +166,147 @@ static bool make_token(char *e) {
   return true;
 }
 
+static bool error = false;
+
+static word_t string2number(char *str) {
+  word_t val = 0;
+  int minus_num = 0;
+  int len = strlen(str);
+  for (int i = 0; i < len; i++) {
+    if (str[i] == '-')  minus_num++;
+  }
+  if (len - minus_num > 10) {
+    error = true;
+    printf("%s out of uint32 max\n", str);
+    return 0;
+  } else if (len == 10) {
+    const char *max_uint = "4294967295";
+      for (int i = 0; i < 10; i++) {
+        if (str[i] < max_uint[i]) break;
+        if (str[i] > max_uint[i]) {
+          error = true;
+          printf("%s out of uint32 max\n", str);
+          return 0; 
+        }
+      }
+  }
+  if (sscanf(str + minus_num, "%u", &val) != 1) {
+    Log("sscanf failed");
+    error = true;
+    return 0;
+  }
+  if (minus_num % 2) {
+    if (val >= 0x80000000) {
+      printf("%u can't be converted to negative number", val);
+      error = true;
+      return 0;
+    } else {
+      val = (word_t)(-1 * (int)val);
+    }
+  }
+  return val;
+}
+
+static bool check_parentheses(int p, int q) {
+  int top = 0;
+  if (tokens[p].type == '(' && tokens[q].type == ')') {
+    for (int i = p + 1; i < q; i++) {
+      if (tokens[i].type == '(') {
+        top++;
+      } else if (tokens[i].type == ')') {
+        if (top <= 0) {
+          error = true;
+          return false;
+        } else {
+          top--;
+        }
+      }
+    }
+    if (top != 0) {
+      error = true;
+      return false;
+    }
+    return true;
+  } else {
+    return false;
+  }
+}
+
+static int find_mainop(int p, int q) {
+  int top = 0;
+  int main_op = p;
+  for (int i = p; i <= q; i++) {
+    switch (tokens[p].type) {
+      case '(': {
+        top++;
+        break;
+      };
+      case ')': {
+        top--;
+        break;
+      };
+      case '+': {
+        if (top) break;
+        main_op = i;
+        break;
+      };
+      case '-': {
+        if (top || i == p) break;
+        if (i > p && (tokens[i - 1].type == TK_NUMBER || tokens[i - 1].type == ')')) {
+          main_op = i;
+        }
+        break;
+      };
+      case '*': {
+        if (top || tokens[main_op].type == '+' || tokens[main_op].type == '-') {
+          break;
+        }
+        main_op = i;
+        break;
+      };
+      case '/': {
+        if (top || tokens[main_op].type == '+' || tokens[main_op].type == '-') {
+          break;
+        }
+        main_op = i;
+        break;
+      }
+    }
+  }
+  if (main_op == p) {
+    error = true;
+    return 0;
+  }
+  return main_op;
+}
+
+static word_t eval(int p, int q) {
+  if (p > q) {
+    printf("Bad Expression\n");
+    error = true;
+    return 0;
+  } else if (p == q) {
+    return string2number(tokens[p].str);
+  } else if (check_parentheses(p, q) == true) {
+    return eval(p + 1, q - 1);
+  } else {
+    if (error) return 0;
+    int op = find_mainop(p, q);
+    if (error) return 0;
+    word_t val1 = eval(p, op - 1);
+    if (error) return 0;
+    word_t val2 = eval(op + 1, q);
+    if (error) return 0;
+
+    switch (tokens[op].type) {
+      case '+': return val1 + val2;
+      case '-': return val1 - val2;
+      case '*': return val1 * val2;
+      case '/': return val1 / val2;
+      default: assert(0);
+    }
+  }
+}
 
 word_t expr(char *e, bool *success) {
   if (!make_token(e)) {
@@ -126,7 +315,8 @@ word_t expr(char *e, bool *success) {
   }
 
   /* TODO: Insert codes to evaluate the expression. */
-  TODO();
-
-  return 0;
+  word_t val = eval(0, nr_token - 1);
+  if (error) *success = false;
+  else *success = true;
+  return val;
 }

@@ -137,7 +137,6 @@ static bool make_token(char *e) {
           case TK_NUMBER: { 
             if (tokens[nr_token].str[0] == '-' && nr_token > 0) {
                 int type = tokens[nr_token - 1].type;
-                if (type == TK_NOTYPE) continue;
                 if (type == TK_NUMBER || type == ')') {
                   tokens[nr_token++].type = '-';
                   substr_len--;

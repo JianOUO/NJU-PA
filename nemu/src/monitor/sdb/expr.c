@@ -305,6 +305,7 @@ static word_t eval(int p, int q) {
   } else {
     if (error) return 0;
     int op = find_mainop(p, q);
+    Log("%c", tokens[op].type);
     if (error) return 0;
     word_t val1 = eval(p, op - 1);
     if (error) return 0;
@@ -328,6 +329,7 @@ word_t expr(char *e, bool *success) {
   }
 
   /* TODO: Insert codes to evaluate the expression. */
+  Log("here");
   word_t val = eval(0, nr_token - 1);
   if (error) *success = false;
   else *success = true;

@@ -140,13 +140,12 @@ static int cmd_x(char *args) {
 }
 
 static int cmd_p(char *args) {
-  char *arg = strtok(NULL, " ");
-  if (arg == NULL) {
+  if (args == NULL) {
     printf("p: no EXPR\n");
     return 0;
   } else {
     bool success;
-    word_t val = expr(arg, &success);
+    word_t val = expr(args, &success);
     if (success) {
       printf(FMT_WORD_U "\n", val);
     } else {

@@ -290,19 +290,24 @@ static word_t eval(int p, int q) {
     error = true;
     return 0;
   } else if (p == q) {
-    return string2number(tokens[p].str);
+    word_t val = string2number(tokens[p].str);
+    Log("string2number: %s -> %u", tokens[p].str, val);
+    return val;
   } else if (check_parentheses(p, q) == true) {
-    return eval(p + 1, q - 1);
+    word_t val = eval(p + 1, q - 1);
+    Log("check_parentheses: %u", val);
+    return val;
   } else {
     if (error) return 0;
     int op = find_mainop(p, q);
     Log("%c %d", tokens[op].type, tokens[op].type);
     if (error) return 0;
     word_t val1 = eval(p, op - 1);
+    Log("val1: %u", val1);
     if (error) return 0;
     word_t val2 = eval(op + 1, q);
+    Log("val1: %u", val2);
     if (error) return 0;
-
     switch (tokens[op].type) {
       case '+': return val1 + val2; 
       case '-': return val1 - val2;
@@ -320,6 +325,7 @@ word_t expr(char *e, bool *success) {
   }
 
   /* TODO: Insert codes to evaluate the expression. */
+  Log("nrtoken: %d", nr_token);
   word_t val = eval(0, nr_token - 1);
   if (error) *success = false;
   else *success = true;

@@ -89,6 +89,13 @@ static bool make_token(char *e) {
       if (regexec(&re[i], e + position, 1, &pmatch, 0) == 0 && pmatch.rm_so == 0) {
         char *substr_start = e + position;
         int substr_len = pmatch.rm_eo;
+
+        if (substr_start[0] == '-' && substr_len != 1) {
+          if (nr_token > 0 && (tokens[nr_token - 1].type == TK_NUMBER || tokens[nr_token - 1].type == ')')) {
+            i++;
+            substr_len = 1;
+          }
+        }
         // %.*s .* 表示精度由参数指定
         // 限制输出的字符数量
         // 如果精度大于字符串长度，输出整个字符串
@@ -135,6 +142,7 @@ static bool make_token(char *e) {
             break;
           }
           case TK_NUMBER: { 
+            /*
             if (tokens[nr_token].str[0] == '-' && nr_token > 0) {
                 int type = tokens[nr_token - 1].type;
                 if (type == TK_NUMBER || type == ')') {
@@ -144,6 +152,7 @@ static bool make_token(char *e) {
                   break;
                 }
             }
+            */
             tokens[nr_token].type = TK_NUMBER;
             Assert(substr_len < 32, "number lens should less than 32");
             strncpy(tokens[nr_token].str, substr_start, substr_len);

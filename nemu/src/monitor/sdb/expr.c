@@ -39,7 +39,7 @@ static struct rule {
   {" +", TK_NOTYPE},    // spaces
   {"\\+", '+'},         // plus \在C语言中是转义字符, \\+在编译后变为\+，匹配"+"的正则表达式
   {"==", TK_EQ},        // equal
-  {"-*\\d+", TK_NUMBER},  // decimal number
+  {"-*[0-9]+", TK_NUMBER},  // decimal number
   {"-", '-'},           // minus
   {"\\*", '*'},         // multiply
   {"/", '/'},           // divide

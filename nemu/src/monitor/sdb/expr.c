@@ -211,20 +211,24 @@ static word_t string2number(char *str) {
   return val;
 }
 
+
 static bool check_parentheses(int p, int q) {
-  int top = 0;
   if (tokens[p].type == '(' && tokens[q].type == ')') {
+    int top = 0;
+    bool valid = true;
+    int left[q - p];
     for (int i = p; i <= q; i++) {
       if (tokens[i].type == '(') {
-        top++;
+        left[top++] = i;
       } else if (tokens[i].type == ')') {
         if (top <= 0) {
           Log("Expr error");
           error = true;
           return false;
-        } else {
-          top--;
+        } else if (left[top - 1] == p && i != q) {
+          valid = false;    
         }
+        top--;
       }
     }
     if (top != 0) {
@@ -232,7 +236,7 @@ static bool check_parentheses(int p, int q) {
       error = true;
       return false;
     }
-    return true;
+    return valid;
   } else {
     return false;
   }

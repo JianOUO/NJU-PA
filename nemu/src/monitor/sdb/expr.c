@@ -260,10 +260,11 @@ static int find_mainop(int p, int q) {
       };
       case '-': {
         if (top || i == p) break;
-        while (i > p) {
-          if (tokens[i - 1].type == TK_NOTYPE) i--;
-          else if (tokens[i - 1].type == TK_NUMBER || tokens[i - 1].type == ')') {
-            main_op = i;
+        int j = i;
+        while (j > p) {
+          if (tokens[j - 1].type == TK_NOTYPE) j--;
+          else if (tokens[j - 1].type == TK_NUMBER || tokens[j - 1].type == ')') {
+            main_op = j;
             break;
           }
         }

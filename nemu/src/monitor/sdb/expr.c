@@ -167,7 +167,7 @@ static bool make_token(char *e) {
   return true;
 }
 
- bool error = false;
+ static bool error = false;
 
 static word_t string2number(char *str) {
   word_t val = 0;

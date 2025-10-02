@@ -304,7 +304,6 @@ static word_t eval(int p, int q) {
     if (error) return 0;
     int op = find_mainop(p, q);
     if (error) return 0;
-    Log("%d", tokens[op].type);
     word_t val1 = eval(p, op - 1);
     if (error) return 0;
     word_t val2 = eval(op + 1, q);

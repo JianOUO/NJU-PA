@@ -143,6 +143,7 @@ static bool make_token(char *e) {
                   tokens[nr_token++].type = '-';
                   substr_len--;
                   substr_start++;                  
+                  break;
                 }
               }
             }

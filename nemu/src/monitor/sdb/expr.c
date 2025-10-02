@@ -240,7 +240,7 @@ static int find_mainop(int p, int q) {
   int top = 0;
   int main_op = p;
   for (int i = p; i <= q; i++) {
-    switch (tokens[p].type) {
+    switch (tokens[i].type) {
       case '(': {
         top++;
         break;
@@ -274,7 +274,7 @@ static int find_mainop(int p, int q) {
         }
         main_op = i;
         break;
-      }
+      };
     }
   }
   if (main_op == p) {

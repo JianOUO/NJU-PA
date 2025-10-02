@@ -136,11 +136,14 @@ static bool make_token(char *e) {
           }
           case TK_NUMBER: { 
             if (tokens[nr_token].str[0] == '-' && nr_token > 0) {
-              int type = tokens[nr_token - 1].type;
-              if (type == TK_NUMBER || type == ')') {
+              for (int j = nr_token - 1; j >= 0; j--) {
+                int type = tokens[j].type;
+                if (type == TK_NOTYPE) continue;
+                if (type == TK_NUMBER || type == ')') {
                   tokens[nr_token++].type = '-';
                   substr_len--;
-                  substr_start++;
+                  substr_start++;                  
+                }
               }
             }
             tokens[nr_token].type = TK_NUMBER;
@@ -256,8 +259,12 @@ static int find_mainop(int p, int q) {
       };
       case '-': {
         if (top || i == p) break;
-        if (i > p && (tokens[i - 1].type == TK_NUMBER || tokens[i - 1].type == ')')) {
-          main_op = i;
+        while (i > p) {
+          if (tokens[i - 1].type == TK_NOTYPE) i--;
+          else if (tokens[i - 1].type == TK_NUMBER || tokens[i - 1].type == ')') {
+            main_op = i;
+            break;
+          }
         }
         break;
       };

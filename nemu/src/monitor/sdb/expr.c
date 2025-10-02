@@ -254,10 +254,8 @@ static int find_mainop(int p, int q) {
         break;
       };
       case '-': {
-        if (top || i == p) break;
-        if (tokens[i - 1].type == TK_NUMBER || tokens[i - 1].type == ')') {
-          main_op = i;
-        }
+        if (top) break;
+        main_op = i;
         break;
       };
       case '*': {

@@ -176,6 +176,7 @@ static word_t string2number(char *str) {
     if (str[i] == '-')  minus_num++;
   }
   if (len - minus_num > 10) {
+    Log("Expr error");
     error = true;
     printf("%s out of uint32 max\n", str);
     return 0;
@@ -184,6 +185,7 @@ static word_t string2number(char *str) {
       for (int i = 0; i < 10; i++) {
         if (str[i] < max_uint[i]) break;
         if (str[i] > max_uint[i]) {
+          Log("Expr error");
           error = true;
           printf("%s out of uint32 max\n", str);
           return 0; 
@@ -215,6 +217,7 @@ static bool check_parentheses(int p, int q) {
         top++;
       } else if (tokens[i].type == ')') {
         if (top <= 0) {
+          Log("Expr error");
           error = true;
           return false;
         } else {
@@ -223,6 +226,7 @@ static bool check_parentheses(int p, int q) {
       }
     }
     if (top != 0) {
+      Log("Expr error");
       error = true;
       return false;
     }
@@ -274,6 +278,7 @@ static int find_mainop(int p, int q) {
     }
   }
   if (main_op == p) {
+    Log("Expr error");
     error = true;
     return 0;
   }
@@ -283,6 +288,7 @@ static int find_mainop(int p, int q) {
 static word_t eval(int p, int q) {
   if (p > q) {
     printf("Bad Expression\n");
+    Log("Expr error");
     error = true;
     return 0;
   } else if (p == q) {

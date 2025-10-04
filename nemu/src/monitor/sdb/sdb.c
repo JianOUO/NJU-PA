@@ -170,7 +170,7 @@ static int cmd_t(char *args) {
     return 0;
   }
   
-  char line[512];
+  char line[1024];
   int total_tests = 0;
   int passed_tests = 0;
   int failed_tests = 0;
@@ -184,7 +184,7 @@ static int cmd_t(char *args) {
     
     // 解析行：result expr
     word_t expected_result;
-    char expr_str[512];
+    char expr_str[1024];
     
     // 使用 sscanf 解析格式：数字 表达式
     int parsed = sscanf(line, "%u %255[^\n]", &expected_result, expr_str);

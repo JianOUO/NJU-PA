@@ -163,6 +163,55 @@ static int cmd_d(char *args) {
   return 0;
 }
 
+static int cmd_t(char *args) {
+  FILE* fp = fopen("input", "r");
+  if (fp == NULL) {
+    printf("Failed to open input file\n");
+    return 0;
+  }
+  
+  char line[512];
+  
+  printf("Running expression tests...\n");
+  printf("========================================\n");
+  
+  while (fgets(line, sizeof(line), fp)) {
+    // 跳过空行
+    if (strlen(line) <= 1) continue;
+    
+    // 解析行：result expr
+    word_t expected_result;
+    char expr_str[512];
+    
+    // 使用 sscanf 解析格式：数字 表达式
+    int parsed = sscanf(line, "%u %255[^\n]", &expected_result, expr_str);
+    
+    if (parsed != 2) {
+      printf("Warning: Failed to parse line: %s", line);
+      continue;
+    }
+    
+    
+    // 调用 expr 函数求值
+    bool success;
+    word_t actual_result = expr(expr_str, &success);
+    
+    if (!success) {
+      printf("FAIL: Expression evaluation failed: %s\n", expr_str);
+      continue;
+    }
+    
+    // 比较结果
+    if (actual_result != expected_result) {
+      printf("FAIL: %s = %u (expected %u)\n", expr_str, actual_result, expected_result);
+    }
+  }
+  
+  fclose(fp);
+ 
+  return 0;
+}
+
 static struct {
   const char *name;
   const char *description;
@@ -177,6 +226,7 @@ static struct {
   { "p", "Expression evaluation. Usage: p EXPR", cmd_p},
   { "w", "Set watch point. Usage: w EXPR", cmd_w},
   { "d", "Delete watch point. Usage: d N", cmd_d},
+  { "t", "Test expr", cmd_t},
   /* TODO: Add more commands */
 };
 

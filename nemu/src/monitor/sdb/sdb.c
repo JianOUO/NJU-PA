@@ -187,7 +187,7 @@ static int cmd_t(char *args) {
     char expr_str[65596];
     
     // 使用 sscanf 解析格式：数字 表达式
-    int parsed = sscanf(line, "%u %255[^\n]", &expected_result, expr_str);
+    int parsed = sscanf(line, "%u %65596[^\n]", &expected_result, expr_str);
     printf("expr: %s\n",expr_str);
     if (parsed != 2) {
       printf("Warning: Failed to parse line: %s", line);

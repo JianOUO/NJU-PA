@@ -171,6 +171,9 @@ static int cmd_t(char *args) {
   }
   
   char line[512];
+  int total_tests = 0;
+  int passed_tests = 0;
+  int failed_tests = 0;
   
   printf("Running expression tests...\n");
   printf("========================================\n");
@@ -181,7 +184,7 @@ static int cmd_t(char *args) {
     
     // 解析行：result expr
     word_t expected_result;
-    char expr_str[512];
+    char expr_str[256];
     
     // 使用 sscanf 解析格式：数字 表达式
     int parsed = sscanf(line, "%u %255[^\n]", &expected_result, expr_str);
@@ -191,6 +194,7 @@ static int cmd_t(char *args) {
       continue;
     }
     
+    total_tests++;
     
     // 调用 expr 函数求值
     bool success;
@@ -198,17 +202,28 @@ static int cmd_t(char *args) {
     
     if (!success) {
       printf("FAIL: Expression evaluation failed: %s\n", expr_str);
+      failed_tests++;
       continue;
     }
     
     // 比较结果
-    if (actual_result != expected_result) {
+    if (actual_result == expected_result) {
+      passed_tests++;
+    } else {
       printf("FAIL: %s = %u (expected %u)\n", expr_str, actual_result, expected_result);
+      failed_tests++;
     }
   }
   
   fclose(fp);
- 
+  
+  // 输出统计信息
+  printf("========================================\n");
+  printf("Test Results:\n");
+  printf("Total:  %d\n", total_tests);
+  printf("Passed: %d\n", passed_tests);
+  printf("Failed: %d\n", failed_tests);
+  
   return 0;
 }
 

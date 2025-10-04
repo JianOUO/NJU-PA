@@ -181,14 +181,14 @@ static int cmd_t(char *args) {
   while (fgets(line, sizeof(line), fp)) {
     // 跳过空行
     if (strlen(line) <= 1) continue;
-    
+    printf("line: %s\n", line);
     // 解析行：result expr
     word_t expected_result;
     char expr_str[65596];
     
     // 使用 sscanf 解析格式：数字 表达式
     int parsed = sscanf(line, "%u %255[^\n]", &expected_result, expr_str);
-    
+    printf("expr: %s\n",expr_str);
     if (parsed != 2) {
       printf("Warning: Failed to parse line: %s", line);
       continue;

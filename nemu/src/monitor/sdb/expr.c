@@ -168,12 +168,13 @@ static bool make_token(char *e) {
  static bool error = false;
 
 static word_t string2number(char *str) {
-  word_t val = 0;
+  int val = 0;
   int minus_num = 0;
   int len = strlen(str);
   for (int i = 0; i < len; i++) {
     if (str[i] == '-')  minus_num++;
   }
+  /*
   bool flag = false;
   if (len - minus_num > 10) {
     flag = true;
@@ -193,12 +194,13 @@ static word_t string2number(char *str) {
     printf("%s out of uint32 max\n", str);
     return 0; 
   }
-  if (sscanf(str + minus_num, "%u", &val) != 1) {
+  */
+  int offset = (minus_num % 2) ? minus_num - 1 : minus_num;
+  if (sscanf(str + offset, "%d", &val) != 1) {
     Log("sscanf failed");
     error = true;
     return 0;
   }
-  if (minus_num % 2) val = -1 * val;
   return val;
 }
 

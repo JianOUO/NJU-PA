@@ -74,7 +74,7 @@ typedef struct token {
   char str[32];
 } Token;
 
-static Token tokens[512] __attribute__((used)) = {};
+static Token tokens[1024] __attribute__((used)) = {};
 static int nr_token __attribute__((used))  = 0;
 
 static bool make_token(char *e) {
@@ -110,7 +110,7 @@ static bool make_token(char *e) {
          * of tokens, some extra actions should be performed.
          */
 
-        Assert(nr_token < 512,"token number should less than 512");
+        Assert(nr_token < 1024,"token number should less than 1024");
         switch (rules[i].token_type) {
           case TK_NOTYPE: break;
           case '+': {

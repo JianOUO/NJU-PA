@@ -142,17 +142,6 @@ static bool make_token(char *e) {
             break;
           }
           case TK_NUMBER: { 
-            /*
-            if (tokens[nr_token].str[0] == '-' && nr_token > 0) {
-                int type = tokens[nr_token - 1].type;
-                if (type == TK_NUMBER || type == ')') {
-                  tokens[nr_token++].type = '-';
-                  substr_len--;
-                  substr_start++;                  
-                  break;
-                }
-            }
-            */
             tokens[nr_token].type = TK_NUMBER;
             Assert(substr_len < 32, "number lens should less than 32");
             strncpy(tokens[nr_token].str, substr_start, substr_len);
@@ -209,7 +198,7 @@ static word_t string2number(char *str) {
     error = true;
     return 0;
   }
-  if (minus_num % 2) val = (word_t)(-1 * (int)val);
+  if (minus_num % 2) val = -1 * val;
   return val;
 }
 
@@ -300,22 +289,22 @@ static word_t eval(int p, int q) {
     return 0;
   } else if (p == q) {
     word_t val = string2number(tokens[p].str);
-    Log("string2number: %s -> %u", tokens[p].str, val);
+    // Log("string2number: %s -> %u", tokens[p].str, val);
     return val;
   } else if (check_parentheses(p, q) == true) {
     word_t val = eval(p + 1, q - 1);
-    Log("check_parentheses: %u", val);
+    // Log("check_parentheses: %u", val);
     return val;
   } else {
     if (error) return 0;
     int op = find_mainop(p, q);
-    Log("%c %d", tokens[op].type, tokens[op].type);
+    // Log("%c %d", tokens[op].type, tokens[op].type);
     if (error) return 0;
     word_t val1 = eval(p, op - 1);
-    Log("val1: %u", val1);
+    // Log("val1: %u", val1);
     if (error) return 0;
     word_t val2 = eval(op + 1, q);
-    Log("val1: %u", val2);
+    // Log("val1: %u", val2);
     if (error) return 0;
     switch (tokens[op].type) {
       case '+': return val1 + val2; 
@@ -334,7 +323,7 @@ word_t expr(char *e, bool *success) {
   }
 
   /* TODO: Insert codes to evaluate the expression. */
-  Log("nrtoken: %d", nr_token);
+  // Log("nrtoken: %d", nr_token);
   word_t val = eval(0, nr_token - 1);
   if (error) *success = false;
   else *success = true;

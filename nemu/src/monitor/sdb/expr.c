@@ -417,7 +417,7 @@ static word_t eval(int p, int q) {
     if (error) return 0;
     word_t val1 = 0;
     if (tokens[op].type != TK_DEREF && tokens[op].type != TK_NEGATIVE) {
-      word_t val1 = eval(p, op - 1);
+      val1 = eval(p, op - 1);
       Log("val1: %u", val1);
       if (error) return 0;
     }

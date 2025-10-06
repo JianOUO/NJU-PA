@@ -70,7 +70,8 @@ static void gen_num() {
 }
 
 static void gen_rand_op() {
-    switch (rand() % 4) {
+    if (buf_len > 65536 - 3) return;
+    switch (rand() % 8) {
       case 0: {
         buf[buf_len++] = '+';
         buf1[buf1_len++] = '+';
@@ -86,10 +87,34 @@ static void gen_rand_op() {
         buf1[buf1_len++] = '*';
         break;
       }
-      default: {
+      case 3: {
         buf[buf_len++] = '/';
         buf1[buf1_len++] = '/';
         break;
+      }
+      case 4: {
+        strcpy(buf + buf_len, "==");
+        strcpy(buf1 + buf1_len, "==");
+        buf_len += 2;
+        buf1_len += 2;
+      } 
+      case 5: {
+        strcpy(buf + buf_len, "!=");
+        strcpy(buf1 + buf1_len, "!=");
+        buf_len += 2;
+        buf1_len += 2;
+      }
+      case 6: {
+        strcpy(buf + buf_len, "<=");
+        strcpy(buf1 + buf1_len, "<=");
+        buf_len += 2;
+        buf1_len += 2;
+      }
+      default: {
+        strcpy(buf + buf_len, "&&");
+        strcpy(buf1 + buf1_len, "&&");
+        buf_len += 2;
+        buf1_len += 2;
       }
     }
     buf[buf_len] = '\0';

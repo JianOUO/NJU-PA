@@ -432,7 +432,7 @@ static word_t eval(int p, int q) {
       case TK_NOTEQ: return val1 != val2;
       case TK_NotGreaterThan: return val1 <= val2;
       case TK_LogicalAnd: return val1 && val2;
-      case TK_NEGATIVE: return -val2;
+      case TK_NEGATIVE: return -1 * (int)val2;
       case TK_DEREF: return deref(val2);
       default: {
         Log("%c %d", tokens[op].type, tokens[op].type);

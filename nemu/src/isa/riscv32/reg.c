@@ -33,6 +33,16 @@ void isa_reg_display() {
 }
 
 word_t isa_reg_str2val(const char *s, bool *success) {
-  
+  if (s[1] == '0' || s[1] == 'z') {
+    *success = true;
+    return gpr(0);
+  }
+  for (int i = 1; i < MUXDEF(CONFIG_RVE, 16, 32); i++) {
+    if (strcmp(s + 1, regs[i]) == 0) {
+      *success = true;
+      return gpr(i);
+    }
+  }
+  *success = false;
   return 0;
 }

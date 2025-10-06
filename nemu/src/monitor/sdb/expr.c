@@ -14,15 +14,16 @@
 ***************************************************************************************/
 
 #include <isa.h>
-
+#include <memory/paddr.h>
 /* We use the POSIX regex functions to process regular expressions.
  * Type 'man regex' for more information about POSIX regex functions.
  */
 #include <regex.h>
 
 enum {
-  TK_NOTYPE = 256, TK_EQ, TK_NUMBER,
-
+  TK_NOTYPE = 256, TK_EQ, TK_NUMBER, TK_HEX, TK_REGISTER,
+  TK_NOTEQ, TK_LogicalAnd, TK_NotGreaterThan, TK_DEREF, TK_MUL,
+  TK_MINUS, TK_NEGATIVE
   /* TODO: Add more token types */
 
 };
@@ -39,12 +40,17 @@ static struct rule {
   {" +", TK_NOTYPE},    // spaces
   {"\\+", '+'},         // plus \在C语言中是转义字符, \\+在编译后变为\+，匹配"+"的正则表达式
   {"==", TK_EQ},        // equal
-  {"-*[0-9]+", TK_NUMBER},  // decimal number
+  {"[0-9]+", TK_NUMBER},  // decimal number
   {"-", '-'},           // minus
-  {"\\*", '*'},         // multiply
+  {"\\*", '*'},         // multiply or deref
   {"/", '/'},           // divide
   {"\\(", '('},          // left parenthesis
   {"\\)", ')'},         // right parenthesis
+  {"0x[0-9a-fA-F]+", TK_HEX}, // hex number
+  {"$([x]([0-2]?[0-9]|3[0-1])|zero|ra|sp|gp|tp|t[0-6]|s[0-11]|a[0-7]|fp)", TK_REGISTER}, // register
+  {"!=", TK_NOTEQ},     // not equal
+  {"<=", TK_NotGreaterThan}, // not greater than
+  {"&&", TK_LogicalAnd}, // logical and
 };
 
 #define NR_REGEX ARRLEN(rules)
@@ -89,13 +95,14 @@ static bool make_token(char *e) {
       if (regexec(&re[i], e + position, 1, &pmatch, 0) == 0 && pmatch.rm_so == 0) {
         char *substr_start = e + position;
         int substr_len = pmatch.rm_eo;
-
+        /*
         if (substr_start[0] == '-' && substr_len != 1) {
           if (nr_token > 0 && (tokens[nr_token - 1].type == TK_NUMBER || tokens[nr_token - 1].type == ')')) {
             i++;
             substr_len = 1;
           }
         }
+        */
         // %.*s .* 表示精度由参数指定
         // 限制输出的字符数量
         // 如果精度大于字符串长度，输出整个字符串
@@ -122,11 +129,19 @@ static bool make_token(char *e) {
             break;
           };
           case '-': {
-            tokens[nr_token++].type = '-';
+            if (nr_token > 0 && (tokens[nr_token - 1].type == TK_NUMBER || tokens[nr_token - 1].type == ')')) {
+              tokens[nr_token++].type = TK_MINUS;
+            } else {
+              tokens[nr_token++].type = TK_NEGATIVE; 
+            }
             break;
           };
           case '*': {
-            tokens[nr_token++].type = '*';
+            if (nr_token > 0 && (tokens[nr_token - 1].type == TK_NUMBER || tokens[nr_token - 1].type == ')')) {
+              tokens[nr_token++].type = TK_MUL;
+            } else {
+              tokens[nr_token++].type = TK_DEREF; 
+            }
             break;
           };
           case '/': {
@@ -146,6 +161,31 @@ static bool make_token(char *e) {
             Assert(substr_len < 32, "number lens should less than 32");
             strncpy(tokens[nr_token].str, substr_start, substr_len);
             tokens[nr_token++].str[substr_len] = '\0';
+            break;
+          }
+          case TK_HEX: {
+            tokens[nr_token].type = TK_HEX;
+            Assert(substr_len < 32, "number lens should less than 32");
+            strncpy(tokens[nr_token].str, substr_start, substr_len);
+            tokens[nr_token++].str[substr_len] = '\0';
+            break;
+          }
+          case TK_REGISTER: {
+            tokens[nr_token].type = TK_REGISTER;
+            strncpy(tokens[nr_token].str, substr_start, substr_len);
+            tokens[nr_token++].str[substr_len] = '\0';
+            break;
+          }
+          case TK_NOTEQ: {
+            tokens[nr_token++].type = TK_NOTEQ;
+            break;
+          }
+          case TK_NotGreaterThan: {
+            tokens[nr_token++].type = TK_NotGreaterThan;
+            break;
+          }
+          case TK_LogicalAnd: {
+            tokens[nr_token++].type = TK_LogicalAnd;
             break;
           }
           default: panic("Unkowned Token Type");
@@ -169,12 +209,12 @@ static bool make_token(char *e) {
 
 static word_t string2number(char *str) {
   int val = 0;
+  /*
   int minus_num = 0;
   int len = strlen(str);
   for (int i = 0; i < len; i++) {
     if (str[i] == '-')  minus_num++;
   }
-  /*
   bool flag = false;
   if (len - minus_num > 10) {
     flag = true;
@@ -194,12 +234,34 @@ static word_t string2number(char *str) {
     printf("%s out of uint32 max\n", str);
     return 0; 
   }
-  */
+  
   int offset = (minus_num % 2) ? minus_num - 1 : minus_num;
   if (sscanf(str + offset, "%d", &val) != 1) {
     Log("sscanf failed");
     error = true;
     return 0;
+  }
+  */
+  if (strlen(str) > 2 && str[1] == 'x') {
+    if (sscanf(str, "%x", &val) != 1) {
+      Log("sscanf failed");
+      error = true;
+      return 0;
+    }
+  } else if (str[0] == '$') {
+    bool success;
+    val = isa_reg_str2val(str, &success);
+    if (!success) {
+      Log("reg2val falied");
+      error = true;
+      return 0;
+    }
+  } else {
+    if (sscanf(str, "%u", &val) != 1) {
+      Log("sscanf failed");
+      error = true;
+      return 0;
+    }
   }
   return val;
 }
@@ -238,6 +300,7 @@ static bool check_parentheses(int p, int q) {
 static int find_mainop(int p, int q) {
   int top = 0;
   int main_op = p;
+  bool have_op = false;
   for (int i = p; i <= q; i++) {
     switch (tokens[i].type) {
       case '(': {
@@ -248,39 +311,89 @@ static int find_mainop(int p, int q) {
         top--;
         break;
       };
+      case TK_LogicalAnd: {
+        if (top) break;
+        main_op = i;
+        if (!have_op) have_op = true;
+        break;
+      };
+      case TK_EQ: {
+        int type = tokens[main_op].type;
+        if (top || type == TK_LogicalAnd) break;
+        main_op = i;
+        if (!have_op) have_op = true;
+        break;
+      };
+      case TK_NOTEQ: {
+        int type = tokens[main_op].type;
+        if (top || type == TK_LogicalAnd) break; 
+        main_op = i;
+        if (!have_op) have_op = true;
+        break;
+      }
+      case TK_NotGreaterThan: {
+        int type = tokens[main_op].type;
+        if (top || type == TK_LogicalAnd || type == TK_EQ || type == TK_NOTEQ) break; 
+        main_op = i;
+        if (!have_op) have_op = true;
+        break;
+      }
       case '+': {
-        if (top) break;
+        int type = tokens[main_op].type;
+        if (top || type == TK_NotGreaterThan || type == TK_EQ || type == TK_NOTEQ || type == TK_LogicalAnd) break;
         main_op = i;
+        if (!have_op) have_op = true;
         break;
       };
-      case '-': {
-        if (top) break;
+      case TK_MINUS: {
+        int type = tokens[main_op].type;
+        if (top || type == TK_NotGreaterThan || type == TK_EQ || type == TK_NOTEQ || type == TK_LogicalAnd) break;
         main_op = i;
+        if (!have_op) have_op = true;
         break;
       };
-      case '*': {
-        if (top || tokens[main_op].type == '+' || tokens[main_op].type == '-') {
-          break;
-        }
+      case TK_MUL: {
+        int type = tokens[main_op].type;
+        if (top || type == '+' || type == '-' || type == TK_NotGreaterThan || type == TK_EQ || type == TK_NOTEQ || type == TK_LogicalAnd) break;
         main_op = i;
+        if (!have_op) have_op = true;
         break;
       };
       case '/': {
-        if (top || tokens[main_op].type == '+' || tokens[main_op].type == '-') {
-          break;
-        }
+        int type = tokens[main_op].type;
+        if (top || type == '+' || type == '-' || type == TK_NotGreaterThan || type == TK_EQ || type == TK_NOTEQ || type == TK_LogicalAnd) break;
         main_op = i;
+        if (!have_op) have_op = true;
         break;
       };
+      case TK_DEREF: {
+        int type = tokens[main_op].type;
+        if (top || type == '+' || type == '-' || type == TK_MUL || type == '/' || type == TK_NotGreaterThan || type == TK_EQ || type == TK_NOTEQ || type == TK_LogicalAnd) break;
+        main_op = i;
+        if (!have_op) have_op = true;
+        break;
+      };
+      case TK_NEGATIVE: {
+        int type = tokens[main_op].type;
+        if (top || type == '+' || type == '-' || type == TK_MUL || type == '/' || type == TK_NotGreaterThan || type == TK_EQ || type == TK_NOTEQ || type == TK_LogicalAnd) break;
+        main_op = i;
+        if (!have_op) have_op = true;
+        break;
+      }
       default: break;
     }
   }
-  if (main_op == p) {
+  if (have_op == false) {
     Log("Expr error");
     error = true;
     return 0;
   }
   return main_op;
+}
+
+static word_t deref(word_t addr) {
+  uint32_t *val = (uint32_t *)guest_to_host((paddr_t)addr);
+  return *val;
 }
 
 static word_t eval(int p, int q) {
@@ -302,17 +415,25 @@ static word_t eval(int p, int q) {
     int op = find_mainop(p, q);
     Log("%c %d", tokens[op].type, tokens[op].type);
     if (error) return 0;
-    word_t val1 = eval(p, op - 1);
-    Log("val1: %u", val1);
-    if (error) return 0;
+    word_t val1 = 0;
+    if (tokens[op].type != TK_DEREF && tokens[op].type != TK_NEGATIVE) {
+      word_t val1 = eval(p, op - 1);
+      Log("val1: %u", val1);
+      if (error) return 0;
+    }
     word_t val2 = eval(op + 1, q);
-    Log("val1: %u", val2);
+    Log("val2: %u", val2);
     if (error) return 0;
     switch (tokens[op].type) {
       case '+': return val1 + val2; 
       case '-': return val1 - val2;
-      case '*': return val1 * val2;
       case '/': return val1 / val2;
+      case TK_MUL: return val1 * val2;
+      case TK_NOTEQ: return val1 != val2;
+      case TK_NotGreaterThan: return val1 <= val2;
+      case TK_LogicalAnd: return val1 && val2;
+      case TK_NEGATIVE: return -val2;
+      case TK_DEREF: return deref(val2);
       default: assert(0);
     }
   }

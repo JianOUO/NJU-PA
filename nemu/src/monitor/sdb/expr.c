@@ -40,13 +40,13 @@ static struct rule {
   {" +", TK_NOTYPE},    // spaces
   {"\\+", '+'},         // plus \在C语言中是转义字符, \\+在编译后变为\+，匹配"+"的正则表达式
   {"==", TK_EQ},        // equal
+  {"0x[0-9a-fA-F]+", TK_HEX}, // hex number
   {"[0-9]+", TK_NUMBER},  // decimal number
   {"-", '-'},           // minus
   {"\\*", '*'},         // multiply or deref
   {"/", '/'},           // divide
   {"\\(", '('},          // left parenthesis
   {"\\)", ')'},         // right parenthesis
-  {"0x[0-9a-fA-F]+", TK_HEX}, // hex number
   {"\\$(0|zero|ra|sp|gp|tp|t[0-6]|s([0-9]|1[0-1])|a[0-7]|fp)", TK_REGISTER}, // register
   {"!=", TK_NOTEQ},     // not equal
   {"<=", TK_NotGreaterThan}, // not greater than

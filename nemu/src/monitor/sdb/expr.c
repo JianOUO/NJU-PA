@@ -47,7 +47,7 @@ static struct rule {
   {"\\(", '('},          // left parenthesis
   {"\\)", ')'},         // right parenthesis
   {"0x[0-9a-fA-F]+", TK_HEX}, // hex number
-  {"$([x]([0-2]?[0-9]|3[0-1])|zero|ra|sp|gp|tp|t[0-6]|s[0-11]|a[0-7]|fp)", TK_REGISTER}, // register
+  {"\\$([x]([0-2]?[0-9]|3[0-1])|zero|ra|sp|gp|tp|t[0-6]|s[0-11]|a[0-7]|fp)", TK_REGISTER}, // register
   {"!=", TK_NOTEQ},     // not equal
   {"<=", TK_NotGreaterThan}, // not greater than
   {"&&", TK_LogicalAnd}, // logical and

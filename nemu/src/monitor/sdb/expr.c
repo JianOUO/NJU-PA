@@ -435,6 +435,7 @@ static word_t eval(int p, int q) {
       case TK_MINUS: return val1 - val2;
       case '/': return val1 / val2;
       case TK_MUL: return val1 * val2;
+      case TK_EQ: return val1 == val2;
       case TK_NOTEQ: return val1 != val2;
       case TK_NotGreaterThan: return val1 <= val2;
       case TK_LogicalAnd: return val1 && val2;

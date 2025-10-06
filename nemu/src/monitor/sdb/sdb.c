@@ -148,6 +148,7 @@ static int cmd_p(char *args) {
     word_t val = expr(args, &success);
     if (success) {
       printf(FMT_WORD_U "\n", val);
+      printf(FMT_WORD "\n", val);
     } else {
       printf("Expr computing failed\n");
     }

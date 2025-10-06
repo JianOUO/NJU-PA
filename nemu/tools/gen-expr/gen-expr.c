@@ -52,17 +52,13 @@ static void gen_num() {
     if (buf_len > 65536 - 12) return; // 10位数字 + U + 终结符
     val = rand() % 0x100000000;
   }
-  char tmp_buf[11];
-  int tmp_count = 0;
-  while (val != 0) {
-    tmp_buf[tmp_count++] = val % 10 + '0';
-    val /= 10;
-  }
-  assert(tmp_count < 11);
-  tmp_buf[tmp_count] = '\0';
-  for (int i = tmp_count - 1; i >= 0; i--) {
-    buf[buf_len++] = tmp_buf[i];
-    buf1[buf1_len++] = tmp_buf[i];
+  int decimal = rand() % 2;
+  if (decimal) {
+    buf_len += snprintf(buf + buf_len, 11, "%u", val);
+    buf1_len += snprintf(buf1 + buf1_len, 11, "%u", val);
+  } else {
+    buf_len += snprintf(buf + buf_len, 11, "0x%08x", val);
+    buf1_len += snprintf(buf1 + buf1_len, 11, "0x%08x", val);
   }
   if (!negative) buf[buf_len++] = 'U';
   buf[buf_len] = '\0';
@@ -97,24 +93,28 @@ static void gen_rand_op() {
         strcpy(buf1 + buf1_len, "==");
         buf_len += 2;
         buf1_len += 2;
+        break;
       } 
       case 5: {
         strcpy(buf + buf_len, "!=");
         strcpy(buf1 + buf1_len, "!=");
         buf_len += 2;
         buf1_len += 2;
+        break;
       }
       case 6: {
         strcpy(buf + buf_len, "<=");
         strcpy(buf1 + buf1_len, "<=");
         buf_len += 2;
         buf1_len += 2;
+        break;
       }
       default: {
         strcpy(buf + buf_len, "&&");
         strcpy(buf1 + buf1_len, "&&");
         buf_len += 2;
         buf1_len += 2;
+        break;
       }
     }
     buf[buf_len] = '\0';

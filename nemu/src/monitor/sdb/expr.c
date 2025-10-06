@@ -131,18 +131,20 @@ static bool make_token(char *e) {
           case '-': {
             if (nr_token > 0) {
               int type = tokens[nr_token - 1].type;
-              if (type == TK_NUMBER || type == TK_HEX || type == ')') {
+              if (type == TK_NUMBER || type == TK_HEX || type == TK_REGISTER || type == ')') {
                 tokens[nr_token++].type = TK_MINUS; 
               } else {
                 tokens[nr_token++].type = TK_NEGATIVE; 
               }
+            } else {
+                tokens[nr_token++].type = TK_NEGATIVE; 
             }
             break;
           };
           case '*': {
             if (nr_token > 0) {
               int type = tokens[nr_token - 1].type;
-              if (type == TK_NUMBER || type == TK_HEX || type == ')') {
+              if (type == TK_NUMBER || type == TK_HEX || type == TK_REGISTER || type == ')') {
                 tokens[nr_token++].type = TK_MUL; 
               } else {
                 tokens[nr_token++].type = TK_DEREF; 

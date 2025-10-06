@@ -196,7 +196,7 @@ int main(int argc, char *argv[]) {
     fputs(code_buf, fp);
     fclose(fp);
     // 执行系统命令编译C代码
-    int ret = system("gcc -Werror=div-by-zero /tmp/.code.c -o /tmp/.expr");
+    int ret = system("gcc -Wall -Werror /tmp/.code.c -o /tmp/.expr");
     // 如果编译失败（ret != 0），跳过当前循环迭代
     if (ret != 0) continue;
 

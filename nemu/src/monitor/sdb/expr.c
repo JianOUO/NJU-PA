@@ -354,28 +354,28 @@ static int find_mainop(int p, int q) {
       };
       case TK_MUL: {
         int type = tokens[main_op].type;
-        if (top || type == '+' || type == '-' || type == TK_NotGreaterThan || type == TK_EQ || type == TK_NOTEQ || type == TK_LogicalAnd) break;
+        if (top || type == '+' || type == TK_MINUS || type == TK_NotGreaterThan || type == TK_EQ || type == TK_NOTEQ || type == TK_LogicalAnd) break;
         main_op = i;
         if (!have_op) have_op = true;
         break;
       };
       case '/': {
         int type = tokens[main_op].type;
-        if (top || type == '+' || type == '-' || type == TK_NotGreaterThan || type == TK_EQ || type == TK_NOTEQ || type == TK_LogicalAnd) break;
+        if (top || type == '+' || type == TK_MINUS || type == TK_NotGreaterThan || type == TK_EQ || type == TK_NOTEQ || type == TK_LogicalAnd) break;
         main_op = i;
         if (!have_op) have_op = true;
         break;
       };
       case TK_DEREF: {
         int type = tokens[main_op].type;
-        if (top || type == '+' || type == '-' || type == TK_MUL || type == '/' || type == TK_NotGreaterThan || type == TK_EQ || type == TK_NOTEQ || type == TK_LogicalAnd) break;
+        if (top || type == '+' || type == TK_MINUS || type == TK_MUL || type == '/' || type == TK_NotGreaterThan || type == TK_EQ || type == TK_NOTEQ || type == TK_LogicalAnd) break;
         main_op = i;
         if (!have_op) have_op = true;
         break;
       };
       case TK_NEGATIVE: {
         int type = tokens[main_op].type;
-        if (top || type == '+' || type == '-' || type == TK_MUL || type == '/' || type == TK_NotGreaterThan || type == TK_EQ || type == TK_NOTEQ || type == TK_LogicalAnd) break;
+        if (top || type == '+' || type == TK_MINUS || type == TK_MUL || type == '/' || type == TK_NotGreaterThan || type == TK_EQ || type == TK_NOTEQ || type == TK_LogicalAnd) break;
         main_op = i;
         if (!have_op) have_op = true;
         break;
@@ -432,7 +432,14 @@ static word_t eval(int p, int q) {
       case TK_NOTEQ: return val1 != val2;
       case TK_NotGreaterThan: return val1 <= val2;
       case TK_LogicalAnd: return val1 && val2;
-      case TK_NEGATIVE: return -1 * (int)val2;
+      case TK_NEGATIVE: {
+        if (val2 == 0x80000000) return val2;
+        else if (val2 > 0x80000000) {
+          Log("val2 greater than 0x80000000 can't be converted to negative");
+          error = true;
+          return 0;
+        } else return -1 * (int)val2;
+      }
       case TK_DEREF: return deref(val2);
       default: {
         Log("%c %d", tokens[op].type, tokens[op].type);

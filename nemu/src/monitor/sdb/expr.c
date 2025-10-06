@@ -147,6 +147,8 @@ static bool make_token(char *e) {
               } else {
                 tokens[nr_token++].type = TK_DEREF; 
               }
+            } else {
+                tokens[nr_token++].type = TK_DEREF;  
             }
             break;
           };

@@ -129,18 +129,24 @@ static bool make_token(char *e) {
             break;
           };
           case '-': {
-            if (nr_token > 0 && (tokens[nr_token - 1].type == TK_NUMBER || tokens[nr_token - 1].type == ')')) {
-              tokens[nr_token++].type = TK_MINUS;
-            } else {
-              tokens[nr_token++].type = TK_NEGATIVE; 
+            if (nr_token > 0) {
+              int type = tokens[nr_token - 1].type;
+              if (type == TK_NUMBER || type == TK_HEX || type == ')') {
+                tokens[nr_token++].type = TK_MINUS; 
+              } else {
+                tokens[nr_token++].type = TK_NEGATIVE; 
+              }
             }
             break;
           };
           case '*': {
-            if (nr_token > 0 && (tokens[nr_token - 1].type == TK_NUMBER || tokens[nr_token - 1].type == ')')) {
-              tokens[nr_token++].type = TK_MUL;
-            } else {
-              tokens[nr_token++].type = TK_DEREF; 
+            if (nr_token > 0) {
+              int type = tokens[nr_token - 1].type;
+              if (type == TK_NUMBER || type == TK_HEX || type == ')') {
+                tokens[nr_token++].type = TK_MUL; 
+              } else {
+                tokens[nr_token++].type = TK_DEREF; 
+              }
             }
             break;
           };

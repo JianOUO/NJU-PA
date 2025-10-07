@@ -54,7 +54,7 @@ static struct rule {
 };
 
 #define NR_REGEX ARRLEN(rules)
-#define EXPR_DEBUG 1
+#define EXPR_DEBUG 0
 
 // 编译后的正则表示式
 static regex_t re[NR_REGEX] = {};

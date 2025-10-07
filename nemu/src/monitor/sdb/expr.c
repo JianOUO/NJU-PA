@@ -95,14 +95,7 @@ static bool make_token(char *e) {
       if (regexec(&re[i], e + position, 1, &pmatch, 0) == 0 && pmatch.rm_so == 0) {
         char *substr_start = e + position;
         int substr_len = pmatch.rm_eo;
-        /*
-        if (substr_start[0] == '-' && substr_len != 1) {
-          if (nr_token > 0 && (tokens[nr_token - 1].type == TK_NUMBER || tokens[nr_token - 1].type == ')')) {
-            i++;
-            substr_len = 1;
-          }
-        }
-        */
+
         // %.*s .* 表示精度由参数指定
         // 限制输出的字符数量
         // 如果精度大于字符串长度，输出整个字符串
@@ -219,39 +212,6 @@ static bool make_token(char *e) {
 
 static word_t string2number(char *str) {
   int val = 0;
-  /*
-  int minus_num = 0;
-  int len = strlen(str);
-  for (int i = 0; i < len; i++) {
-    if (str[i] == '-')  minus_num++;
-  }
-  bool flag = false;
-  if (len - minus_num > 10) {
-    flag = true;
-  } else if (len - minus_num == 10) {
-    const char *max_uint = "4294967295";
-    for (int i = 0; i < 10; i++) {
-      if (str[i] < max_uint[i]) break;
-      if (str[i] > max_uint[i]) {
-        flag = true;
-        break;
-      }
-    }
-  }
-  if (flag) {
-    Log("Expr error");
-    error = true;
-    printf("%s out of uint32 max\n", str);
-    return 0; 
-  }
-  
-  int offset = (minus_num % 2) ? minus_num - 1 : minus_num;
-  if (sscanf(str + offset, "%d", &val) != 1) {
-    Log("sscanf failed");
-    error = true;
-    return 0;
-  }
-  */
   if (strlen(str) > 2 && str[1] == 'x') {
     if (sscanf(str, "%x", &val) != 1) {
       Log("sscanf failed");

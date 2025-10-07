@@ -17,14 +17,6 @@
 
 #define NR_WP 32
 
-typedef struct watchpoint {
-  int NO;
-  struct watchpoint *next;
-
-  /* TODO: Add more members if necessary */
-
-} WP;
-
 static WP wp_pool[NR_WP] = {};
 static WP *head = NULL, *free_ = NULL;
 
@@ -33,6 +25,9 @@ void init_wp_pool() {
   for (i = 0; i < NR_WP; i ++) {
     wp_pool[i].NO = i;
     wp_pool[i].next = (i == NR_WP - 1 ? NULL : &wp_pool[i + 1]);
+    wp_pool[i].expr = NULL;
+    wp_pool[i].first = true;
+    wp_pool[i].val = 0;
   }
 
   head = NULL;
@@ -41,3 +36,78 @@ void init_wp_pool() {
 
 /* TODO: Implement the functionality of watchpoint */
 
+WP *new_wp(char *expr) {
+  if (free_ == NULL) return NULL;
+  free_->expr = strdup(expr);
+  WP *tmp = free_->next;
+  free_->next = head;
+  head = free_;
+  free_ = tmp;
+  return head;
+}
+
+void free_wp(int number) {
+  if (head == NULL) {
+    printf("no used watchpoint\n");
+    return;
+  }
+  if (number >= NR_WP) {
+      printf("there is no NO.%d watchpoint \n", number);
+      return;
+  }
+  WP *tmp;
+  if (head->NO == number) {
+    free(head->expr);
+    head->expr = NULL;
+    head->first = true;
+    head->val = 0;
+    tmp = head->next;
+    head->next = free_;
+    free_ = head;
+    head = tmp;
+  } else {
+    tmp = head;
+    while(tmp->next != NULL && tmp->next->NO != number) tmp = tmp->next;
+    if (tmp->next == NULL) {
+      printf("can't find the watchpoint\n");
+      return;
+    }
+    WP *wp = tmp->next;
+    free(wp->expr);
+    wp->expr = NULL;
+    wp->first = true;
+    wp->val = 0;
+    tmp->next = wp->next;
+    wp->next = free_;
+    free_ = wp;
+  }
+}
+
+void wp_display() {
+  WP *tmp = head;
+  while (tmp != NULL) {
+    printf("No.%d watchpoint, Expr:%s, val: %u\n", tmp->NO, tmp->expr, tmp->val);
+    tmp = tmp->next;
+  }
+}
+
+void wp_scan() {
+  WP *tmp = head;
+  while (tmp != NULL) {
+    bool success;
+    word_t val = expr(tmp->expr, &success);
+    if (!success) {
+      printf("wp_scan: Expr compute failed. Expr: \"%s\"\n", tmp->expr);
+      return;
+    }
+    if (tmp->first) {
+      tmp->val = val;
+      tmp->first = false;
+    } else if (val != tmp->val) {
+      nemu_state.state = NEMU_STOP;
+      printf("No.%d watchpoint: Expr \"%s\", val changed from %u to %u\n", tmp->NO, tmp->expr, tmp->val, val);
+      tmp->val = val;
+    }
+    tmp = tmp->next;
+  }
+}

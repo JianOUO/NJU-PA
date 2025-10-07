@@ -24,6 +24,9 @@ static int is_batch_mode = false;
 
 void init_regex();
 void init_wp_pool();
+WP *new_wp();
+void free_wp(int number);
+void wp_display();
 
 /* We use the `readline' library to provide more flexibility to read from stdin. */
 static char* rl_gets() {
@@ -85,7 +88,7 @@ static int cmd_info(char *args) {
     if (*arg == 'r') {
       isa_reg_display();
     } else if (*arg == 'w') {
-
+      wp_display();
     } else {
       printf("info: Unkowned SUBCMD: '%c'\n", *arg);
       return 0;
@@ -157,10 +160,27 @@ static int cmd_p(char *args) {
 }
 
 static int cmd_w(char *args) {
+  if (args == NULL) {
+    printf("w: no EXPR\n");
+  } else {
+    WP *wp = new_wp(args);
+    if (wp == NULL) { 
+      printf("no free watchpoint\n");
+      return 0;
+    }
+    printf("new watchpoint has been created: No.%d Expr:%s\n", wp->NO, wp->expr);
+  }
   return 0;
 }
 
 static int cmd_d(char *args) {
+  char *arg = strtok(NULL, " ");
+  int number;
+  if (sscanf(arg, "%d", &number) != 1) {
+    printf("d: sscanf failed\n");
+    return 0;
+  }
+  free_wp(number);
   return 0;
 }
 

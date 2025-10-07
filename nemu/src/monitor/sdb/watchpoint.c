@@ -41,6 +41,7 @@ WP *new_wp(char *expression) {
   free_->val = expr(expression, &success);
   if (!success) {
       printf("wp_scan: Expr compute failed. Expr: \"%s\"\n", expression);
+      return NULL;
   }
   free_->expr = strdup(expression);
   WP *tmp = free_->next;

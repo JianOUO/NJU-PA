@@ -92,6 +92,7 @@ void wp_display() {
 }
 
 void wp_scan() {
+  printf("wp_scan\n");
   WP *tmp = head;
   while (tmp != NULL) {
     bool success;

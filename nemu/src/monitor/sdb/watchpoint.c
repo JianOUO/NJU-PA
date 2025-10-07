@@ -26,7 +26,6 @@ void init_wp_pool() {
     wp_pool[i].NO = i;
     wp_pool[i].next = (i == NR_WP - 1 ? NULL : &wp_pool[i + 1]);
     wp_pool[i].expr = NULL;
-    wp_pool[i].first = true;
     wp_pool[i].val = 0;
   }
 
@@ -36,9 +35,14 @@ void init_wp_pool() {
 
 /* TODO: Implement the functionality of watchpoint */
 
-WP *new_wp(char *expr) {
+WP *new_wp(char *expression) {
   if (free_ == NULL) return NULL;
-  free_->expr = strdup(expr);
+  bool success;
+  free_->val = expr(expression, &success);
+  if (!success) {
+      printf("wp_scan: Expr compute failed. Expr: \"%s\"\n", expression);
+  }
+  free_->expr = strdup(expression);
   WP *tmp = free_->next;
   free_->next = head;
   head = free_;
@@ -59,7 +63,6 @@ void free_wp(int number) {
   if (head->NO == number) {
     free(head->expr);
     head->expr = NULL;
-    head->first = true;
     head->val = 0;
     tmp = head->next;
     head->next = free_;
@@ -75,7 +78,6 @@ void free_wp(int number) {
     WP *wp = tmp->next;
     free(wp->expr);
     wp->expr = NULL;
-    wp->first = true;
     wp->val = 0;
     tmp->next = wp->next;
     wp->next = free_;
@@ -101,10 +103,7 @@ void wp_scan() {
       printf("wp_scan: Expr compute failed. Expr: \"%s\"\n", tmp->expr);
       return;
     }
-    if (tmp->first) {
-      tmp->val = val;
-      tmp->first = false;
-    } else if (val != tmp->val) {
+    if (val != tmp->val) {
       nemu_state.state = NEMU_STOP;
       printf("No.%d watchpoint: Expr \"%s\", val changed from %u to %u\n", tmp->NO, tmp->expr, tmp->val, val);
       tmp->val = val;

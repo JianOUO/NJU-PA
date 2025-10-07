@@ -54,6 +54,7 @@ static struct rule {
 };
 
 #define NR_REGEX ARRLEN(rules)
+#define EXPR_DEBUG 1
 
 // 编译后的正则表示式
 static regex_t re[NR_REGEX] = {};
@@ -214,7 +215,7 @@ static word_t string2number(char *str) {
   int val = 0;
   if (strlen(str) > 2 && str[1] == 'x') {
     if (sscanf(str, "%x", &val) != 1) {
-      Log("sscanf failed");
+      IFDEF(EXPR_DEBUG, Log("sscanf failed"));
       error = true;
       return 0;
     }
@@ -222,13 +223,13 @@ static word_t string2number(char *str) {
     bool success;
     val = isa_reg_str2val(str, &success);
     if (!success) {
-      Log("reg2val falied");
+      IFDEF(EXPR_DEBUG, Log("reg2val falied"));
       error = true;
       return 0;
     }
   } else {
     if (sscanf(str, "%u", &val) != 1) {
-      Log("sscanf failed");
+      IFDEF(EXPR_DEBUG, Log("sscanf failed"));
       error = true;
       return 0;
     }
@@ -247,7 +248,7 @@ static bool check_parentheses(int p, int q) {
         left[top++] = i;
       } else if (tokens[i].type == ')') {
         if (top <= 0) {
-          Log("Expr error");
+          IFDEF(EXPR_DEBUG, Log("Expr error"));
           error = true;
           return false;
         } else if (left[top - 1] == p && i != q) {
@@ -257,7 +258,7 @@ static bool check_parentheses(int p, int q) {
       }
     }
     if (top != 0) {
-      Log("Expr error");
+      IFDEF(EXPR_DEBUG, Log("Expr error"));
       error = true;
       return false;
     }
@@ -354,7 +355,7 @@ static int find_mainop(int p, int q) {
     }
   }
   if (have_op == false) {
-    Log("Expr error");
+    IFDEF(EXPR_DEBUG, Log("Expr error"));
     error = true;
     return 0;
   }
@@ -369,30 +370,30 @@ static word_t deref(word_t addr) {
 static word_t eval(int p, int q) {
   if (p > q) {
     printf("Bad Expression\n");
-    Log("Expr error");
+    IFDEF(EXPR_DEBUG, Log("Expr error"));
     error = true;
     return 0;
   } else if (p == q) {
     word_t val = string2number(tokens[p].str);
-    Log("string2number: %s -> %u", tokens[p].str, val);
+    IFDEF(EXPR_DEBUG, Log("string2number: %s -> %u", tokens[p].str, val));
     return val;
   } else if (check_parentheses(p, q) == true) {
     word_t val = eval(p + 1, q - 1);
-    Log("check_parentheses: %u", val);
+    IFDEF(EXPR_DEBUG, Log("check_parentheses: %u", val));
     return val;
   } else {
     if (error) return 0;
     int op = find_mainop(p, q);
-    Log("%c %d", tokens[op].type, tokens[op].type);
+    IFDEF(EXPR_DEBUG, Log("%c %d", tokens[op].type, tokens[op].type));
     if (error) return 0;
     word_t val1 = 0;
     if (tokens[op].type != TK_DEREF && tokens[op].type != TK_NEGATIVE) {
       val1 = eval(p, op - 1);
-      Log("val1: %u", val1);
+      IFDEF(EXPR_DEBUG, Log("val1: %u", val1));
       if (error) return 0;
     }
     word_t val2 = eval(op + 1, q);
-    Log("val2: %u", val2);
+    IFDEF(EXPR_DEBUG, Log("val2: %u", val2));
     if (error) return 0;
     switch (tokens[op].type) {
       case '+': return val1 + val2; 
@@ -427,7 +428,7 @@ word_t expr(char *e, bool *success) {
   }
 
   /* TODO: Insert codes to evaluate the expression. */
-  Log("nrtoken: %d", nr_token);
+  IFDEF(EXPR_DEBUG, Log("nrtoken: %d", nr_token));
   error = false;
   word_t val = eval(0, nr_token - 1);
   if (error) *success = false;

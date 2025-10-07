@@ -168,7 +168,7 @@ static int cmd_w(char *args) {
       printf("no free watchpoint\n");
       return 0;
     }
-    printf("new watchpoint has been created: No.%d Expr:%s\n", wp->NO, wp->expr);
+    printf("new watchpoint has been created: No.%d Expr \"%s\"\n", wp->NO, wp->expr);
   }
   return 0;
 }

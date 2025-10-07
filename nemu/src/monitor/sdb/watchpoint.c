@@ -56,8 +56,8 @@ void free_wp(int number) {
     return;
   }
   if (number >= NR_WP) {
-      printf("there is no NO.%d watchpoint \n", number);
-      return;
+    printf("there is no NO.%d watchpoint \n", number);
+    return;
   }
   WP *tmp;
   if (head->NO == number) {
@@ -88,13 +88,12 @@ void free_wp(int number) {
 void wp_display() {
   WP *tmp = head;
   while (tmp != NULL) {
-    printf("No.%d watchpoint, Expr:%s, val: %u\n", tmp->NO, tmp->expr, tmp->val);
+    printf("No.%d watchpoint, Expr: \"%s\", val: %u\n", tmp->NO, tmp->expr, tmp->val);
     tmp = tmp->next;
   }
 }
 
 void wp_scan() {
-  printf("wp_scan\n");
   WP *tmp = head;
   while (tmp != NULL) {
     bool success;

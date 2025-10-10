@@ -165,7 +165,7 @@ static int cmd_w(char *args) {
   } else {
     WP *wp = new_wp(args);
     if (wp == NULL) { 
-      printf("no free watchpoint\n");
+      printf("no free watchpoint or Expr compute failed\n");
       return 0;
     }
     printf("new watchpoint has been created: No.%d Expr \"%s\"\n", wp->NO, wp->expr);
@@ -175,6 +175,10 @@ static int cmd_w(char *args) {
 
 static int cmd_d(char *args) {
   char *arg = strtok(NULL, " ");
+  if (arg == NULL) {
+    printf("d: no watchpoint number\n");
+    return 0;
+  }
   int number;
   if (sscanf(arg, "%d", &number) != 1) {
     printf("d: sscanf failed\n");

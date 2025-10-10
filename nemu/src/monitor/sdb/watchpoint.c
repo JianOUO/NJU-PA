@@ -97,6 +97,7 @@ void wp_display() {
 void wp_scan() {
   WP *tmp = head;
   while (tmp != NULL) {
+    assert(tmp->expr);
     bool success;
     word_t val = expr(tmp->expr, &success);
     if (!success) {

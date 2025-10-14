@@ -122,8 +122,13 @@ CFLAGS_TRACE += -DITRACE_COND=$(if $(CONFIG_ITRACE_COND),$(call remove_quote,$(C
 # CFLAGS：C 编译器标志
 # LDFLAGS：链接器标志
 # -D__GUEST_ISA__=$(GUEST_ISA)：定义目标 ISA 的宏
+
 CFLAGS  += $(CFLAGS_BUILD) $(CFLAGS_TRACE) -D__GUEST_ISA__=$(GUEST_ISA)
 LDFLAGS += $(CFLAGS_BUILD)
+
+# 添加 -save-temps=obj 保存预处理文件到 build/obj-* 目录
+# 注释掉下面这行可以禁用
+CFLAGS_BUILD += -save-temps=obj
 
 # Include rules for menuconfig
 include $(NEMU_HOME)/scripts/config.mk

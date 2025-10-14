@@ -85,6 +85,20 @@
 
 #define BITMASK(bits) ((1ull << (bits)) - 1)
 #define BITS(x, hi, lo) (((x) >> (lo)) & BITMASK((hi) - (lo) + 1)) // similar to x[hi:lo] in verilog
+/*
+SEXT(x, len) 展开为：
+({
+    struct {
+        int64_t n : len;  // 定义一个len位的有符号位域
+    } __x = { .n = x };   // 将x的低len位赋值给这个位域
+    
+    (uint64_t)__x.n;      // 读取位域，自动符号扩展到64位
+})
+int64_t n : len;  表示只使用 len 位来存储有符号整数,超出的位会被截断,读取时会自动进行符号扩展。
+__x = { .n = x }; 取 x 的低 len 位存入位域 n, 如果第 len-1 位是1（负数），位域会记住这是个负数。
+(uint64_t)__x.n;  如果位域的最高位（第 len-1 位）是 0，高位填充 0；如果位域的最高位（第 len-1 位）是 1，高位填充 1。
+                  最后被转化为无符号整数。
+*/
 #define SEXT(x, len) ({ struct { int64_t n : len; } __x = { .n = x }; (uint64_t)__x.n; })
 
 #define ROUNDUP(a, sz)   ((((uintptr_t)a) + (sz) - 1) & ~((sz) - 1))

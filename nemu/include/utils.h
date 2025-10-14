@@ -20,7 +20,15 @@
 
 // ----------- state -----------
 
-enum { NEMU_RUNNING, NEMU_STOP, NEMU_END, NEMU_ABORT, NEMU_QUIT };
+//NEMU 状态枚举:
+enum { 
+  NEMU_RUNNING,  // 正在运行
+  NEMU_STOP,     // 暂停（单步调试）
+  NEMU_END,      // 正常结束 ← ebreak 设置这个状态
+  NEMU_ABORT,    // 异常终止（非法指令）
+  NEMU_QUIT      // 用户退出
+};
+//enum { NEMU_RUNNING, NEMU_STOP, NEMU_END, NEMU_ABORT, NEMU_QUIT };
 
 typedef struct {
   int state;

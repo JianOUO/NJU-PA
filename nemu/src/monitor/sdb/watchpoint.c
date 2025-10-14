@@ -36,6 +36,7 @@ void init_wp_pool() {
 /* TODO: Implement the functionality of watchpoint */
 
 WP *new_wp(char *expression) {
+  assert(expression);
   if (free_ == NULL) return NULL;
   bool success;
   free_->val = expr(expression, &success);
@@ -44,6 +45,7 @@ WP *new_wp(char *expression) {
       return NULL;
   }
   free_->expr = strdup(expression);
+  assert(free_->expr);
   WP *tmp = free_->next;
   free_->next = head;
   head = free_;

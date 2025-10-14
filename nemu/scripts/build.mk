@@ -75,10 +75,10 @@ OBJS = $(SRCS:%.c=$(OBJ_DIR)/%.o) $(CXXSRC:%.cc=$(OBJ_DIR)/%.o)
 # @：不显示执行的命令本身，只显示输出
 
 # 预处理规则：手动生成 .i 文件
-# $(OBJ_DIR)/%.i: %.c
-#	@echo + CC $<
-#	@mkdir -p $(dir $@)
-#	@$(CC) $(CFLAGS) -E -o $@ $<
+$(OBJ_DIR)/%.i: %.c
+	@echo + CC $<
+	@mkdir -p $(dir $@)
+	@$(CC) $(CFLAGS) -E -o $@ $<
 
 $(OBJ_DIR)/%.o: %.c
 # + CC：显示正在编译 C 文件

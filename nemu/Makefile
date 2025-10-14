@@ -128,7 +128,7 @@ LDFLAGS += $(CFLAGS_BUILD)
 
 # 添加 -save-temps=obj 保存预处理文件到 build/obj-* 目录
 # 注释掉下面这行可以禁用
-CFLAGS_BUILD += -save-temps=obj
+# CFLAGS_BUILD += -save-temps=obj
 
 # Include rules for menuconfig
 include $(NEMU_HOME)/scripts/config.mk

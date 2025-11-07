@@ -35,16 +35,26 @@ static inline void difftest_detach() {}
 static inline void difftest_attach() {}
 #endif
 
+// dut.c中定义
 extern void (*ref_difftest_memcpy)(paddr_t addr, void *buf, size_t n, bool direction);
 extern void (*ref_difftest_regcpy)(void *dut, bool direction);
 extern void (*ref_difftest_exec)(uint64_t n);
 extern void (*ref_difftest_raise_intr)(uint64_t NO);
 
+/*
+bool difftest_check_reg(
+    const char *name,  // 寄存器名称（用于日志）
+    vaddr_t pc,        // 当前 PC（用于定位错误）
+    word_t ref,        // 参考实现的寄存器值（正确值）
+    word_t dut         // NEMU 的寄存器值（被测值）
+)
+  
+*/
 static inline bool difftest_check_reg(const char *name, vaddr_t pc, word_t ref, word_t dut) {
   if (ref != dut) {
     Log("%s is different after executing instruction at pc = " FMT_WORD
         ", right = " FMT_WORD ", wrong = " FMT_WORD ", diff = " FMT_WORD,
-        name, pc, ref, dut, ref ^ dut);
+        name, pc, ref, dut, ref ^ dut); // 通过异或操作显示差异位
     return false;
   }
   return true;

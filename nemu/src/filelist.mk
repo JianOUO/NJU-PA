@@ -36,6 +36,10 @@ SHARE = $(if $(CONFIG_TARGET_SHARE),1,0)
 # 效果：每次运行时程序在内存中的位置可能不同
 LIBS += $(if $(CONFIG_TARGET_NATIVE_ELF),-lreadline -ldl -pie,)
 
+# mainargs只要通过命令行传递，如 make mainargs=/path/to/some/binary
+# 当 mainargs 被设置为某个路径时：汇编器会定义宏 BIN_PATH；
+# am-bin.S 中的 .incbin BIN_PATH 会将该路径的二进制文件直接嵌入到编译后的 NEMU 可执行文件中
+# 程序运行时可以通过 bin_start 和 bin_end 符号访问这段数据
 ifdef mainargs
 # ASFLAGS 是汇编器标志变量
 # -D 定义预处理器宏

@@ -21,6 +21,7 @@
 
 // The macro `__GUEST_ISA__` is defined in $(CFLAGS).
 // It will be expanded as "x86" or "mips32" ...
+// GUEST_ISA_CPU_state 和 GUEST_ISA_ISADecodeInfo 在src/isa/$(GUEST_ISA)/include/isa-def.h中定义
 typedef concat(__GUEST_ISA__, _CPU_state) CPU_state;
 typedef concat(__GUEST_ISA__, _ISADecodeInfo) ISADecodeInfo;
 
@@ -34,6 +35,8 @@ void isa_reg_display();
 word_t isa_reg_str2val(const char *name, bool *success);
 
 // exec
+// 前向声明，告诉编译器："Decode 是一个结构体，详细定义在别处"
+// struct Decode 在cpu/decode.h中定义, decode.h中包含isa.h
 struct Decode;
 int isa_exec_once(struct Decode *s);
 

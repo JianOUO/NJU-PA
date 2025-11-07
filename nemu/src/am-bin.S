@@ -12,7 +12,7 @@
 *
 * See the Mulan PSL v2 for more details.
 ***************************************************************************************/
-
+# BIN_PATH 在filelist.mk中定义
 .section .rodata
 .globl bin_start, bin_end
 bin_start:

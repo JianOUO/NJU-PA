@@ -1,0 +1,48 @@
+Defconfig 配置文件的使用流程
+1 用户执行命令
+   ↓
+make riscv32-am_defconfig
+
+2 Makefile 匹配规则 (scripts/config.mk:86)
+   ↓
+%defconfig: $(CONF) $(FIXDEP)
+	$(Q)$< $(silent) --defconfig=configs/$@ $(Kconfig)
+
+3 实际执行的命令
+   ↓
+tools/kconfig/build/conf --defconfig=configs/riscv32-am_defconfig Kconfig
+
+4 conf 工具读取 defconfig
+   ↓
+读取: configs/riscv32-am_defconfig
+内容:
+  CONFIG_TARGET_AM=y
+  CONFIG_MSIZE=0x2000000
+  CONFIG_DEVICE=y
+
+5 生成 .config (完整配置)
+   ↓
+写入: nemu/.config (包含所有配置项的完整版本)
+
+6 执行 syncconfig
+   ↓
+tools/kconfig/build/conf --syncconfig Kconfig
+
+7 生成构建系统使用的配置文件
+   ↓
+   ├─ include/config/auto.conf          ← Makefile 使用
+   ├─ include/config/auto.conf.cmd      ← 依赖跟踪
+   └─ include/generated/autoconf.h      ← C 代码使用
+
+auto.conf/auto.conf.cmd → 被 Makefile 包含
+使用位置： nemu/Makefile
+-include $(NEMU_HOME)/include/config/auto.conf
+-include $(NEMU_HOME)/include/config/auto.conf.cmd
+
+autoconf.h → 被 C 代码包含
+使用位置: 
+位置1: include/common.h
+#include <generated/autoconf.h>
+#include <macro.h>
+位置2：include/difftest-def.h
+#include <generated/autoconf.h>

@@ -13,5 +13,7 @@
 # See the Mulan PSL v2 for more details.
 #**************************************************************************************/
 
+# ENGINE来自nemu/makefile: ENGINE ?= $(call remove_quote,$(CONFIG_ENGINE))
+# 默认值是interpreter
 INC_PATH += $(NEMU_HOME)/src/engine/$(ENGINE)
 DIRS-y += src/engine/$(ENGINE)

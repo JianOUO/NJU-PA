@@ -28,7 +28,12 @@ void (*ref_difftest_raise_intr)(uint64_t NO) = NULL;
 
 #ifdef CONFIG_DIFFTEST
 
+// 由于实现差异，ref和dut的相同指令可能生成不同的状态, 为了避免状态不一致产生的报错，
+// 将is_skip_ref为true，表示让ref跳过执行这些指令，直接将dut的状态同步到ref
 static bool is_skip_ref = false;
+// 由于QEMU指令打包的特性，QEMU可能一次执行多条指令
+// 这时我们跳过检查，直到NEMU的PC追上QEMU的PC，再继续检查
+// skip_dut_nr_inst记录需要跳过检查的指令数
 static int skip_dut_nr_inst = 0;
 
 // this is used to let ref skip instructions which
@@ -42,6 +47,8 @@ void difftest_skip_ref() {
   // already write some memory, and the incoming instruction in NEMU
   // will load that memory, we will encounter false negative. But such
   // situation is infrequent.
+
+  // 如果正在追赶QEMU,现在遇到需要跳过的指令(如ebreak),就不需要再追赶了,后续直接同步状态
   skip_dut_nr_inst = 0;
 }
 
@@ -63,9 +70,12 @@ void init_difftest(char *ref_so_file, long img_size, int port) {
   assert(ref_so_file != NULL);
 
   void *handle;
+  // 动态加载参考实现的共享库文件
+  // RTLD_LAZY：延迟绑定模式，符号在第一次使用时才解析
   handle = dlopen(ref_so_file, RTLD_LAZY);
   assert(handle);
 
+  //使用 dlsym 从动态库中查找并绑定函数
   ref_difftest_memcpy = dlsym(handle, "difftest_memcpy");
   assert(ref_difftest_memcpy);
 
@@ -86,12 +96,17 @@ void init_difftest(char *ref_so_file, long img_size, int port) {
       "This will help you a lot for debugging, but also significantly reduce the performance. "
       "If it is not necessary, you can turn it off in menuconfig.", ref_so_file);
 
+  // 初始化参考实现
   ref_difftest_init(port);
+  // 同步初始内存：将客户机程序镜像复制到参考实现的内存
   ref_difftest_memcpy(RESET_VECTOR, guest_to_host(RESET_VECTOR), img_size, DIFFTEST_TO_REF);
+  // 同步初始寄存器状态：将 NEMU 的寄存器状态复制到参考实现
   ref_difftest_regcpy(&cpu, DIFFTEST_TO_REF);
 }
 
 static void checkregs(CPU_state *ref, vaddr_t pc) {
+  // 对比寄存器状态是isa相关的，具体实现在/src/isa/$(GUEST_ISA)/difftest/dut.c中
+  // 如果寄存器状态不一致，终止NEMU，并显示寄存器状态
   if (!isa_difftest_checkregs(ref, pc)) {
     nemu_state.state = NEMU_ABORT;
     nemu_state.halt_pc = pc;
@@ -99,32 +114,35 @@ static void checkregs(CPU_state *ref, vaddr_t pc) {
   }
 }
 
+// 每执行一条指令，在cpu-exec.c:trace_and_difftest函数中调用一次difftest_step
+// 其中pc指向当前指令,npc指向下一条指令
 void difftest_step(vaddr_t pc, vaddr_t npc) {
   CPU_state ref_r;
-
+  // 需要跳过检查的指令数大于0，dut正在追赶ref的PC
   if (skip_dut_nr_inst > 0) {
-    ref_difftest_regcpy(&ref_r, DIFFTEST_TO_DUT);
-    if (ref_r.pc == npc) {
+    ref_difftest_regcpy(&ref_r, DIFFTEST_TO_DUT); // 复制ref的寄存器状态
+    if (ref_r.pc == npc) { // 追赶成功，skip_dut_nr_inst清零,对比寄存器状态
       skip_dut_nr_inst = 0;
       checkregs(&ref_r, npc);
       return;
     }
-    skip_dut_nr_inst --;
-    if (skip_dut_nr_inst == 0)
+    skip_dut_nr_inst --; // 还未追上，跳过检查的指令数减1
+    if (skip_dut_nr_inst == 0) // 追赶失败，报错并终止
       panic("can not catch up with ref.pc = " FMT_WORD " at pc = " FMT_WORD, ref_r.pc, pc);
     return;
   }
 
-  if (is_skip_ref) {
+  if (is_skip_ref) { // 跳过检查，直接复制dut的寄存器状态到ref
     // to skip the checking of an instruction, just copy the reg state to reference design
     ref_difftest_regcpy(&cpu, DIFFTEST_TO_REF);
     is_skip_ref = false;
     return;
   }
-
+  // ref执行一条指令
   ref_difftest_exec(1);
+  // 复制ref的寄存器状态到dut
   ref_difftest_regcpy(&ref_r, DIFFTEST_TO_DUT);
-
+  // 对比寄存器状态
   checkregs(&ref_r, pc);
 }
 #else

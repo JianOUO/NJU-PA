@@ -21,6 +21,8 @@
 #if   defined(CONFIG_PMEM_MALLOC)
 static uint8_t *pmem = NULL;
 #else // CONFIG_PMEM_GARRAY
+// PG_ALIGN是__attribute__((aligned(4096)))的宏定义，表示物理内存地址对齐到4096字节
+// 效果：pmem 数组的起始地址必须是 4096 的倍数
 static uint8_t pmem[CONFIG_MSIZE] PG_ALIGN = {}; // 用数组模拟nemu的物理内存
 #endif
 

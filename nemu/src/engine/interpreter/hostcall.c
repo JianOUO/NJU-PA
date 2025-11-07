@@ -19,16 +19,21 @@
 #include <cpu/difftest.h>
 
 void set_nemu_state(int state, vaddr_t pc, int halt_ret) {
+  // 跳过ref的下次执行，直接同步NEMU的状态到参考实现
   difftest_skip_ref();
   nemu_state.state = state;
   nemu_state.halt_pc = pc;
   nemu_state.halt_ret = halt_ret;
 }
 
+// 函数在此调用: INSTPAT("??????? ????? ????? ??? ????? ????? ??", inv, N, INV(s->pc));
+// 指令解码是 NEMU 的性能关键路径（每条指令执行一次）,invalid_inst 是冷路径（只在出错时执行）
+// 内联会让热路径代码膨胀，导致：指令缓存（I-Cache）污染，更多的缓存未命中，降低正常指令的执行效率
 __attribute__((noinline))
 void invalid_inst(vaddr_t thispc) {
   uint32_t temp[2];
   vaddr_t pc = thispc;
+  // pc会更新为下一条指令的地址
   temp[0] = inst_fetch(&pc, 4);
   temp[1] = inst_fetch(&pc, 4);
 

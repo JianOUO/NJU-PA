@@ -60,12 +60,13 @@ static long load_img() {
   // 适合读取：图片、音频、视频、压缩文件、二进制数据
   FILE *fp = fopen(img_file, "rb");
   Assert(fp, "Can not open '%s'", img_file);
-
+  // 移动文件指针到文件末尾
   fseek(fp, 0, SEEK_END);
+  // ftell() 返回文件指针距离文件开头的字节数
   long size = ftell(fp);
 
   Log("The image is %s, size = %ld", img_file, size);
-
+  // 移动文件指针回到文件开头
   fseek(fp, 0, SEEK_SET);
   // 将整个image-file读入到nemu模拟的物理内存(字节数组)中
   int ret = fread(guest_to_host(RESET_VECTOR), size, 1, fp);
@@ -85,7 +86,7 @@ static int parse_args(int argc, char *argv[]) {
     {0          , 0                , NULL,  0 },
   };
   int o;
-  // argc, argv: 命令行参数 "-bhl:d:p:": 短选项字符串 table: 长选项表 NULL: 不需要返回长选项索引
+  // argc, argv: 命令行参数, "-bhl:d:p:": 短选项字符串, table: 长选项表, NULL: 不需要返回长选项索引
   while ( (o = getopt_long(argc, argv, "-bhl:d:p:", table, NULL)) != -1) {
     switch (o) {
       case 'b': sdb_set_batch_mode(); break;
@@ -143,7 +144,7 @@ void init_monitor(int argc, char *argv[]) {
 }
 #else // CONFIG_TARGET_AM
 static long load_img() {
-  extern char bin_start, bin_end;
+  extern char bin_start, bin_end; // am-bin.S
   size_t size = &bin_end - &bin_start;
   Log("img size = %ld", size);
   memcpy(guest_to_host(RESET_VECTOR), &bin_start, size);

@@ -18,6 +18,7 @@
 
 #define TIMER_HZ 60
 
+// 定义一个类型别名 alarm_handler_t，代表"指向无参数、无返回值函数的指针"
 typedef void (*alarm_handler_t) ();
 void add_alarm_handle(alarm_handler_t h);
 

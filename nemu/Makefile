@@ -119,10 +119,10 @@ CFLAGS_BUILD += $(if $(CONFIG_CC_ASAN),-fsanitize=address,)
 # 作用：设置指令追踪的启用条件
 # 默认：如果未配置，默认为 true（总是启用）
 CFLAGS_TRACE += -DITRACE_COND=$(if $(CONFIG_ITRACE_COND),$(call remove_quote,$(CONFIG_ITRACE_COND)),true)
+
 # CFLAGS：C 编译器标志
 # LDFLAGS：链接器标志
 # -D__GUEST_ISA__=$(GUEST_ISA)：定义目标 ISA 的宏
-
 CFLAGS  += $(CFLAGS_BUILD) $(CFLAGS_TRACE) -D__GUEST_ISA__=$(GUEST_ISA)
 LDFLAGS += $(CFLAGS_BUILD)
 

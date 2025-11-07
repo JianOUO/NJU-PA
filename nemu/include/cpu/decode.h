@@ -19,14 +19,32 @@
 #include <isa.h>
 
 typedef struct Decode {
-  vaddr_t pc;
+  vaddr_t pc;   // 当前指令
   vaddr_t snpc; // static next pc
   vaddr_t dnpc; // dynamic next pc
-  ISADecodeInfo isa;
+  ISADecodeInfo isa; // 指令编码
   IFDEF(CONFIG_ITRACE, char logbuf[128]);
 } Decode;
 
 // --- pattern matching mechanism ---
+/*
+__attribute__((always_inline)) 是 GCC 属性
+作用： 强制编译器总是内联这个函数，无论优化级别如何
+1. 普通函数（可能不内联）
+void func1() { ... }
+2. inline 关键字（建议内联,视编译优化级别而定）
+inline void func2() { ... }
+3. always_inline（强制内联）
+__attribute__((always_inline))
+static inline void func3() { ... }
+
+性能关键路径
+// INSTPAT 宏在每次执行指令时都会调用
+INSTPAT("0000000 00001 00000 000 00000 11100 11", ebreak, N, ...);
+// 展开后
+pattern_decode("0000000...", 38, &key, &mask, &shift);
+调用频率极高，即使微小的函数调用开销也会累积
+*/
 __attribute__((always_inline))
 static inline void pattern_decode(const char *str, int len,
     uint64_t *key, uint64_t *mask, uint64_t *shift) {

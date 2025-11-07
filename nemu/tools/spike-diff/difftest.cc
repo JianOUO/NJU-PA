@@ -15,7 +15,20 @@
 
 #include "mmu.h"
 #include "sim.h"
+/*
+引号 " " - 相对路径包含
+搜索顺序：
+1. 先在当前文件所在目录搜索
+2. 然后在 -I 指定的目录搜索
+3. 最后在系统目录搜索
+3. 不会在当前目录搜索
+*/
 #include "../../include/common.h"
+/*
+1. 在 -I 指定的目录搜索
+2. 在系统标准目录搜索（/usr/include 等）
+3. 不会在当前目录搜索
+*/
 #include <difftest-def.h>
 
 #define NR_GPR MUXDEF(CONFIG_RVE, 16, 32)

@@ -40,3 +40,8 @@ __EXPORT void difftest_init(int port) {
   /* Perform ISA dependent initialization. */
   init_isa();
 }
+
+/*
+这个文件定义了当 NEMU 作为参考实现（REF） 时需要提供的接口函数。
+使用 __EXPORT 宏（展开为 __attribute__((visibility("default")))）导出符号，使得函数可以被动态链接库加载器找到。
+*/

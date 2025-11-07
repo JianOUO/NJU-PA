@@ -38,7 +38,7 @@
       assert(cond); \
     } \
   } while (0)
-
+// ##在__VA_ARGS__为空时吸收前面的逗号
 #define panic(format, ...) Assert(0, format, ## __VA_ARGS__)
 
 #define TODO() panic("please implement me")

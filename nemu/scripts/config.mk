@@ -66,16 +66,40 @@ menuconfig: $(MCONF) $(CONF) $(FIXDEP)
 # $(Q)：静默执行（@，不显示命令本身）
 # $(MCONF)：菜单配置工具（tools/kconfig/build/mconf）
 # $(Kconfig)：主配置文件（Kconfig）
-# 作用：启动图形化配置界面，让用户选择配置选项。
+# 作用：启动图形化配置界面，让用户选择配置选项。结果保存到.config文件中
 	$(Q)$(MCONF) $(Kconfig)
 # $(CONF)：配置解析器（tools/kconfig/build/conf）
 # $(silent)：静默标志（-s，减少输出）
 # --syncconfig：同步配置选项
-#作用：将用户在界面中的选择转换为构建系统可用的文件。
+# 作用：将用户在界面中的选择转换为构建系统可用的文件。
+#Step 1: 读取 .config
+#   ├─ 用户通过 menuconfig 保存的配置
+#   └─ 包含所有配置选项的值
+#Step 2: 读取 Kconfig
+#   ├─ 配置选项的定义
+#   ├─ 依赖关系
+#   └─ 默认值
+#Step 3: 生成配置文件
+#   ├─ include/config/auto.conf       (Makefile 变量)
+#   ├─ include/config/auto.conf.cmd   (依赖追踪)
+#   └─ include/generated/autoconf.h   (C 预处理器宏)
+#Step 4: 创建/更新空文件
+#   ├─ include/config/msize.h
+#   ├─ include/config/mbase.h
+#   ├─ include/config/watchpoint.h
+#   └─ ... (对每个启用的配置)
+#Step 5: 更新依赖关系
+#   └─ 记录哪些 Kconfig 文件被使用
 	$(Q)$(CONF) $(silent) --syncconfig $(Kconfig)
 
 # 等价于tools/kconfig/build/conf --savedefconfig=configs/defconfig Kconfig
-# 作用：将最小化的默认配置保存到 configs/defconfig 文件中。
+#Step 1: 读取当前的 .config
+#   包含所有配置项（200+ 行）
+#Step 2: 与 Kconfig 中的默认值比较
+#   ├─ 如果某项 = 默认值 → 不保存
+#   └─ 如果某项 ≠ 默认值 → 保存
+#Step 3: 生成最小配置文件
+#   configs/defconfig (只有 5-10 行)
 savedefconfig: $(CONF)
 	$(Q)$< $(silent) --$@=configs/defconfig $(Kconfig)
 
@@ -84,7 +108,22 @@ savedefconfig: $(CONF)
 # --defconfig=configs/$@：从指定文件加载默认配置
 # --syncconfig：同步配置到构建系统
 %defconfig: $(CONF) $(FIXDEP)
-# 从 configs/%_defconfig 文件加载预设配置到 .config
+# 从 configs/%_defconfig加载预设配置到 .config
+#Step 1: 读取 Kconfig 文件
+#   ├─ 了解有哪些配置选项
+#   ├─ 每个选项的类型和默认值
+#   └─ 依赖关系
+# Step 2: 读取 defconfig 文件
+#   ├─ CONFIG_TARGET_AM=y
+#   ├─ CONFIG_MSIZE=0x2000000
+#   └─ ... (用户的选择)
+# Step 3: 合并和计算
+#   ├─ 从 defconfig 读取用户设置
+#   ├─ 从 Kconfig 读取默认值
+#   ├─ 计算依赖关系
+#   └─ 生成完整的 .config
+# Step 4: 输出结果
+#   └─ 生成 .config 文件（200+ 行）
 	$(Q)$< $(silent) --defconfig=configs/$@ $(Kconfig)
 # 处理配置依赖，生成构建系统需要的文件
 	$(Q)$< $(silent) --syncconfig $(Kconfig)
@@ -106,18 +145,18 @@ distclean: clean
 # unused：固定参数，fixdep 工具要求的格式
 # > $(1).tmp：将输出重定向到临时文件
 # 当使用 gcc -MMD 时，生成的依赖文件包含：
-# 原始生成的 build/src/main.d
+# 原始生成的 build/src/main.d:
 # build/src/main.o: src/main.c /usr/include/stdio.h \
   /usr/include/features.h /usr/include/stdc-predef.h \
-  include/common.h include/config.h
-# ... 很多系统头文件
-# fixdep 处理后的 build/src/main.d
+  include/common.h include/config.h ... 很多系统头文件
+# fixdep 处理后的 build/src/main.d:
 # build/src/main.o: src/main.c include/common.h include/config.h
 # fixdep 的功能
 # 过滤系统头文件：移除 /usr/include/ 等系统路径
 # 保留项目文件：只保留项目相关的头文件
-# 优化增量编译：避免系统头文件修改触发不必要的重新编译
-# tools/fixdep/build/fixdep build/src/main.d build/src/main.o unused > build/src/main.d.tmp
+# 替换 autoconf.h 为细粒度依赖
+# 优化增量编译，避免系统头文件修改触发不必要的重新编译
+# 命令等价于：tools/fixdep/build/fixdep build/src/main.d build/src/main.o unused > build/src/main.d.tmp
 # bulid/src/main.d 是原始的依赖文件，build/src/main.d.tmp 是处理后的依赖文件
 # mv build/src/main.d.tmp build/src/main.d
 # 用处理后的依赖文件替换原始依赖文件

@@ -89,6 +89,68 @@
  *  but I don't think the added complexity is worth it)
  */
 
+/*
+# 假设有 100 个源文件都包含了 autoconf.h
+src1.c → #include <generated/autoconf.h>
+src2.c → #include <generated/autoconf.h>
+...
+src100.c → #include <generated/autoconf.h>
+
+# 用户只修改了一个配置项：CONFIG_WATCHPOINT
+make menuconfig
+# 改变 CONFIG_WATCHPOINT 从 n 到 y
+
+# autoconf.h 被重新生成（整个文件都变了）
+# Make 检测到 autoconf.h 变化
+# 结果：重新编译所有 100 个文件！
+# 即使只有 1 个文件用到了 CONFIG_WATCHPOINT
+
+# fixdep 将依赖转换为：
+src1.c → include/config/msize.h
+src2.c → include/config/isa.h
+...
+src10.c → include/config/watchpoint.h  ← 只有这个用到
+...
+
+# 用户修改了 CONFIG_WATCHPOINT
+make menuconfig
+
+# 只有 include/config/watchpoint.h 被 touch（更新时间戳）
+# Make 检测到只有 watchpoint.h 变化
+# 结果：只重新编译 src10.c ✓
+# 节省了 99% 的编译时间！
+
+Step 1: gcc 编译生成原始依赖文件 (.d)
+   src/memory/paddr.c → build/obj-*\/src/memory/paddr.d
+   
+   内容：
+   paddr.o: src/memory/paddr.c \
+     include/common.h \
+     include/generated/autoconf.h \  ← 粗粒度依赖
+     include/memory/paddr.h
+
+Step 2: fixdep 分析源文件中使用的 CONFIG_* 宏
+   扫描 paddr.c 发现：
+   - CONFIG_MSIZE
+   - CONFIG_MBASE
+   - CONFIG_PMEM_GARRAY
+
+Step 3: fixdep 转换依赖关系
+   替换：
+   include/generated/autoconf.h
+   
+   为：
+   include/config/msize.h
+   include/config/mbase.h
+   include/config/pmem/garray.h  ← 细粒度依赖
+
+Step 4: 生成新的 .d 文件
+   paddr.o: src/memory/paddr.c \
+     include/common.h \
+     include/config/msize.h \
+     include/config/mbase.h \
+     include/config/pmem/garray.h
+*/
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>

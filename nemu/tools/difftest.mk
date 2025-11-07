@@ -21,6 +21,7 @@ ARGS_DIFF = --diff=$(DIFF_REF_SO)
 
 # 不以NEMU为参考实现时
 ifndef CONFIG_DIFFTEST_REF_NEMU
+# -C 切换到指定目录
 $(DIFF_REF_SO):
 	$(MAKE) -s -C $(DIFF_REF_PATH) $(MKFLAGS)
 endif
@@ -30,6 +31,6 @@ endif
 
 # 首次启用差分测试: make run
 # 检查 $(DIFF_REF_SO) 是否存在
-# 如果不存在，触发构建规则, 如make -s -C /home/user/nexus-am GUEST_ISA=riscv32 SHARE=1 ENGINE=interpreter
-# 构建参考实现的共享库
-# 运行 NEMU 并传递 --diff=... 参数
+# 如果不存在，触发构建规则, 如make -s -C /nemu/tools/spike-diff GUEST_ISA=riscv32 SHARE=1 ENGINE=interpreter
+# 生成$(DIFF_REF_SO)
+# 然后运行 NEMU 并传递 $ARGS_DIFF: --diff=$(DIFF_REF_SO) 参数(native.mk:40)

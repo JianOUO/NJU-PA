@@ -19,7 +19,7 @@
 #include <stdint.h>
 #include <macro.h>
 #include <generated/autoconf.h>
-
+// 符号可见性宏
 #define __EXPORT __attribute__((visibility("default")))
 enum { DIFFTEST_TO_DUT, DIFFTEST_TO_REF };
 

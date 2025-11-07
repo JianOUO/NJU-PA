@@ -34,12 +34,12 @@ void isa_reg_display() {
 
 word_t isa_reg_str2val(const char *s, bool *success) {
   // $pc
-  if (s[1] == 'p') {
+  if (strcmp(s, "$pc") == 0) {
     *success = true;
     return cpu.pc;
   }
   // $0 or $zero
-  if (s[1] == '0' || s[1] == 'z') {
+  if (strcmp(s, "$0") == 0 || strcmp(s, "$zero") == 0) {
     *success = true;
     return gpr(0);
   }

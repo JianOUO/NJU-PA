@@ -24,11 +24,18 @@
 enum { 
   NEMU_RUNNING,  // 正在运行
   NEMU_STOP,     // 暂停（单步调试）
-  NEMU_END,      // 正常结束 ← ebreak 设置这个状态
-  NEMU_ABORT,    // 异常终止（非法指令）
+  NEMU_END,      // 正常结束 
+  NEMU_ABORT,    // 异常终止
   NEMU_QUIT      // 用户退出
 };
 //enum { NEMU_RUNNING, NEMU_STOP, NEMU_END, NEMU_ABORT, NEMU_QUIT };
+/*
+何时状态会改变？
+执行 ebreak 指令 → NEMU_END
+非法指令 → NEMU_ABORT
+差分测试失败 → NEMU_ABORT
+用户按 Ctrl+C → NEMU_QUIT
+*/
 
 typedef struct {
   int state;
@@ -63,6 +70,18 @@ uint64_t get_time();
 #define ANSI_NONE       "\33[0m"
 
 #define ANSI_FMT(str, fmt) fmt str ANSI_NONE
+
+/*
+默认情况下，fprintf 不会立即写入磁盘：
+用户调用 fprintf()
+  ↓
+数据写入内存缓冲区（buffer）
+  ↓
+缓冲区满了 或 文件关闭 或 遇到换行符
+  ↓
+才真正写入磁盘
+*/
+// 强制刷新文件缓冲区，立即写入磁盘
 
 #define log_write(...) IFDEF(CONFIG_TARGET_NATIVE_ELF, \
   do { \

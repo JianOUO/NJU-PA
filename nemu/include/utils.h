@@ -72,6 +72,7 @@ uint64_t get_time();
 #define ANSI_FMT(str, fmt) fmt str ANSI_NONE
 
 /*
+fprintf(log_fp, __VA_ARGS__); \
 默认情况下，fprintf 不会立即写入磁盘：
 用户调用 fprintf()
   ↓
@@ -80,8 +81,10 @@ uint64_t get_time();
 缓冲区满了 或 文件关闭 或 遇到换行符
   ↓
 才真正写入磁盘
+
+fflush(log_fp);
+强制刷新文件缓冲区，立即写入磁盘
 */
-// 强制刷新文件缓冲区，立即写入磁盘
 
 #define log_write(...) IFDEF(CONFIG_TARGET_NATIVE_ELF, \
   do { \

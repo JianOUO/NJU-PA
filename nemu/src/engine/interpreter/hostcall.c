@@ -33,7 +33,7 @@ __attribute__((noinline))
 void invalid_inst(vaddr_t thispc) {
   uint32_t temp[2];
   vaddr_t pc = thispc;
-  // pc会更新为下一条指令的地址
+  // inst_fetch会使pc更新为下一条静态指令的地址
   temp[0] = inst_fetch(&pc, 4);
   temp[1] = inst_fetch(&pc, 4);
 

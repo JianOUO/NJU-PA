@@ -21,6 +21,7 @@
 void cpu_exec(uint64_t n);
 
 void set_nemu_state(int state, vaddr_t pc, int halt_ret);
+// invalid_inst()在src/engine/interpreter/hostcall.c中实现
 void invalid_inst(vaddr_t thispc);
 // NEMU_END 在include/utils.h中定义
 #define NEMUTRAP(thispc, code) set_nemu_state(NEMU_END, thispc, code)

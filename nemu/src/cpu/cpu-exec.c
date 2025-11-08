@@ -76,9 +76,9 @@ static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {
 
 // 让CPU执行当前PC指向的一条指令, 然后更新PC
 static void exec_once(Decode *s, vaddr_t pc) {
-  // 更新PC
+  // s->pc在后续执行与PC相关的指令时表示当前的指令地址
   s->pc = pc;
-  // snpc在后续执行阶段会被更新，指向静态下一条指令
+  // s->snpc在后续阶段用于取指令，并且会被更新指向静态下一条指令
   s->snpc = pc;
   isa_exec_once(s);
   // 指令执行完毕，s->dnpc和cpu.pc指向动态下一条指令

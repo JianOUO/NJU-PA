@@ -123,6 +123,7 @@ static int decode_exec(Decode *s) {
   INSTPAT("??????? ????? ????? 101 ????? 00000 11", lhu    , I, R(rd) = Mr(src1 + imm, 2));
   INSTPAT("0000001 ????? ????? 001 ????? 01100 11", mulh   , R, R(rd) = MUXDEF(CONFIG_ISA64, ((__int128)(sword_t)src1 * (__int128)(sword_t)src2) >> 64, ((int64_t)(sword_t)src1 * (int64_t)(sword_t)src2) >> 32)); // 这里必须先转化为sword_t，否则会进行零扩展而非符号扩展.
   INSTPAT("0000001 ????? ????? 010 ????? 01100 11", mulhsu , R, R(rd) = MUXDEF(CONFIG_ISA64, ((__int128)(sword_t)src1 * (__int128)src2) >> 64, ((int64_t)(sword_t)src1 * (int64_t)(sword_t)src2) >> 32));
+  INSTPAT("0000001 ????? ????? 011 ????? 01100 11", mulhu  , R, R(rd) = MUXDEF(CONFIG_ISA64, ((__uint128)src1 * (__uint128)src2) >> 64, ((uint64_t)src1 * (uint64_t)src2) >> 32));
   INSTPAT("0000001 ????? ????? 111 ????? 01100 11", remu   , R, R(rd) = (src2 == 0) ? src1 : src1 % src2);
   INSTPAT("0000001 ????? ????? 101 ????? 01100 11", divu   , R, R(rd) = (src2 == 0) ? (MUXDEF(CONFIG_ISA64, 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFF)) : src1 / src2);
   INSTPAT("0100000 ????? ????? 101 ????? 01100 11", sra    , R, R(rd) = (sword_t)src1 >> (src2 & 0x1F)); //src2的低5位(在RV64I中是低6位)为移位位数，高位忽略。

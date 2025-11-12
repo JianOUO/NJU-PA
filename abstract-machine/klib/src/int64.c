@@ -4,6 +4,26 @@
 /* Assumption: Right shift of signed negative is arithmetic shift. */
 /* Assumption: Endianness is little or big (not mixed). */
 
+/*
+第 1 部分：平台检测和配置 (27-174行)
+检测字节序（大端/小端），支持多种平台：GCC/Clang（通用），Solaris，BSD 系列，macOS，Windows
+第 2 部分：类型定义 (176-301行)
+基本类型：si_int - signed int（32位有符号）/ su_int - signed unsigned（32位无符号）/ di_int - double int（64位有符号）/ du_int - double unsigned（64位无符号）
+联合体：将 64 位拆成两个 32 位 
+第 3 部分：64 位除法/取模实现 (304-640行)
+__divdi3()      // 有符号 64位 除法：  a / b
+__udivdi3()     // 无符号 64位 除法：  a / b
+__moddi3()      // 有符号 64位 取模：  a % b
+__umoddi3()     // 无符号 64位 取模：  a % b
+__divmoddi4()   // 有符号 64位 除法和取模
+__udivmoddi4()  // 无符号 64位 除法和取模（核心实现）
+第 4 部分：位操作函数实现 (642-738行)
+__clzsi2()      // 计算前导零位数（32位）
+__clzdi2()      // 计算前导零位数（64位）
+__ctzsi2()      // 计算尾随零位数（32位）
+__ctzdi2()      // 计算尾随零位数（64位）
+*/
+
 #if defined(__ELF__)
 #define FNALIAS(alias_name, original_name) \
   void alias_name() __attribute__((__alias__(#original_name)))

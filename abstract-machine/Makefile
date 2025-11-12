@@ -95,9 +95,6 @@ endif
 # 获取当前工作目录的绝对路径，比如 am 或者 klib
 WORK_DIR  = $(shell pwd)
 DST_DIR   = $(WORK_DIR)/build/$(ARCH)
-$(info [DEBUG] WORK_DIR=$(WORK_DIR))
-$(info [DEBUG] ARCH=$(ARCH))
-$(info [DEBUG] DST_DIR=$(DST_DIR))
 $(shell mkdir -p $(DST_DIR))
 
 ### Compilation targets (a binary image or archive)

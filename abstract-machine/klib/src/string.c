@@ -29,7 +29,10 @@ int strncmp(const char *s1, const char *s2, size_t n) {
 }
 
 void *memset(void *s, int c, size_t n) {
-  panic("Not implemented");
+  //panic("Not implemented");
+  uint8_t *m = s;
+  for (size_t i = 0; i < n; i++) *(m + i) = c;
+  return s;
 }
 
 void *memmove(void *dst, const void *src, size_t n) {

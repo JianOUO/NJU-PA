@@ -10,11 +10,43 @@ int printf(const char *fmt, ...) {
 }
 
 int vsprintf(char *out, const char *fmt, va_list ap) {
-  panic("Not implemented");
+  //panic("Not implemented");
+  assert(out != NULL);
+  assert(fmt != NULL);
+  const char *begin = out;
+  char f, s;
+  while ((f = *fmt++)) {
+    if (f != '%') {
+      *out++ = f;
+      continue;
+    }
+    switch (f = *fmt++) {
+      case 'd': {
+        int value = va_arg(ap, int);
+        out += itoa(value, out);
+        break;
+      }
+      case 's': {
+        char *str = va_arg(ap, char *);
+        assert(str != NULL);
+        while ((s = *str++)) *out++ = s;
+        break;
+      }
+      default: panic("Invalid conversion specifiers");
+    }
+  }
+  assert(f == '\0');
+  *out = f;
+  return out - begin;
 }
 
 int sprintf(char *out, const char *fmt, ...) {
-  panic("Not implemented");
+  //panic("Not implemented");
+  va_list ap;
+  va_start(ap, fmt);
+  int result = vsprintf(out, fmt, ap);
+  va_end(ap);
+  return result;
 }
 
 int snprintf(char *out, size_t n, const char *fmt, ...) {
@@ -22,16 +54,7 @@ int snprintf(char *out, size_t n, const char *fmt, ...) {
 }
 
 int vsnprintf(char *out, size_t n, const char *fmt, va_list ap) {
-  panic("Not implemented");
+  panic("Not implemented"); 
 }
 
 #endif
-
-/*
-推荐实现顺序：
-实现 vsnprintf() - 核心格式化引擎
-基于它实现 snprintf() - 包装可变参数
-基于 vsnprintf 实现 vsprintf() - 不限长度
-基于 snprintf 实现 sprintf() - 不限长度
-基于 vsnprintf 实现 printf() - 输出到标准输出
-*/

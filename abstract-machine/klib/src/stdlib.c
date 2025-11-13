@@ -1,6 +1,7 @@
 #include <am.h>
 #include <klib.h>
 #include <klib-macros.h>
+#include <limits.h>
 
 #if !defined(__ISA_NATIVE__) || defined(__NATIVE_USE_KLIB__)
 // 随机数生成器的内部状态
@@ -44,6 +45,26 @@ int atoi(const char* nptr) {
   }
   return x;
 }
+
+int itoa (int val, char *buf) {
+  char *begin = buf;
+  char *end = buf;
+  if (val == INT_MIN) {
+    strcpy(buf, "-2147483648");
+    return 11;
+  }
+  if (val < 0) {
+    *end++ = '-';
+    val = -val;
+  }
+  do {
+    *end++ = val % 10 + '0';
+    val /= 10;
+  } while (val != 0);
+
+  return end - begin;
+}
+
 
 void *malloc(size_t size) {
   // On native, malloc() will be called during initializaion of C runtime.

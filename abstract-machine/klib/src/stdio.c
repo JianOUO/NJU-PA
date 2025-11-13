@@ -23,6 +23,7 @@ int vsprintf(char *out, const char *fmt, va_list ap) {
     switch ((f = *fmt++)) {
       case 'd': {
         int value = va_arg(ap, int);
+        assert(0);
         assert(value == 10);
         out += itoa(value, out);
         break;

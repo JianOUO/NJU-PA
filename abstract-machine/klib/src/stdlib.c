@@ -49,6 +49,8 @@ int atoi(const char* nptr) {
 int itoa (int val, char *buf) {
   char *begin = buf;
   char *end = buf;
+  char tmp;
+  int result;
   if (val == INT_MIN) {
     strcpy(buf, "-2147483648");
     return 11;
@@ -60,9 +62,17 @@ int itoa (int val, char *buf) {
   do {
     *end++ = val % 10 + '0';
     val /= 10;
-  } while (val != 0);
-
-  return end - begin;
+  } while (val != 0); 
+  result = end - begin;
+  end--;
+  while (end > begin) {
+    tmp = *begin;
+    *begin = *end;
+    *end = tmp;
+    end--;
+    begin++;
+  }
+  return result;
 }
 
 

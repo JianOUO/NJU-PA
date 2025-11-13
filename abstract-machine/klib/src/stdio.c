@@ -10,9 +10,7 @@ int printf(const char *fmt, ...) {
 }
 
 int vsprintf(char *out, const char *fmt, va_list ap) {
-  //panic("Not implemented");
-  assert(out != NULL);
-  assert(fmt != NULL);
+  panic("Not implemented");
   const char *begin = out;
   char f, s;
   while ((f = *fmt++)) {
@@ -28,14 +26,12 @@ int vsprintf(char *out, const char *fmt, va_list ap) {
       }
       case 's': {
         char *str = va_arg(ap, char *);
-        assert(str != NULL);
         while ((s = *str++)) *out++ = s;
         break;
       }
       default: panic("Invalid conversion specifiers");
     }
   }
-  assert(f == '\0');
   *out = f;
   return out - begin;
 }

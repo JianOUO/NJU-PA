@@ -225,7 +225,7 @@ else
 # LINKAGE += $$(AM_HOME)/$(1)/build/$(1)-$$(ARCH).a: 添加到链接列表
 define LIB_TEMPLATE =
 $$(AM_HOME)/$(1)/build/$(1)-$$(ARCH).a: force
-	@bear -- $$(MAKE) -B -s -C $$(AM_HOME)/$(1) archive
+	@ -- $$(MAKE) -s -C $$(AM_HOME)/$(1) archive
 LINKAGE += $$(AM_HOME)/$(1)/build/$(1)-$$(ARCH).a
 endef
 

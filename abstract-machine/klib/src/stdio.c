@@ -10,7 +10,7 @@ int printf(const char *fmt, ...) {
 }
 
 int vsprintf(char *out, const char *fmt, va_list ap) {
-  panic("Not implemented");
+  //panic("Not implemented");
   assert(out != NULL);
   assert(fmt != NULL);
   const char *begin = out;
@@ -23,6 +23,7 @@ int vsprintf(char *out, const char *fmt, va_list ap) {
     switch ((f = *fmt++)) {
       case 'd': {
         int value = va_arg(ap, int);
+        assert(value == 2);
         out += itoa(value, out);
         break;
       }

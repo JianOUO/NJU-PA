@@ -20,12 +20,12 @@
 bool isa_difftest_checkregs(CPU_state *ref_r, vaddr_t pc) {
   bool flag = true;
   if (ref_r->pc != cpu.pc) {
-    printf("ref-pc: 0x%X\ndut-pc:%X\n",ref_r->pc, cpu.pc);
+    Log("nemu: ref-pc = " FMT_WORD "  dut-pc = " FMT_WORD, ref_r->pc, cpu.pc);
     flag = false;
   }
   for (int i = 0; i < MUXDEF(CONFIG_RVE, 16, 32); i++) {
     if (ref_r->gpr[i] != cpu.gpr[i]) {
-      printf("ref-%s: 0x%X\ndut-%s:0x%X\n",reg_name(i), ref_r->gpr[i], reg_name(i), cpu.gpr[i]);
+      Log("nemu: ref-%s = " FMT_WORD "  dut-%s = " FMT_WORD, reg_name(i), ref_r->pc, reg_name(i), cpu.pc);
       flag = false;
     }
   }

@@ -15,11 +15,18 @@
 
 #include <utils.h>
 
+#ifdef CONFIG_ITRACE
+extern void iringbuf_print();
+#endif
+
 NEMUState nemu_state = { .state = NEMU_STOP };
 
 int is_exit_status_bad() {
   // 什么是"好的"退出状态？
   int good = (nemu_state.state == NEMU_END && nemu_state.halt_ret == 0) ||
     (nemu_state.state == NEMU_QUIT);
+  #ifdef CONFIG_ITRACE
+  iringbuf_print();
+  #endif
   return !good;
 }

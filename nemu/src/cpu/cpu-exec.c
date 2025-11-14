@@ -25,6 +25,10 @@
  */
 #define MAX_INST_TO_PRINT 10
 
+#ifdef CONFIG_ITRACE
+extern void iringbuf_push(const char *);
+#endif
+
 CPU_state cpu = {};
 // 全局变量，记录执行的总指令数
 uint64_t g_nr_guest_inst = 0;
@@ -113,6 +117,7 @@ static void exec_once(Decode *s, vaddr_t pc) {
   void disassemble(char *str, int size, uint64_t pc, uint8_t *code, int nbyte);
   disassemble(p, s->logbuf + sizeof(s->logbuf) - p,
       MUXDEF(CONFIG_ISA_x86, s->snpc, s->pc), (uint8_t *)&s->isa.inst, ilen);
+  iringbuf_push(s->logbuf);
   /*
   示例：
   0x80000000: 97 02 00 00  auipc	t0, 0

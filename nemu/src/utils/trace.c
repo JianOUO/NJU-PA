@@ -22,13 +22,11 @@ void iringbuf_push(const char *log_buf) {
 void iringbuf_print() {
   if (count == IRINGBUFLEN) {
     for (int i = 0; i < IRINGBUFLEN; i++) {
-      printf("[ITRACE] ");
-      puts(iringbuf[(top + i) % IRINGBUFLEN].buf);
+      printf(ANSI_FMT("[ITRACE] %s\n", ANSI_FG_BLACK), iringbuf[(top + i) % IRINGBUFLEN].buf);
     }
   } else {
     for (int i = 0; i < top; i++) {
-      printf("[ITRACE] ");
-      puts(iringbuf[i].buf);
+      printf(ANSI_FMT("[ITRACE] %s\n", ANSI_FG_BLACK), iringbuf[(i) % IRINGBUFLEN].buf);
     }
   }
 }

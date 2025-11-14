@@ -33,7 +33,7 @@ paddr_t host_to_guest(uint8_t *haddr) { return haddr - pmem + CONFIG_MBASE; }
 static word_t pmem_read(paddr_t addr, int len) {
   word_t ret = host_read(guest_to_host(addr), len);
   #ifdef CONFIG_MTRACE
-  printf(ANSI_FMT("[MTRACE] Read  " FMT_WORD " FROM " FMT_WORD "\n", ANSI_FG_YELLOW), ret, addr);
+  printf(ANSI_FMT("[MTRACE] Read  " FMT_WORD " FROM " FMT_WORD "\n", ANSI_FG_RED), ret, addr);
   #endif
   return ret;
 }

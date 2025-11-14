@@ -20,13 +20,16 @@ void iringbuf_push(const char *log_buf) {
 }
 
 void iringbuf_print() {
-  puts("ITRACE:");
   if (count == IRINGBUFLEN) {
-    for (int i = 0; i < IRINGBUFLEN; i++) 
+    for (int i = 0; i < IRINGBUFLEN; i++) {
+      printf("ITRACE: ");
       puts(iringbuf[(top + i) % IRINGBUFLEN].buf);
+    }
   } else {
-    for (int i = 0; i < top; i++)
+    for (int i = 0; i < top; i++) {
+      printf("ITRACE: ");
       puts(iringbuf[i].buf);
+    }
   }
 }
 #endif

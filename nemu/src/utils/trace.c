@@ -32,7 +32,3 @@ void iringbuf_print() {
 }
 
 #endif
-
-#ifdef CONFIG_MTRACE
-
-#endif

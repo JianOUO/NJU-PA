@@ -20,6 +20,7 @@ void iringbuf_push(const char *log_buf) {
 }
 
 void iringbuf_print() {
+  puts("ITRACE:");
   if (count == IRINGBUFLEN) {
     for (int i = 0; i < IRINGBUFLEN; i++) 
       puts(iringbuf[(top + i) % IRINGBUFLEN].buf);

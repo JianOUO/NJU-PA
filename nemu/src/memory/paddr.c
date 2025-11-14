@@ -40,7 +40,6 @@ static word_t pmem_read(paddr_t addr, int len) {
 
 static void pmem_write(paddr_t addr, int len, word_t data) {
   #ifdef CONFIG_MTRACE
-  /*
   switch (len) {
     case 1: printf(ANSI_FMT("[MTRACE] Write " FMT_WORD " TO   " FMT_WORD "\n", ANSI_FG_GREEN), data & 0xFF, addr); break;
     case 2: printf(ANSI_FMT("[MTRACE] Write " FMT_WORD " TO   " FMT_WORD "\n", ANSI_FG_GREEN), data & 0xFFFF, addr); break;
@@ -48,8 +47,6 @@ static void pmem_write(paddr_t addr, int len, word_t data) {
     IFDEF(CONFIG_ISA64, case 8: printf(ANSI_FMT("[MTRACE] Write " FMT_WORD " TO   " FMT_WORD "\n", ANSI_FG_GREEN), data & 0xFFFFFFFFFFFFFFFF, addr); break);
     IFDEF(CONFIG_RT_CHECK, default: assert(0));
   }
-  */
-  printf(ANSI_FMT("[MTRACE] Write " FMT_WORD " TO   " FMT_WORD "\n", ANSI_FG_GREEN), data, addr);
   #endif
   host_write(guest_to_host(addr), len, data);
 }

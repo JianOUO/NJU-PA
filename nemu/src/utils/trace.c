@@ -118,7 +118,7 @@ void ftrace(vaddr_t pc, vaddr_t addr, bool call) {
     if (ELF32_ST_TYPE(symtab_ent.st_info) == STT_FUNC && addr >= symtab_ent.st_value && addr < symtab_ent.st_value + symtab_ent.st_size) {
       if (call) {
         char c;
-        printf("[FTRACE] " FMT_WORD ": ", pc);
+        printf(ANSI_FG_CYAN "[FTRACE] " FMT_WORD ": ", pc);
         for (uint32_t j = 0; j < space; j++) putchar(' ');
         printf("call [");
         Assert(lseek(fd, strtab_off + symtab_ent.st_name, SEEK_SET) != -1, "function name offset lseek failed");
@@ -127,7 +127,7 @@ void ftrace(vaddr_t pc, vaddr_t addr, bool call) {
           putchar(c);
           Assert(read(fd, &c, sizeof(char)) == sizeof(char), "function name read failed");
         }
-        printf("@" FMT_WORD "]\n", symtab_ent.st_value);
+        printf("@" FMT_WORD "]\n" ANSI_NONE, symtab_ent.st_value);
         space += 2;
         return;
       } else {

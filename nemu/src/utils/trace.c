@@ -35,16 +35,16 @@ void iringbuf_print() {
 
 #ifdef CONFIG_MTRACE
 void mtrace_read(paddr_t addr, word_t data) {
-  printf(ANSI_FMT("[MTRACE] Read  " FMT_WORD " FROM " FMT_WORD "\n", ANSI_FG_YELLOW), data, addr);
+  printf(ANSI_FMT("[MTRACE] Read  " FMT_WORD " FROM " FMT_WORD "\n", ANSI_FG_MAGENTA), data, addr);
   return;
 }
 
 void mtrace_write(paddr_t addr, int len, word_t data) {
   switch (len) {
-    case 1: printf(ANSI_FMT("[MTRACE] Write " FMT_WORD " TO   " FMT_WORD "\n", ANSI_FG_YELLOW), data & 0xFF, addr); break;
-    case 2: printf(ANSI_FMT("[MTRACE] Write " FMT_WORD " TO   " FMT_WORD "\n", ANSI_FG_YELLOW), data & 0xFFFF, addr); break;
-    case 4: printf(ANSI_FMT("[MTRACE] Write " FMT_WORD " TO   " FMT_WORD "\n", ANSI_FG_YELLOW), data & 0xFFFFFFFF, addr); break;
-    IFDEF(CONFIG_ISA64, case 8: printf(ANSI_FMT("[MTRACE] Write " FMT_WORD " TO   " FMT_WORD "\n", ANSI_FG_YELLOW), data & 0xFFFFFFFFFFFFFFFF, addr); break);
+    case 1: printf(ANSI_FMT("[MTRACE] Write " FMT_WORD " TO   " FMT_WORD "\n", ANSI_FG_MAGENTA), data & 0xFF, addr); break;
+    case 2: printf(ANSI_FMT("[MTRACE] Write " FMT_WORD " TO   " FMT_WORD "\n", ANSI_FG_MAGENTA), data & 0xFFFF, addr); break;
+    case 4: printf(ANSI_FMT("[MTRACE] Write " FMT_WORD " TO   " FMT_WORD "\n", ANSI_FG_MAGENTA), data & 0xFFFFFFFF, addr); break;
+    IFDEF(CONFIG_ISA64, case 8: printf(ANSI_FMT("[MTRACE] Write " FMT_WORD " TO   " FMT_WORD "\n", ANSI_FG_MAGENTA), data & 0xFFFFFFFFFFFFFFFF, addr); break);
     IFDEF(CONFIG_RT_CHECK, default: assert(0));
   }
   return;
@@ -133,7 +133,7 @@ void ftrace(vaddr_t pc, vaddr_t addr, bool call) {
       } else {
         space -= 2;
         char c;
-        printf(ANSI_FG_MAGENTA "[FTRACE] " FMT_WORD ": ", pc);
+        printf(ANSI_FG_CYAN "[FTRACE] " FMT_WORD ": ", pc);
         for (uint32_t j = 0; j < space; j++) putchar(' ');
         printf("ret  [");
         Assert(lseek(fd, strtab_off + symtab_ent.st_name, SEEK_SET) != -1, "function name offset lseek failed");

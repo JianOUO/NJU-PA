@@ -49,4 +49,13 @@ void mtrace_write(paddr_t addr, int len, word_t data) {
   }
   return;
 }
+
+#endif
+
+#ifdef CONFIG_FTRACE
+
+void init_ftrace(const char *elf) {
+
+}
+
 #endif

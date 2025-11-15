@@ -23,7 +23,9 @@ void init_difftest(char *ref_so_file, long img_size, int port);
 void init_device();
 void init_sdb();
 void init_disasm();
-void init_ftrace();
+#ifdef CONFIG_FTRACE
+void init_ftrace(const char *elf);
+#endif
 
 static void welcome() {
   Log("Trace: %s", MUXDEF(CONFIG_TRACE, ANSI_FMT("ON", ANSI_FG_GREEN), ANSI_FMT("OFF", ANSI_FG_RED)));
@@ -123,6 +125,10 @@ void init_monitor(int argc, char *argv[]) {
 
   /* Open the log file. */
   init_log(log_file);
+
+  #ifdef CONFIG_FTRACE
+  init_ftrace(elf_file);
+  #endif
 
   /* Initialize memory. */
   init_mem();

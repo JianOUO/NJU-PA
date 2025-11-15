@@ -25,7 +25,7 @@ const char *regs[] = {
 
 void isa_reg_display() {
   for (int i = 0; i < MUXDEF(CONFIG_RVE, 16, 32); i++) {
-    printf("%s = " FMT_WORD " " 
+    printf("%3s = " FMT_WORD " " 
     MUXDEF(CONFIG_ISA64, "%20" PRId64, "%10" PRId32) " "
     MUXDEF(CONFIG_ISA64, "%20" PRIu64, "%10" PRIu32) "\n", 
     reg_name(i), gpr(i), gpr(i), gpr(i));

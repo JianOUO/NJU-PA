@@ -18,6 +18,7 @@
 #include <memory/vaddr.h>
 #include <device/map.h>
 
+// 最大I/O空间为32MB
 #define IO_SPACE_MAX (32 * 1024 * 1024)
 
 static uint8_t *io_space = NULL;
@@ -25,7 +26,7 @@ static uint8_t *p_space = NULL;
 
 uint8_t* new_space(int size) {
   uint8_t *p = p_space;
-  // page aligned;
+  // page aligned, 按页取整(向上取整到页边界)
   size = (size + (PAGE_SIZE - 1)) & ~PAGE_MASK;
   p_space += size;
   assert(p_space - io_space < IO_SPACE_MAX);

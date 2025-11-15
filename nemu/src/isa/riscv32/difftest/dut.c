@@ -24,11 +24,9 @@ bool isa_difftest_checkregs(CPU_state *ref_r, vaddr_t pc) {
     Log(ANSI_FMT("nemu: ref-pc = " FMT_WORD "  dut-pc = " FMT_WORD, ANSI_FG_RED), ref_r->pc, cpu.pc);
     flag = false;
   }
-  for (int i = 0; i < MUXDEF(CONFIG_RVE, 16, 32); i++) {
-    if (ref_r->gpr[i] != cpu.gpr[i]) {
-      Log(ANSI_FMT("DIFFTEST: ref-%s = " FMT_WORD " dut-%s = " FMT_WORD, ANSI_FG_RED), reg_name(i), ref_r->gpr[i], reg_name(i), cpu.gpr[i]);
+  for (int i = 0; i < RISCV_GPR_NUM; i++) {
+    if (!difftest_check_reg(reg_name(i), pc, ref_r->gpr[i], cpu.gpr[i]))
       flag = false;
-    }
   }
   return flag;
 }

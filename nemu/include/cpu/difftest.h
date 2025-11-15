@@ -52,8 +52,8 @@ bool difftest_check_reg(
 */
 static inline bool difftest_check_reg(const char *name, vaddr_t pc, word_t ref, word_t dut) {
   if (ref != dut) {
-    Log("%s is different after executing instruction at pc = " FMT_WORD
-        ", right = " FMT_WORD ", wrong = " FMT_WORD ", diff = " FMT_WORD,
+    Log(ANSI_FG_RED "%s is different after executing instruction at pc = " FMT_WORD
+        ", right = " FMT_WORD ", wrong = " FMT_WORD ", diff = " FMT_WORD ANSI_NONE,
         name, pc, ref, dut, ref ^ dut); // 通过异或操作显示差异位
     return false;
   }

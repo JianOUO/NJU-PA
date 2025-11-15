@@ -32,3 +32,21 @@ void iringbuf_print() {
 }
 
 #endif
+
+#ifdef CONFIG_MTRACE
+void mtrace_read(paddr_t addr, word_t data) {
+  printf(ANSI_FMT("[MTRACE] Read  " FMT_WORD " FROM " FMT_WORD "\n", ANSI_FG_YELLOW), data, addr);
+  return;
+}
+
+void mtrace_write(paddr_t addr, int len, word_t data) {
+  switch (len) {
+    case 1: printf(ANSI_FMT("[MTRACE] Write " FMT_WORD " TO   " FMT_WORD "\n", ANSI_FG_YELLOW), data & 0xFF, addr); break;
+    case 2: printf(ANSI_FMT("[MTRACE] Write " FMT_WORD " TO   " FMT_WORD "\n", ANSI_FG_YELLOW), data & 0xFFFF, addr); break;
+    case 4: printf(ANSI_FMT("[MTRACE] Write " FMT_WORD " TO   " FMT_WORD "\n", ANSI_FG_YELLOW), data & 0xFFFFFFFF, addr); break;
+    IFDEF(CONFIG_ISA64, case 8: printf(ANSI_FMT("[MTRACE] Write " FMT_WORD " TO   " FMT_WORD "\n", ANSI_FG_YELLOW), data & 0xFFFFFFFFFFFFFFFF, addr); break);
+    IFDEF(CONFIG_RT_CHECK, default: assert(0));
+  }
+  return;
+}
+#endif

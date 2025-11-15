@@ -26,6 +26,11 @@ static uint8_t *pmem = NULL;
 static uint8_t pmem[CONFIG_MSIZE] PG_ALIGN = {}; // 用数组模拟nemu的物理内存
 #endif
 
+#ifdef CONFIG_MTRACE
+void mtrace_read(paddr_t addr, word_t data);
+void mtrace_write(paddr_t addr, int len, word_t data);
+#endif
+
 // 将guest program中的地址映射到nemu模拟的物理内存上
 uint8_t* guest_to_host(paddr_t paddr) { return pmem + paddr - CONFIG_MBASE; }
 paddr_t host_to_guest(uint8_t *haddr) { return haddr - pmem + CONFIG_MBASE; }
@@ -33,22 +38,16 @@ paddr_t host_to_guest(uint8_t *haddr) { return haddr - pmem + CONFIG_MBASE; }
 static word_t pmem_read(paddr_t addr, int len) {
   word_t ret = host_read(guest_to_host(addr), len);
   #ifdef CONFIG_MTRACE
-  printf(ANSI_FMT("[MTRACE] Read  " FMT_WORD " FROM " FMT_WORD "\n", ANSI_FG_YELLOW), ret, addr);
+  mtrace_read(addr, ret);
   #endif
   return ret;
 }
 
 static void pmem_write(paddr_t addr, int len, word_t data) {
-  #ifdef CONFIG_MTRACE
-  switch (len) {
-    case 1: printf(ANSI_FMT("[MTRACE] Write " FMT_WORD " TO   " FMT_WORD "\n", ANSI_FG_YELLOW), data & 0xFF, addr); break;
-    case 2: printf(ANSI_FMT("[MTRACE] Write " FMT_WORD " TO   " FMT_WORD "\n", ANSI_FG_YELLOW), data & 0xFFFF, addr); break;
-    case 4: printf(ANSI_FMT("[MTRACE] Write " FMT_WORD " TO   " FMT_WORD "\n", ANSI_FG_YELLOW), data & 0xFFFFFFFF, addr); break;
-    IFDEF(CONFIG_ISA64, case 8: printf(ANSI_FMT("[MTRACE] Write " FMT_WORD " TO   " FMT_WORD "\n", ANSI_FG_YELLOW), data & 0xFFFFFFFFFFFFFFFF, addr); break);
-    IFDEF(CONFIG_RT_CHECK, default: assert(0));
-  }
-  #endif
   host_write(guest_to_host(addr), len, data);
+  #ifdef CONFIG_MTRACE
+  mtrace_write(addr, len, data);
+  #endif
 }
 
 static void out_of_bound(paddr_t addr) {

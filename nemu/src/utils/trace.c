@@ -64,6 +64,7 @@ static Elf32_Off  strtab_off;
 static uint32_t   symtab_entsize;
 static uint32_t   symtab_entcnt;
 static Elf32_Sym  symtab_ent;
+static uint32_t   space = 0;
 
 void init_ftrace(const char *elf) {
   unsigned char e_ident[EI_NIDENT];
@@ -83,9 +84,10 @@ void init_ftrace(const char *elf) {
   Assert(e_ident[EI_CLASS] == ELFCLASS32, "EI_CLASS is NOT ELFCLASS32");
   Assert(e_ident[EI_MAG0] == ELFMAG0 && e_ident[EI_MAG1] == ELFMAG1 && e_ident[EI_MAG2] == ELFMAG2 && e_ident[EI_MAG3] == ELFMAG3,
   "Invalid ELF magic number");
+  // 一开始忘记将文件指针重置到文件开头
   Assert(lseek(fd, 0, SEEK_SET) != -1, "to file start lseek failed");
   Assert(read(fd, &ehdr, sizeof(Elf32_Ehdr)) == sizeof(Elf32_Ehdr), "ehdr read failed");
-  Assert(ehdr.e_machine == EM_RISCV, "The elf architecture is NOT riscv BUT %u", ehdr.e_machine);
+  Assert(ehdr.e_machine == EM_RISCV, "The elf architecture is NOT riscv");
   Assert(ehdr.e_shoff != 0, "this elf file has no section table");
   Assert(lseek(fd, ehdr.e_shoff, SEEK_SET) != -1, "e_shoff lseek failed");
   Assert(read(fd, &shdr, sizeof(Elf32_Shdr)) == sizeof(Elf32_Shdr), "shdr entry 0 read failed");
@@ -109,15 +111,39 @@ void init_ftrace(const char *elf) {
   return;
 }
 
-void ftrace(vaddr_t addr, bool call) {
+void ftrace(vaddr_t pc, vaddr_t addr, bool call) {
   Assert(lseek(fd, symtab_off, SEEK_SET) != -1, "symtab offset lseek failed");
   for (uint32_t i = 0; i < symtab_entcnt; i++) { 
     Assert(read(fd, &symtab_ent, sizeof(Elf32_Sym)) == sizeof(Elf32_Sym), "shdr entry %" PRIu32 "read failed", i);
     if (ELF32_ST_TYPE(symtab_ent.st_info) == STT_FUNC && addr >= symtab_ent.st_value && addr < symtab_ent.st_value + symtab_ent.st_size) {
       if (call) {
-
+        char c;
+        printf("[FTRACE] " FMT_WORD ": ", pc);
+        for (uint32_t j = 0; j < space; j++) putchar(' ');
+        printf("call [");
+        Assert(lseek(fd, strtab_off + symtab_ent.st_name, SEEK_SET) != -1, "function name offset lseek failed");
+        Assert(read(fd, &c, sizeof(char)) == sizeof(char), "function name read failed");
+        while (c != '\0') {
+          putchar(c);
+          Assert(read(fd, &c, sizeof(char)) == sizeof(char), "function name read failed");
+        }
+        printf("@" FMT_WORD "]\n", symtab_ent.st_value);
+        space += 2;
+        return;
       } else {
-
+        space -= 2;
+        char c;
+        printf("[FTRACE] " FMT_WORD ": ", pc);
+        for (uint32_t j = 0; j < space; j++) putchar(' ');
+        printf("ret  [");
+        Assert(lseek(fd, strtab_off + symtab_ent.st_name, SEEK_SET) != -1, "function name offset lseek failed");
+        Assert(read(fd, &c, sizeof(char)) == sizeof(char), "function name read failed");
+        while (c != '\0') {
+          putchar(c);
+          Assert(read(fd, &c, sizeof(char)) == sizeof(char), "function name read failed");
+        }
+        printf("]\n");
+        return;
       }
     }
   }

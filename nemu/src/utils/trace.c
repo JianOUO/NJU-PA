@@ -54,8 +54,71 @@ void mtrace_write(paddr_t addr, int len, word_t data) {
 
 #ifdef CONFIG_FTRACE
 
-void init_ftrace(const char *elf) {
+#include <fcntl.h>
+#include <unistd.h>
+#include <elf.h>
 
+static int fd = 0;
+static Elf32_Off  symtab_off;
+static Elf32_Off  strtab_off;
+static uint32_t   symtab_entsize;
+static uint32_t   symtab_entcnt;
+static Elf32_Sym  symtab_ent;
+
+void init_ftrace(const char *elf) {
+  unsigned char e_ident[EI_NIDENT];
+  Elf32_Ehdr ehdr;
+  Elf32_Shdr shdr;
+  uint32_t shnum;
+  uint32_t shstrndx;
+  if (elf != NULL) {
+    fd = open(elf, O_RDONLY);
+    Assert(fd != -1, "elf open failed");
+    Log("Get ELF file %s", elf);
+  } else {
+    Log("ELF file is NULL"); 
+  }
+  Assert(read(fd, e_ident, EI_NIDENT) == EI_NIDENT, "e_ident read failed");
+  Assert(e_ident[EI_CLASS] == ELFCLASS32, "EI_CLASS is NOT ELFCLASS32");
+  Assert(e_ident[EI_MAG0] == ELFMAG0 && e_ident[EI_MAG1] == ELFMAG1 && e_ident[EI_MAG2] == ELFMAG2 && e_ident[EI_MAG3] == ELFMAG3,
+  "Invalid ELF magic number");
+  Assert(read(fd, &ehdr, sizeof(Elf32_Ehdr)) == sizeof(Elf32_Ehdr), "ehdr read failed");
+  Assert(ehdr.e_machine == EM_RISCV, "The elf architecture is NOT riscv");
+  Assert(ehdr.e_shoff != 0, "this elf file has no section table");
+  Assert(lseek(fd, ehdr.e_shoff, SEEK_SET) != -1, "e_shoff lseek failed");
+  Assert(read(fd, &shdr, sizeof(Elf32_Shdr)) == sizeof(Elf32_Shdr), "shdr entry 0 read failed");
+  Assert(ehdr.e_shnum != 0 || shdr.sh_size != 0, "section header table's entry num is zero");
+  if (ehdr.e_shnum == 0 && shdr.sh_size != 0) shnum = shdr.sh_size;
+  else shnum = ehdr.e_shnum;
+  Assert(ehdr.e_shstrndx != SHN_UNDEF, "the file has no section name string table");
+  if (ehdr.e_shstrndx == SHN_XINDEX) shstrndx = shdr.sh_link;
+  else shstrndx = ehdr.e_shstrndx;
+  for (uint32_t i = 1; i < shnum; i++) {
+    Assert(read(fd, &shdr, sizeof(Elf32_Shdr)) == sizeof(Elf32_Shdr), "shdr entry %" PRIu32 " read failed", i);
+    if (shdr.sh_type == SHT_SYMTAB) {
+      symtab_off = shdr.sh_offset;
+      Assert(shdr.sh_entsize != 0, "symtab entsize == 0");
+      symtab_entsize = shdr.sh_entsize;
+      symtab_entcnt = shdr.sh_size / shdr.sh_entsize;
+    } else if (shdr.sh_type == SHT_STRTAB && i != shstrndx) {
+      strtab_off = shdr.sh_offset;
+    }
+  }
+  return;
+}
+
+void ftrace(vaddr_t addr, bool call) {
+  Assert(lseek(fd, symtab_off, SEEK_SET) != -1, "symtab offset lseek failed");
+  for (uint32_t i = 0; i < symtab_entcnt; i++) { 
+    Assert(read(fd, &symtab_ent, sizeof(Elf32_Sym)) == sizeof(Elf32_Sym), "shdr entry %" PRIu32 "read failed", i);
+    if (ELF32_ST_TYPE(symtab_ent.st_info) == STT_FUNC && addr >= symtab_ent.st_value && addr < symtab_ent.st_value + symtab_ent.st_size) {
+      if (call) {
+        
+      } else {
+
+      }
+    }
+  }
 }
 
 #endif

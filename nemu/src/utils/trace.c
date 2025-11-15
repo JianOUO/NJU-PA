@@ -84,7 +84,7 @@ void init_ftrace(const char *elf) {
   Assert(e_ident[EI_MAG0] == ELFMAG0 && e_ident[EI_MAG1] == ELFMAG1 && e_ident[EI_MAG2] == ELFMAG2 && e_ident[EI_MAG3] == ELFMAG3,
   "Invalid ELF magic number");
   Assert(read(fd, &ehdr, sizeof(Elf32_Ehdr)) == sizeof(Elf32_Ehdr), "ehdr read failed");
-  Assert(ehdr.e_machine == EM_RISCV, "The elf architecture is NOT riscv");
+  Assert(ehdr.e_machine == EM_RISCV, "The elf architecture is NOT riscv BUT %u", ehdr.e_machine);
   Assert(ehdr.e_shoff != 0, "this elf file has no section table");
   Assert(lseek(fd, ehdr.e_shoff, SEEK_SET) != -1, "e_shoff lseek failed");
   Assert(read(fd, &shdr, sizeof(Elf32_Shdr)) == sizeof(Elf32_Shdr), "shdr entry 0 read failed");

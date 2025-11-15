@@ -133,7 +133,7 @@ void ftrace(vaddr_t pc, vaddr_t addr, bool call) {
       } else {
         space -= 2;
         char c;
-        printf("[FTRACE] " FMT_WORD ": ", pc);
+        printf(ANSI_FG_CYAN "[FTRACE] " FMT_WORD ": ", pc);
         for (uint32_t j = 0; j < space; j++) putchar(' ');
         printf("ret  [");
         Assert(lseek(fd, strtab_off + symtab_ent.st_name, SEEK_SET) != -1, "function name offset lseek failed");
@@ -142,7 +142,7 @@ void ftrace(vaddr_t pc, vaddr_t addr, bool call) {
           putchar(c);
           Assert(read(fd, &c, sizeof(char)) == sizeof(char), "function name read failed");
         }
-        printf("]\n");
+        printf("]\n" ANSI_NONE);
         return;
       }
     }

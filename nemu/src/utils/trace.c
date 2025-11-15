@@ -77,6 +77,7 @@ void init_ftrace(const char *elf) {
     Log("Get ELF file %s", elf);
   } else {
     Log("ELF file is NULL"); 
+    return;
   }
   Assert(read(fd, e_ident, EI_NIDENT) == EI_NIDENT, "e_ident read failed");
   Assert(e_ident[EI_CLASS] == ELFCLASS32, "EI_CLASS is NOT ELFCLASS32");
@@ -113,7 +114,7 @@ void ftrace(vaddr_t addr, bool call) {
     Assert(read(fd, &symtab_ent, sizeof(Elf32_Sym)) == sizeof(Elf32_Sym), "shdr entry %" PRIu32 "read failed", i);
     if (ELF32_ST_TYPE(symtab_ent.st_info) == STT_FUNC && addr >= symtab_ent.st_value && addr < symtab_ent.st_value + symtab_ent.st_size) {
       if (call) {
-        
+
       } else {
 
       }

@@ -36,7 +36,7 @@ $(BINARY):: compile_git
 # ARGS 被命令行覆盖，结果为: --help，丢失了默认参数和追加参数！
 # 有override时，make run ARGS="--help" 
 # 结果为: --help $(EXTRA_ARGS): 用户参数 + 强制追加参数
-# ?=：条件赋值，如果未定义则为空
+# ?=：条件赋值，如果未定义则赋值
 override ARGS ?= --log=$(BUILD_DIR)/nemu-log.txt
 override ARGS += $(ARGS_DIFF)
 

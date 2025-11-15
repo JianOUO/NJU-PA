@@ -26,7 +26,7 @@
 #define MAX_INST_TO_PRINT 10
 
 #ifdef CONFIG_ITRACE
-extern void iringbuf_push(const char *);
+void iringbuf_push(const char *);
 #endif
 
 CPU_state cpu = {};

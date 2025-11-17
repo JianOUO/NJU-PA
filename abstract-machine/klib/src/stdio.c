@@ -80,19 +80,21 @@ static int nitoa (int val, char *buf, size_t n) {
 }
 
 #define OUTSIZE 256
-/*
+
 int printf(const char *fmt, ...) {
   //panic("Not implemented");
   char out[OUTSIZE];
   int result = 0;
-  snprintf(out, OUTSIZE,fmt);
+  va_list ap;
+  va_start(ap, fmt);
+  vsnprintf(out, OUTSIZE, fmt, ap);
+  va_end(ap);
   for (const char *p = out; *p; p++) {
     putch(*p);
     result++;
   }
   return result;
 }
-*/
 
 int vsprintf(char *out, const char *fmt, va_list ap) {
   //panic("Not implemented");

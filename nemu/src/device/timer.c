@@ -25,14 +25,9 @@ static uint32_t *rtc_port_base = NULL;
 static void rtc_io_handler(uint32_t offset, int len, bool is_write) {
   // 只允许访问偏移 0 或 4，分别表示低 32 位寄存器和高 32 位寄存器
   assert(offset == 0 || offset == 4);
-  // 仅在“读高 32 位寄存器”时执行更新逻辑
-  /*
-  一致性快照：在读高位寄存器时同时刷新低位与高位，
-  这样软件按"先读低(0)，再读高(4)"的惯例能拿到同一时刻的64位时间，
-  避免跨越更新导致的撕裂
-  */
+  //仅在"读高 32 位寄存器"时执行更新逻辑
   if (!is_write && offset == 4) {
-    // 调用 get_time() 获取当前时间（单位通常为微秒，64 位）
+    // 调用 get_time() 获取系统从启动开始到现在的时间（单位通常为微秒，64 位）
     uint64_t us = get_time();
     // 将时间拆分为低 32 位和高 32 位，分别写入 rtc_port_base[0]与 rtc_port_base[1]。
     rtc_port_base[0] = (uint32_t)us;

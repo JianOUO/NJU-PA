@@ -6,6 +6,24 @@
 
 #if !defined(__ISA_NATIVE__) || defined(__NATIVE_USE_KLIB__)
 
+static int numlen(int val) {
+  int result = 0;
+
+  if (val == INT_MIN) return 11;
+
+  if (val < 0) {
+    result++;
+    val = -val;
+  }
+
+  do {
+    result++;
+    val /= 10;
+  } while (val != 0);
+
+  return result;
+}
+
 static int itoa (int val, char *buf) {
   int result = 0;
   int len = 0;
@@ -144,7 +162,8 @@ int snprintf(char *out, size_t n, const char *fmt, ...) {
 int vsnprintf(char *out, size_t n, const char *fmt, va_list ap) {
   //panic("Not implemented"); 
   int ret = 0;
-  char f, s;
+  int width = 0;
+  char f, s, pad = ' ';
   while ((f = *fmt++)) {
     if (f != '%') {
       if (n > 1) {
@@ -154,10 +173,32 @@ int vsnprintf(char *out, size_t n, const char *fmt, va_list ap) {
       ret++;
       continue;
     }
+    while ((f = *fmt)) {
+      if (f == '0') {
+        pad = f;
+        fmt++;
+        continue;
+      } else if (f > '0' && f <= '9') {
+        width = f - '0';
+        fmt++;
+        break; 
+      }
+      break;
+    }
     switch ((f = *fmt++)) {
       case 'd': {
         int value = va_arg(ap, int);
-        int r;
+        int len = numlen(value);
+        int r, off = width - len;
+        while (off-- > 0) {
+          if (n > 1) {
+            *out++ = pad;
+            n--;
+          }
+          ret++;
+        }
+        pad = ' ';
+        width = 0;
         if (n > 1) {
           r = nitoa(value, out, n - 1);
           if (r > n - 1) {

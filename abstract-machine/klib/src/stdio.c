@@ -173,6 +173,17 @@ int vsnprintf(char *out, size_t n, const char *fmt, va_list ap) {
       ret++;
       continue;
     }
+
+    if ((f = *fmt) == '%') {
+      if (n > 1) {
+        *out++ = f;
+        n--;
+      }
+      ret++;
+      fmt++;
+      continue;
+    }
+
     while ((f = *fmt)) {
       if (f == '0') {
         pad = f;
@@ -185,6 +196,7 @@ int vsnprintf(char *out, size_t n, const char *fmt, va_list ap) {
       }
       break;
     }
+
     switch ((f = *fmt++)) {
       case 'd': {
         int value = va_arg(ap, int);

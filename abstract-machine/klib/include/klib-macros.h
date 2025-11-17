@@ -15,6 +15,7 @@
 #define putstr(s) \
   ({ for (const char *p = s; *p; p++) putch(*p); })
 
+// 对IOE的读写API进行封装, 方便对抽象寄存器的访问
 #define io_read(reg) \
   ({ reg##_T __io_param; \
     ioe_read(reg, &__io_param); \

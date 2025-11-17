@@ -21,6 +21,17 @@
  *          15 May 2002
  */
 
+/*
+mmc.h 文件的作用：
+定义 MMC/SD 协议标准：命令码、响应格式、状态位
+提供协议常量：供 SD 卡模拟实现使用
+保持兼容性：与 Linux 内核标准一致
+简化实现：避免重复定义协议相关常量
+
+这是 NEMU 中 SD 卡设备模拟的基础头文件，定义了 MMC/SD 协议的标准接口，
+使 NEMU 能够正确模拟 SD 卡行为并与 Linux 驱动兼容。
+*/
+
 #ifndef LINUX_MMC_MMC_H
 #define LINUX_MMC_MMC_H
 

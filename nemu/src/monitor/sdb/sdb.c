@@ -320,7 +320,26 @@ void sdb_mainloop() {
     if (args >= str_end) {
       args = NULL;
     }
+/*
+清空 SDL 事件队列，丢弃所有待处理的 SDL 事件。
+执行流程：
+1. rl_gets() 读取用户输入（从终端读取，不是从SDL）
+   └─> 用户输入 "si" 命令
 
+2. 清空 SDL 事件队列
+   └─> 丢弃在等待输入期间累积的所有 SDL 事件
+       └─> 这些事件可能是：
+           - 窗口焦点变化
+           - 鼠标移动
+           - 按键（但这些是给调试器的，不是给模拟程序的）
+
+3. 处理命令
+   └─> 执行 "si"（单步执行）
+       └─> 执行一条指令
+           └─> device_update() 被调用
+               └─> 此时 SDL 事件队列是干净的
+                   └─> 只处理新的事件
+*/
 #ifdef CONFIG_DEVICE
     extern void sdl_clear_event_queue();
     sdl_clear_event_queue();

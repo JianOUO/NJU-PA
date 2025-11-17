@@ -148,7 +148,7 @@ static void statistic() {
   Native	在 Linux 上运行	 支持 setlocale 和 %'
   AM	    裸机环境	       没有 C 标准库完整支持
   */
-  // 如果不是 AM（Abstract Machine）目标平台，设置数字本地化，使千位分隔符生效
+  // 如果不是 AM 目标平台，设置数字本地化，使千位分隔符生效
   IFNDEF(CONFIG_TARGET_AM, setlocale(LC_NUMERIC, ""));
   // 如果不是 AM 目标平台，使用千位分隔符
 #define NUMBERIC_FMT MUXDEF(CONFIG_TARGET_AM, "%", "%'") PRIu64

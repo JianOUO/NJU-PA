@@ -53,7 +53,8 @@ static inline int find_mapid_by_addr(IOMap *maps, int size, paddr_t addr) {
   int i;
   for (i = 0; i < size; i ++) {
     if (map_inside(maps + i, addr)) {
-      // 设备的行为无法保持一致，跳过ref的检查，直接同步状态
+      // NEMU中设备的行为是我们自定义的, 与REF中的标准设备的行为不完全一样
+      // 所以跳过ref的检查，直接同步状态
       difftest_skip_ref();
       return i;
     }

@@ -2,12 +2,97 @@
 #include <klib.h>
 #include <klib-macros.h>
 #include <stdarg.h>
+#include <limits.h>
 
 #if !defined(__ISA_NATIVE__) || defined(__NATIVE_USE_KLIB__)
 
-int printf(const char *fmt, ...) {
-  panic("Not implemented");
+static int itoa (int val, char *buf) {
+  int result = 0;
+  int len = 0;
+  int tmp = val;
+  if (val == INT_MIN) {
+    strcpy(buf, "-2147483648");
+    return 11;
+  }
+
+  if (val < 0) {
+    *buf++ = '-';
+    result++;
+    val = -val;
+  }
+
+  do {
+    len++;
+    tmp /= 10;
+  } while (tmp != 0);
+
+  result += len;
+
+  do {
+    *(buf + len - 1) = val % 10 + '0';
+    val /= 10;
+    len--;
+  } while (val != 0);
+
+  return result;
 }
+
+static int nitoa (int val, char *buf, size_t n) {
+  int result = 0;
+  int len = 0;
+  int tmp = val;
+
+  if (val == INT_MIN) {
+    char int_min[12] = "-2147483648";
+    size_t min = n < 11 ? n : 11;
+    for (size_t i = 0; i < min; i++) {
+      buf[i] = int_min[i];
+    }
+    return 11;
+  }
+
+  if (val < 0) {
+    if (n >= 1) {
+      *buf++ = '-';
+      n--;
+    }
+    result++;
+    val = -val;
+  }
+
+  do {
+    len++;
+    tmp /= 10;
+  } while (tmp != 0);
+
+  result += len;
+
+  do {
+    if (n >= len) {
+      *(buf + len - 1) = val % 10 + '0';
+      //n--;
+    }
+    val /= 10;
+    len--;
+  } while (val != 0);
+
+  return result;
+}
+
+#define OUTSIZE 256
+/*
+int printf(const char *fmt, ...) {
+  //panic("Not implemented");
+  char out[OUTSIZE];
+  int result = 0;
+  snprintf(out, OUTSIZE,fmt);
+  for (const char *p = out; *p; p++) {
+    putch(*p);
+    result++;
+  }
+  return result;
+}
+*/
 
 int vsprintf(char *out, const char *fmt, va_list ap) {
   //panic("Not implemented");
@@ -32,7 +117,7 @@ int vsprintf(char *out, const char *fmt, va_list ap) {
       default: panic("Invalid conversion specifiers");
     }
   }
-  *out = f;
+  *out = '\0';
   return out - begin;
 }
 
@@ -46,11 +131,62 @@ int sprintf(char *out, const char *fmt, ...) {
 }
 
 int snprintf(char *out, size_t n, const char *fmt, ...) {
-  panic("Not implemented");
+  //panic("Not implemented");
+  va_list ap;
+  va_start(ap, fmt);
+  int result = vsnprintf(out, n, fmt, ap);
+  va_end(ap);
+  return result;
 }
 
 int vsnprintf(char *out, size_t n, const char *fmt, va_list ap) {
-  panic("Not implemented"); 
+  //panic("Not implemented"); 
+  int ret = 0;
+  char f, s;
+  while ((f = *fmt++)) {
+    if (f != '%') {
+      if (n > 1) {
+        *out++ = f;
+        n--;  
+      }
+      ret++;
+      continue;
+    }
+    switch ((f = *fmt++)) {
+      case 'd': {
+        int value = va_arg(ap, int);
+        int r;
+        if (n > 1) {
+          r = nitoa(value, out, n - 1);
+          if (r > n - 1) {
+            out += n - 1;
+            n = 1;
+          } else {
+            out += r;
+            n -= r;
+          }
+        } else {
+          r = nitoa(value, out, 0);
+        }
+        ret += r;
+        break;
+      }
+      case 's': {
+        char *str = va_arg(ap, char *);
+        while ((s = *str++)) {
+          if (n > 1) {
+            *out++ = s;
+            n--;
+          }
+          ret++;
+        }
+        break;
+      }
+      default: panic("Invalid conversion specifiers");
+    }
+  }
+  *out = '\0';
+  return ret;
 }
 
 #endif

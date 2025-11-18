@@ -320,6 +320,15 @@ int vsnprintf(char *out, size_t n, const char *fmt, va_list ap) {
         ret += r;
         break;
       }
+      case 'c': {
+        char c = (char)va_arg(ap, int);
+        if (n > 1) {
+          *out++ = c;
+          n--;
+        }
+        ret++;
+        break;
+      }
       default: panic("Invalid conversion specifiers");
     }
   }

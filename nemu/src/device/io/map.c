@@ -18,6 +18,11 @@
 #include <memory/vaddr.h>
 #include <device/map.h>
 
+#ifdef CONFIG_DTRACE
+void dtrace_read(paddr_t addr, int len, IOMap *map, word_t data);
+void dtrace_write(paddr_t addr, int len, IOMap *map, word_t data);
+#endif
+
 // 最大I/O空间为32MB
 #define IO_SPACE_MAX (32 * 1024 * 1024)
 
@@ -75,6 +80,9 @@ word_t map_read(paddr_t addr, int len, IOMap *map) {
   // 先调用回调，用于准备读取数据
   invoke_callback(map->callback, offset, len, false); // prepare data to read
   word_t ret = host_read(map->space + offset, len);
+  #ifdef CONFIG_DTRACE
+  dtrace_read(addr, len, map, ret);
+  #endif
   return ret;
 }
 
@@ -86,6 +94,9 @@ void map_write(paddr_t addr, int len, word_t data, IOMap *map) {
   // 计算相对于映射区域的偏移量
   paddr_t offset = addr - map->low;
   host_write(map->space + offset, len, data);
+  #ifdef CONFIG_DTRACE
+  dtrace_write(addr, len, map, data);
+  #endif
   // 后调用回调，用于处理写入后的设备逻辑
   invoke_callback(map->callback, offset, len, true);
 }

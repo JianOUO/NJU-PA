@@ -156,11 +156,13 @@ void ftrace(vaddr_t pc, vaddr_t addr, bool call) {
 #include <device/map.h>
 
 void dtrace_read(paddr_t addr, int len, IOMap *map, word_t data) {
-  printf(ANSI_FMT("[DTRACE] Read  " FMT_WORD " FROM %s(" FMT_PADDR ")\n", ANSI_FG_MAGENTA), data, map->name, addr);
+  printf(ANSI_FMT("[DTRACE] Read  " FMT_WORD " FROM %s(" FMT_PADDR ")", ANSI_FG_MAGENTA), data, map->name, addr);
+  printf("\n");
 }
 
 void dtrace_write(paddr_t addr, int len, IOMap *map, word_t data) {
-  printf(ANSI_FMT("[DTRACE] Write " FMT_WORD " TO   %s(" FMT_PADDR ")\n", ANSI_FG_MAGENTA), data, map->name, addr);
+  printf(ANSI_FMT("[DTRACE] Write " FMT_WORD " TO   %s(" FMT_PADDR ")", ANSI_FG_MAGENTA), data, map->name, addr);
+  printf("\n");
 }
 
 #endif

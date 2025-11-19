@@ -22,7 +22,7 @@ AM_DEVREG( 7, INPUT_CONFIG, RD, bool present); // 查询输入设备是否可用
 AM_DEVREG( 8, INPUT_KEYBRD, RD, bool keydown; int keycode); // 读取键盘事件, keydown表示是否按下, keycode表示按键码
 AM_DEVREG( 9, GPU_CONFIG,   RD, bool present, has_accel; int width, height, vmemsz); // 查询GPU配置, present表示是否可用, has_accel表示是否支持加速, width表示宽度, height表示高度, vmemsz表示帧缓冲区(显存)大小
 AM_DEVREG(10, GPU_STATUS,   RD, bool ready); // 查询 GPU 是否就绪
-AM_DEVREG(11, GPU_FBDRAW,   WR, int x, y; void *pixels; int w, h; bool sync); // 绘制矩形到帧缓冲区, x, y（位置）、pixels（像素数据）、w, h（宽高）、sync（是否同步）
+AM_DEVREG(11, GPU_FBDRAW,   WR, int x, y; void *pixels; int w, h; bool sync); // AM帧缓冲控制器, 可写入绘图信息, 向屏幕(x, y)坐标处绘制w*h的矩形图像. 图像像素按行优先方式存储在pixels中, 每个像素用32位整数以00RRGGBB的方式描述颜色. 若sync为true, 则马上将帧缓冲中的内容同步到屏幕上.
 AM_DEVREG(12, GPU_MEMCPY,   WR, uint32_t dest; void *src; int size); // 复制数据到显存, dest表示目标地址, src表示源地址, size表示复制大小
 AM_DEVREG(13, GPU_RENDER,   WR, uint32_t root); // 渲染场景树, root表示根节点
 AM_DEVREG(14, AUDIO_CONFIG, RD, bool present; int bufsize); // 查询音频配置, present表示是否可用, bufsize表示缓冲区大小

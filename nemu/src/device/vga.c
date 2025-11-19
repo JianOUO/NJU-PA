@@ -103,6 +103,8 @@ static inline void update_screen() {
 void vga_update_screen() {
   // TODO: call `update_screen()` when the sync register is non-zero,
   // then zero out the sync register
+  if (vgactl_port_base[1] != 0) update_screen();
+  vgactl_port_base[1] = 0;
 }
 
 void init_vga() {
@@ -111,6 +113,7 @@ void init_vga() {
   // vgactl_port_base[0] 存储分辨率：高 16 位：宽度，低 16 位：高度
   // 例如：400×300 → 0x0190012c（0x0190 = 400, 0x012c = 300）
   vgactl_port_base[0] = (screen_width() << 16) | screen_height();
+  vgactl_port_base[1] = 0;
   // 映射到 PIO 或 MMIO 地址, 程序可读取分辨率信息
 #ifdef CONFIG_HAS_PORT_IO
   add_pio_map ("vgactl", CONFIG_VGA_CTL_PORT, vgactl_port_base, 8, NULL);

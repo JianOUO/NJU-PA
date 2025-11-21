@@ -41,9 +41,9 @@ cpu_exec()在执行每条指令之后就会调用device_update()函数,
 */
 void device_update() {
   // 使用指令计数器来减少 get_time() 调用频率
-  static uint64_t inst_counter = 0;
-  // 每执行 100 条指令才检查一次时间（可根据性能需求调整）
-  static const uint64_t CHECK_INTERVAL = 100;
+  static uint32_t inst_counter = 0;
+  // 每执行 100 条指令才检查一次时间
+  static const uint32_t CHECK_INTERVAL = 100;
   
   inst_counter++;
   if (inst_counter < CHECK_INTERVAL) {

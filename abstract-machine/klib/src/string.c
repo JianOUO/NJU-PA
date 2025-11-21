@@ -67,13 +67,62 @@ void *memmove(void *dst, const void *src, size_t n) {
   return dst;
 }
 
+#define OPSIZ 4
+#define OP_T_THRES 16
+
+#define BYTE_COPY_FWD(dstp, srcp, nbytes)           \
+do {                                                \
+  size_t __nbytes = (nbytes);                       \
+  uintptr_t __dstp = (uintptr_t)(dstp);             \
+  uintptr_t __srcp = (uintptr_t)(srcp);             \
+  while (__nbytes > 0) {                            \
+    unsigned char x = ((unsigned char *)__srcp)[0]; \
+    __srcp += 1;                                    \
+    __nbytes -= 1;                                  \
+    ((unsigned char *)__dstp)[0] = x;               \
+    __dstp += 1;                                    \
+  }                                                 \
+} while (0)                                       
+
+#define WORD_COPY_FWD(dstp, srcp, nbytes)         \
+do {                                              \
+  size_t __nbytes = (nbytes);                     \
+  uintptr_t __dstp = (uintptr_t)(dstp);           \
+  uintptr_t __srcp = (uintptr_t)(srcp);           \
+  while (__nbytes > 0) {                          \
+    uint32_t x = ((uint32_t *)__srcp)[0];         \
+    __srcp += OPSIZ;                              \
+    __nbytes -= OPSIZ;                            \
+    ((uint32_t *)__dstp)[0] = x;                  \
+    __dstp += OPSIZ;                              \
+  }                                               \
+} while (0)                                       
+
 void *memcpy(void *out, const void *in, size_t n) {
   //panic("Not implemented");
+  /*
   const unsigned char *in1 = in;
   unsigned char *out1 = out;
   for (size_t i = 0; i < n; i++)
     *(out1 + i) = *(in1 + i);
   return out1;
+  */
+  uintptr_t dstp = (uintptr_t)out;
+  uintptr_t srcp = (uintptr_t)in;
+  if (n >= OP_T_THRES) {
+    size_t align_byte = (-dstp) % OPSIZ;
+    BYTE_COPY_FWD(dstp, srcp, align_byte);
+    n    -= align_byte;
+    dstp += align_byte;
+    srcp += align_byte;
+    size_t len = ROUNDDOWN(n, OPSIZ);
+    WORD_COPY_FWD(dstp, srcp, len);
+    dstp += len;
+    srcp += len;
+    n    -= len;
+  }
+  BYTE_COPY_FWD(dstp, srcp, n);
+  return out;
 }
 
 int memcmp(const void *s1, const void *s2, size_t n) {

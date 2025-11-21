@@ -52,74 +52,104 @@ int strncmp(const char *s1, const char *s2, size_t n) {
   panic("Not implemented");
 }
 
+#define OPSIZ 4
+
 void *memset(void *s, int c, size_t n) {
   //panic("Not implemented");
-  unsigned char *m = s;
-  for (size_t i = 0; i < n; i++) *(m + i) = c;
+  uintptr_t dstp = (uintptr_t) s;
+  if (n >= 8) {
+    size_t xlen;
+    uint32_t cccc = (unsigned char)c;
+    cccc |= cccc << 8;
+    cccc |= cccc << 16;
+    
+    while (dstp % OPSIZ != 0) {
+      ((unsigned char *)dstp)[0] = c;
+      dstp += 1;
+      n -= 1;
+    }
+
+    xlen = n / (OPSIZ * 8);
+    while (xlen > 0) {
+      ((uint32_t *)dstp)[0] = cccc;
+      ((uint32_t *)dstp)[1] = cccc;
+      ((uint32_t *)dstp)[2] = cccc;
+      ((uint32_t *)dstp)[3] = cccc;
+      ((uint32_t *)dstp)[4] = cccc;
+      ((uint32_t *)dstp)[5] = cccc;
+      ((uint32_t *)dstp)[6] = cccc;
+      ((uint32_t *)dstp)[7] = cccc;
+      dstp += OPSIZ * 8;
+      xlen -= 1;
+    }
+    n %= OPSIZ * 8;
+
+    xlen = n / OPSIZ;
+    while (xlen > 0) {
+      ((uint32_t *)dstp)[0] = cccc;
+      dstp += OPSIZ;
+      xlen -= 1;
+    }
+    n %= OPSIZ;
+  }
+  while (n > 0) {
+    ((unsigned char *)dstp)[0] = c;
+    dstp += 1;
+    n -= 1;
+  }
   return s;
 }
 
 void *memmove(void *dst, const void *src, size_t n) {
   //panic("Not implemented");
-  uint8_t temp[n];
-  memcpy(temp, src, n);
-  memcpy(dst, temp, n);
+  uintptr_t dstp = (uintptr_t)dst;
+  uintptr_t srcp = (uintptr_t)src;
+  if (srcp < dstp && dstp - srcp < n) {
+    uint8_t temp[n];
+    memcpy(temp, src, n);
+    memcpy(dst, temp, n);
+  } else {
+    memcpy(dst, src, n);
+  }
   return dst;
 }
 
-#define OPSIZ 4
 #define OP_T_THRES 16
 
 #define BYTE_COPY_FWD(dstp, srcp, nbytes)           \
 do {                                                \
   size_t __nbytes = (nbytes);                       \
-  uintptr_t __dstp = (uintptr_t)(dstp);             \
-  uintptr_t __srcp = (uintptr_t)(srcp);             \
   while (__nbytes > 0) {                            \
-    unsigned char x = ((unsigned char *)__srcp)[0]; \
-    __srcp += 1;                                    \
+    unsigned char x = ((unsigned char *)srcp)[0]; \
+    srcp += 1;                                    \
     __nbytes -= 1;                                  \
-    ((unsigned char *)__dstp)[0] = x;               \
-    __dstp += 1;                                    \
+    ((unsigned char *)dstp)[0] = x;               \
+    dstp += 1;                                    \
   }                                                 \
 } while (0)                                       
 
 #define WORD_COPY_FWD(dstp, srcp, nbytes)         \
 do {                                              \
-  size_t __nbytes = (nbytes);                     \
-  uintptr_t __dstp = (uintptr_t)(dstp);           \
-  uintptr_t __srcp = (uintptr_t)(srcp);           \
-  while (__nbytes > 0) {                          \
-    uint32_t x = ((uint32_t *)__srcp)[0];         \
-    __srcp += OPSIZ;                              \
-    __nbytes -= OPSIZ;                            \
-    ((uint32_t *)__dstp)[0] = x;                  \
-    __dstp += OPSIZ;                              \
-  }                                               \
+  size_t xlen = nbytes / OPSIZ;                \
+  while (xlen > 0) {                          \
+    uint32_t x = ((uint32_t *)srcp)[0];         \
+    srcp += OPSIZ;                              \
+    ((uint32_t *)dstp)[0] = x;                  \
+    dstp += OPSIZ;                              \
+    xlen -= 1;                                  \
+  }                                             \
+  nbytes %= OPSIZ;                               \
 } while (0)                                       
 
+// 只对dstp不对齐进行了处理
 void *memcpy(void *out, const void *in, size_t n) {
   //panic("Not implemented");
-  /*
-  const unsigned char *in1 = in;
-  unsigned char *out1 = out;
-  for (size_t i = 0; i < n; i++)
-    *(out1 + i) = *(in1 + i);
-  return out1;
-  */
   uintptr_t dstp = (uintptr_t)out;
   uintptr_t srcp = (uintptr_t)in;
   if (n >= OP_T_THRES) {
-    size_t align_byte = (-dstp) % OPSIZ;
-    BYTE_COPY_FWD(dstp, srcp, align_byte);
-    n    -= align_byte;
-    dstp += align_byte;
-    srcp += align_byte;
-    size_t len = ROUNDDOWN(n, OPSIZ);
-    WORD_COPY_FWD(dstp, srcp, len);
-    dstp += len;
-    srcp += len;
-    n    -= len;
+    n -= (-dstp) % OPSIZ;
+    BYTE_COPY_FWD(dstp, srcp, (-dstp) % OPSIZ);
+    WORD_COPY_FWD(dstp, srcp, n);
   }
   BYTE_COPY_FWD(dstp, srcp, n);
   return out;

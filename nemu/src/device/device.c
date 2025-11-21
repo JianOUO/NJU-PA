@@ -40,6 +40,17 @@ cpu_exec()在执行每条指令之后就会调用device_update()函数,
 否则则直接返回, 避免检查过于频繁, 因为上述事件发生的频率是很低的.
 */
 void device_update() {
+  // 使用指令计数器来减少 get_time() 调用频率
+  static uint64_t inst_counter = 0;
+  // 每执行 100 条指令才检查一次时间（可根据性能需求调整）
+  static const uint64_t CHECK_INTERVAL = 100;
+  
+  inst_counter++;
+  if (inst_counter < CHECK_INTERVAL) {
+    return;
+  }
+  inst_counter = 0;
+  
   // 静态变量，记录上次更新时间, 首次调用时为 0
   static uint64_t last = 0;
   // 获取当前时间

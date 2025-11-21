@@ -19,9 +19,9 @@ AM_SRCS := native/trm.c \
 # 返回-I/usr/include/SDL2 -D_REENTRANT
 # -I/usr/include/SDL2 - SDL2 头文件路径
 # -D_REENTRANT - 定义宏，启用线程安全的 C 库函数
-CFLAGS  += -fpie $(shell sdl2-config --cflags)
+CFLAGS  += -fpie $(shell sdl2-config --cflags) -g -O0
 # -fpie（汇编器）：生成位置无关的汇编代码,与 C 代码保持一致
-ASFLAGS += -fpie -pie
+ASFLAGS += -fpie -pie -g -O0
 # 定义一个逗号变量, Make 中逗号有特殊含义，直接写会被解析为参数分隔符
 comma = ,
 # 将链接器选项转换为 g++ 格式

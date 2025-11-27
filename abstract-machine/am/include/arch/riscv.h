@@ -20,7 +20,7 @@ Page Directory（页目录指针）,指向页表基地址,用于支持虚拟内�
 */
 struct Context {
   // TODO: fix the order of these members to match trap.S
-  uintptr_t mepc, mcause, gpr[NR_REGS], mstatus;
+  uintptr_t gpr[NR_REGS], mcause, mstatus, mepc;
   void *pdir;
 };
 

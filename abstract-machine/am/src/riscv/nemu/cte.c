@@ -8,6 +8,18 @@ Context* __am_irq_handle(Context *c) {
   if (user_handler) {
     Event ev = {0};
     switch (c->mcause) {
+      case 8: { // System Call From U-Mode
+        #ifdef __riscv_e
+        uintptr_t syscall_num = c->gpr[15]; // $a5
+        #else
+        uintptr_t syscall_num = c->gpr[17]; // $a7
+        #endif
+
+        if (syscall_num == (uintptr_t)(-1)) {
+          ev.event = EVENT_YIELD;
+          break;
+        }
+      }
       default: ev.event = EVENT_ERROR; break;
     }
 

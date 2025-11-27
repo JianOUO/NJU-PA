@@ -20,12 +20,10 @@
 
 bool isa_difftest_checkregs(CPU_state *ref_r, vaddr_t pc) {
   bool flag = true;
-  /*
   if (ref_r->pc != cpu.pc) {
     Log(ANSI_FMT("nemu: ref-pc = " FMT_WORD "  dut-pc = " FMT_WORD, ANSI_FG_RED), ref_r->pc, cpu.pc);
     flag = false;
   }
-  */
   for (int i = 0; i < RISCV_GPR_NUM; i++) {
     if (!difftest_check_reg(reg_name(i), pc, ref_r->gpr[i], cpu.gpr[i]))
       flag = false;

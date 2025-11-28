@@ -35,7 +35,7 @@ static void restart() {
   cpu.gpr[0] = 0;
 
   /* 让DiffTest支持异常响应机制 */
-  //cpu.csr[MSTATUS] = 0x1800;
+  cpu.csr[MSTATUS] = 0x1800;
 }
 
 void init_isa() {

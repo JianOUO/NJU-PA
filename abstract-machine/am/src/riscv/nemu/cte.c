@@ -8,7 +8,7 @@ Context* __am_irq_handle(Context *c) {
   if (user_handler) {
     Event ev = {0};
     switch (c->mcause) {
-      case 8: { // System Call From U-Mode
+      case 11: { // System Call From U-Mode
         #ifdef __riscv_e
         uintptr_t syscall_num = c->gpr[15]; // $a5
         #else

@@ -24,7 +24,8 @@ LDFLAGS   += --gc-sections -e _start
 # 将 NEMU 的日志输出重定向到 nemu-log.txt 文件
 # -b 启动批处理模式
 # -e 指定 ELF 文件路径，用于函数跟踪（ftrace）
-NEMUFLAGS += -l $(shell dirname $(IMAGE).elf)/nemu-log.txt  -e $(IMAGE).elf
+NEMUFLAGS += -l $(shell dirname $(IMAGE).elf)/nemu-log.txt -b -e $(IMAGE).elf
+#NEMUFLAGS += -l $(shell dirname $(IMAGE).elf)/nemu-log.txt -e $(IMAGE).elf
 # 主函数参数的最大长度（字节数）
 MAINARGS_MAX_LEN = 64
 # 主函数参数的占位符，在二进制文件中标记参数插入位置, 在insert-arg规则中替换为实际参数

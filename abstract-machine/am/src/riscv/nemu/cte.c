@@ -5,10 +5,13 @@
 static Context* (*user_handler)(Event, Context*) = NULL;
 
 Context* __am_irq_handle(Context *c) {
+  for (int i = 0; i < 32; i++) {
+    printf("gpr%d: 0x%x\n", c->gpr[i]);
+  }
   if (user_handler) {
     Event ev = {0};
     switch (c->mcause) {
-      case 11: { // System Call From U-Mode
+      case 11: { // System Call From M-Mode
         #ifdef __riscv_e
         uintptr_t syscall_num = c->gpr[15]; // $a5
         #else

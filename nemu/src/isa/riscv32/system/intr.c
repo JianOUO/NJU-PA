@@ -15,12 +15,19 @@
 
 #include <isa.h>
 
+#ifdef CONFIG_ETRACE
+void etrace(word_t mcause, word_t mstatus, word_t mepc);
+#endif
+
 word_t isa_raise_intr(word_t NO, vaddr_t epc) {
   /* TODO: Trigger an interrupt/exception with ``NO''.
    * Then return the address of the interrupt/exception vector.
    */
   cpu.csr[MCAUSE] = NO;
   cpu.csr[MEPC] = epc;
+  #ifdef CONFIG_ETRACE
+  etrace(cpu.csr[MCAUSE], cpu.csr[MSTATUS], cpu.csr[MEPC]);
+  #endif
   return cpu.csr[MTVEC];
 }
 

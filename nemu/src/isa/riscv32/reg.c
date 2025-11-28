@@ -36,7 +36,7 @@ void isa_reg_display() {
   }
   
   for (int i = 0; i < CSR_LEN; i++) {
-    printf("%-3s = " FMT_WORD " " 
+    printf("%-7s = " FMT_WORD " " 
     MUXDEF(CONFIG_ISA64, "%20" PRId64, "%10" PRId32) " "
     MUXDEF(CONFIG_ISA64, "%20" PRIu64, "%10" PRIu32) "\n", 
     csr_name(i), csr(i), csr(i), csr(i));

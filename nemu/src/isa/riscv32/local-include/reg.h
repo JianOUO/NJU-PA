@@ -26,13 +26,8 @@ static inline int check_reg_idx(int idx) {
 }
 
 static inline int check_csr_idx(int idx) {
-  switch (idx) {
-    case 0x300: return MSTATUS;
-    case 0x305: return MTVEC;
-    case 0x341: return MEPC;
-    case 0x342: return MCAUSE;
-    default: assert(0);
-  }
+  IFDEF(CONFIG_RT_CHECK, assert(idx >= 0 && idx < CSR_LEN));
+  return idx;
 }
 
 #define gpr(idx) (cpu.gpr[check_reg_idx(idx)])

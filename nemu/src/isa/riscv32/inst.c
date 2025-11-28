@@ -18,6 +18,16 @@
 #include <cpu/ifetch.h>
 #include <cpu/decode.h>
 
+static inline int map_csr_idx(word_t idx) {
+  switch (idx) {
+    case 0x300: return MSTATUS;
+    case 0x305: return MTVEC;
+    case 0x341: return MEPC;
+    case 0x342: return MCAUSE;
+    default: assert(0);
+  }
+}
+
 #define CSR(i) csr(i)
 #define R(i) gpr(i)
 #define Mr vaddr_read
@@ -133,8 +143,8 @@ static int decode_exec(Decode *s) {
   INSTPAT("0000001 ????? ????? 101 ????? 01100 11", divu   , R, R(rd) = (src2 == 0) ? (MUXDEF(CONFIG_ISA64, 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFF)) : src1 / src2);
   INSTPAT("0100000 ????? ????? 101 ????? 01100 11", sra    , R, R(rd) = (sword_t)src1 >> (src2 & 0x1F)); //src2的低5位(在RV64I中是低6位)为移位位数，高位忽略。
   INSTPAT("0000000 ????? ????? 101 ????? 01100 11", srl    , R, R(rd) = src1 >> (src2 & 0x1F)); //src2的低5位(在RV64I中是低6位)为移位位数，高位忽略。
-  INSTPAT("??????? ????? ????? 001 ????? 11100 11", csrrw  , I, imm &= BITMASK(12); word_t tmp = CSR(imm); CSR(imm) = src1; R(rd) = tmp);
-  INSTPAT("??????? ????? ????? 010 ????? 11100 11", csrrs  , I, imm &= BITMASK(12); word_t tmp = CSR(imm); CSR(imm) = tmp | src1; R(rd) = tmp);
+  INSTPAT("??????? ????? ????? 001 ????? 11100 11", csrrw  , I, imm = map_csr_idx(imm & BITMASK(12)); word_t tmp = CSR(imm); CSR(imm) = src1; R(rd) = tmp);
+  INSTPAT("??????? ????? ????? 010 ????? 11100 11", csrrs  , I, imm = map_csr_idx(imm & BITMASK(12)); word_t tmp = CSR(imm); CSR(imm) = tmp | src1; R(rd) = tmp);
   INSTPAT("0000000 00000 00000 000 00000 11100 11", ecall  , I, s->dnpc = isa_raise_intr(11, s->pc)); // Machine Mode System call, NO = 11
   INSTPAT("0011000 00010 00000 000 00000 11100 11", mret   , R, s->dnpc = cpu.csr[MEPC]);
   INSTPAT("0000000 00001 00000 000 00000 11100 11", ebreak , N, NEMUTRAP(s->pc, R(10))); // R(10) is $a0

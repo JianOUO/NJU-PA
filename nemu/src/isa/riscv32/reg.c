@@ -30,6 +30,11 @@ void isa_reg_display() {
     MUXDEF(CONFIG_ISA64, "%20" PRIu64, "%10" PRIu32) "\n", 
     reg_name(i), gpr(i), gpr(i), gpr(i));
   }
+  
+  printf("%-3s = " FMT_WORD " " 
+  MUXDEF(CONFIG_ISA64, "%20" PRId64, "%10" PRId32) " "
+  MUXDEF(CONFIG_ISA64, "%20" PRIu64, "%10" PRIu32) "\n", 
+  "mstatus", cpu.csr[MSTATUS], cpu.csr[MSTATUS], cpu.csr[MSTATUS]);
 }
 
 word_t isa_reg_str2val(const char *s, bool *success) {

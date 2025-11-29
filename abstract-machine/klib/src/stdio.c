@@ -6,6 +6,8 @@
 
 #if !defined(__ISA_NATIVE__) || defined(__NATIVE_USE_KLIB__)
 
+static const char trans[16] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
+
 static int intlen(int val) {
   int result = 0;
 
@@ -31,6 +33,17 @@ static int uintlen(unsigned int val, unsigned int base) {
     result++;
     val /= base;
   } while (val != 0);
+
+  return result;
+}
+
+static int uintptrlen(uintptr_t value, unsigned int base) {
+  int result = 0;
+
+  do {
+    result++;
+    value /= base;
+  } while (value != 0);
 
   return result;
 }
@@ -69,7 +82,6 @@ static int itoa (int val, char *buf) {
 static int nuitoa (unsigned int val, char *buf, size_t n, unsigned int base) {
   int result = uintlen(val, base);
   int len = result;
-  char trans[16] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
 
   do {
     if (n >= len) {
@@ -81,6 +93,22 @@ static int nuitoa (unsigned int val, char *buf, size_t n, unsigned int base) {
 
   return result;
 }
+
+static int nuiptrtoa(uintptr_t val, char *buf, size_t n, unsigned int base) {
+  int result = uintptrlen(val, base);
+  int len = result;
+
+  do {
+    if (n >= len) {
+      *(buf + len - 1) = trans[val % base];
+    }
+    val /= base;
+    len--;
+  } while (val != 0);
+
+  return result;
+}
+
 
 static int nitoa (int val, char *buf, size_t n) {
   int result = 0;
@@ -124,7 +152,7 @@ static int nitoa (int val, char *buf, size_t n) {
   return result;
 }
 
-#define OUTSIZE 256
+#define OUTSIZE 2048
 
 int printf(const char *fmt, ...) {
   //panic("Not implemented");
@@ -211,15 +239,15 @@ int vsnprintf(char *out, size_t n, const char *fmt, va_list ap) {
       continue;
     }
 
+    if ((f = *fmt) == '0') {
+      pad = f;
+      fmt++;
+    }
     while ((f = *fmt)) {
-      if (f == '0') {
-        pad = f;
+      if (f >= '0' && f <= '9') {
+        width = width * 10 + (f - '0');
         fmt++;
         continue;
-      } else if (f > '0' && f <= '9') {
-        width = f - '0';
-        fmt++;
-        break; 
       }
       break;
     }
@@ -327,6 +355,69 @@ int vsnprintf(char *out, size_t n, const char *fmt, va_list ap) {
           n--;
         }
         ret++;
+        break;
+      }
+      case 'p': {
+        void *ptr = va_arg(ap, void*);
+        uintptr_t value = (uintptr_t)ptr;
+        int len = uintptrlen(value, 16) + 2; // 0x
+        int r, off = width - len;
+        if (pad == ' ') {
+          while (off-- > 0) {
+            if (n > 1) {
+              *out++ = pad;
+              n--;
+            }
+            ret++;
+          }
+
+          if (n > 1) {
+            *out++ = '0';
+            n--;
+          }
+          ret++;
+          if (n > 1) {
+            *out++ = 'x';
+            n--;
+          }
+          ret++;
+        } else if (pad == '0') {
+          if (n > 1) {
+            *out++ = '0';
+            n--;
+          }
+          ret++;
+          if (n > 1) {
+            *out++ = 'x';
+            n--;
+          }
+          ret++;
+
+          while (off-- > 0) {
+            if (n > 1) {
+              *out++ = pad;
+              n--;
+            }
+            ret++;
+          }
+
+          pad = ' ';
+        }
+        width = 0;
+
+        if (n > 1) {
+          r = nuiptrtoa(value, out, n - 1, 16);
+          if (r > n - 1) {
+            out += n - 1;
+            n = 1;
+          } else {
+            out += r;
+            n -= r;
+          }
+        } else {
+          r = nuiptrtoa(value, out, 0, 16);
+        }
+        ret += r;
         break;
       }
       default: panic("Invalid conversion specifiers");

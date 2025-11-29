@@ -9,6 +9,7 @@
 #define NAME(key) \
   [AM_KEY_##key] = #key,
 
+// __attribute__((used)): 防止编译器优化掉未使用的静态变量,即使代码中未直接引用，也保留该数组
 static const char *keyname[256] __attribute__((used)) = {
   [AM_KEY_NONE] = "NONE",
   AM_KEYS(NAME)

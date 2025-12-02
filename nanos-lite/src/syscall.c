@@ -1,7 +1,7 @@
 #include <common.h>
 #include "syscall.h"
 
-//#define CONFIG_STRACE
+#define CONFIG_STRACE
 
 #ifdef CONFIG_STRACE
 #define ANSI_FG_BLUE    "\33[1;34m"

@@ -2,12 +2,15 @@
 #include "syscall.h"
 
 #define CONFIG_STRACE
+
+#ifdef CONFIG_STRACE
 #define ANSI_FG_BLUE    "\33[1;34m"
 #define ANSI_NONE       "\33[0m"
 #define STRACE(format, ...) \
   do { \
     printf(ANSI_FG_BLUE format ANSI_NONE "\n", ## __VA_ARGS__); \
   } while (0)
+#endif
 
 void do_syscall(Context *c) {
   uintptr_t a[4];

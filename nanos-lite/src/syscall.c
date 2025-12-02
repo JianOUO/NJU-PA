@@ -20,7 +20,7 @@ void do_syscall(Context *c) {
   switch (a[0]) {
     case SYS_yield: {
       #ifdef CONFIG_STRACE
-      STRACE("[STRACE] SYS_yield no arg ret 0x0");
+      STRACE("[STRACE] SYS_yield ret 0x0");
       #endif
       yield(); 
       c->GPRx = 0; 

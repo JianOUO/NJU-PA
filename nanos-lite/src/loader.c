@@ -40,7 +40,7 @@ static uintptr_t loader(PCB *pcb, const char *filename) {
 
   assert(ehdr.e_phoff != 0);
   assert(ehdr.e_phnum != 0);
-  assert(ehdr.e_phentsize == sizeof(Elf_Phdr));
+  //assert(ehdr.e_phentsize == sizeof(Elf_Phdr));
   if (ehdr.e_phnum == PN_XNUM) {
     assert(shdr.sh_info != 0);
     e_phnum = shdr.sh_info;

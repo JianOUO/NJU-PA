@@ -1,7 +1,7 @@
 #include <common.h>
 #include "syscall.h"
 
-#define CONFIG_STRACE
+//#define CONFIG_STRACE
 
 #ifdef CONFIG_STRACE
 #define ANSI_FG_BLUE    "\33[1;34m"
@@ -20,7 +20,7 @@ void do_syscall(Context *c) {
   switch (a[0]) {
     case SYS_yield: {
       #ifdef CONFIG_STRACE
-      STRACE("[STRACE] SYS_yield ret 0x0");
+      STRACE("[STRACE] yield() = 0x0");
       #endif
       yield(); 
       c->GPRx = 0; 
@@ -28,7 +28,7 @@ void do_syscall(Context *c) {
     }
     case SYS_exit: {
       #ifdef CONFIG_STRACE
-      STRACE("[STRACE] SYS_exit arg 0x%x", a[1]);
+      STRACE("[STRACE] exit(0x%x)", a[1]);
       #endif
       halt(a[1]);
     }

@@ -31,3 +31,26 @@ void init_ramdisk() {
 size_t get_ramdisk_size() {
   return RAMDISK_SIZE;
 }
+
+/*
+0x80000000  ┌─────────────────┐
+            │   .text (代码)  │
+            ├─────────────────┤
+            │   .rodata       │
+            ├─────────────────┤
+            │   .data         │
+            │   ├─ ramdisk    │ ← ramdisk_start
+            │   │  (29020字节)│
+            │   └─            │ ← ramdisk_end
+            ├─────────────────┤
+            │   .bss          │
+            ├─────────────────┤
+            │   Stack (32KB)  │
+            ├─────────────────┤
+            │   Heap Start    │ ← _heap_start (对齐后)
+            │   ├─ Free Pages │ ← pf (空闲页从这里开始)
+            │   │             │
+            │   │  (可分配内存)│
+            │   │             │
+0x88000000  └─────────────────┘ ← PMEM_END (heap.end)
+*/

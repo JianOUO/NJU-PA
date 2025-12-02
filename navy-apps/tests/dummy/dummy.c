@@ -1,5 +1,6 @@
 #include <stdint.h>
 
+// native 不使用Nanos-lite的系统调用
 #ifdef __ISA_NATIVE__
 #error can not support ISA=native
 #endif

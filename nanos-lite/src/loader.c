@@ -13,7 +13,7 @@
 # define Elf_Class ELFCLASS32
 #endif
 
-#if defined(__ISA_NATIVE__)
+#if defined(__ISA_AM_NATIVE__)
 # define EXPECT_TYPE EM_X86_64
 #elif defined(__ISA_RISCV32__)
 # define EXPECT_TYPE EM_RISCV
@@ -40,7 +40,7 @@ static uintptr_t loader(PCB *pcb, const char *filename) {
 
   assert(ehdr.e_phoff != 0);
   assert(ehdr.e_phnum != 0);
-  assert(ehdr.e_phentsize == sizeof(Elf_Ehdr));
+  assert(ehdr.e_phentsize == sizeof(Elf_Phdr));
   if (ehdr.e_phnum == PN_XNUM) {
     assert(shdr.sh_info != 0);
     e_phnum = shdr.sh_info;

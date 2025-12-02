@@ -7,6 +7,7 @@ SRCS = $(shell find -L ./src/ -name "*.c" -o -name "*.cpp" -o -name "*.S")
 include $(AM_HOME)/Makefile
 
 ifeq ($(ARCH),native)
+# 这里会将 AM_HOME 中的 Makefile 中定义的 ISA=native 覆盖
 ISA = am_native
 else
 INC_PATH += include $(NAVY_HOME)/libs/libc/include

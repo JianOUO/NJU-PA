@@ -27,18 +27,12 @@ struct Context {
 #ifdef __riscv_e
 #define GPR1 gpr[15] // a5 因为 RV32E 只有 16 个寄存器,a5 是可用的最高参数寄存器
 #else
-#define GPR1 gpr[17] // a7 第 8 个参数寄存器,也用作系统调用号寄存器
+#define GPR1 gpr[17] // a7 系统调用号寄存器
 #endif
-/*
-gpr[0] 是 x0 (zero) 寄存器，永远是 0
-这样设计的原因可能是: 
-这个 Context 主要用于系统调用和异常处理
-在 AM 的系统调用约定中,a7 (GPR1)用于传递系统调用号，其他参数通过栈或其他方式传递，不需要使用 GPR2-GPR4
-将它们指向 x0 是一种占位实现，读取时永远返回 0，写入时无效（x0 不可写），避免未定义行为
-*/
-#define GPR2 gpr[0]
-#define GPR3 gpr[0]
-#define GPR4 gpr[0]
-#define GPRx gpr[0]
+
+#define GPR2 gpr[10] // a0 系统调用的第一个参数
+#define GPR3 gpr[11] // a1 系统调用的第二个参数
+#define GPR4 gpr[12] // a2 系统调用的第三个参数
+#define GPRx gpr[10] // a0 系统调用的返回值
 
 #endif

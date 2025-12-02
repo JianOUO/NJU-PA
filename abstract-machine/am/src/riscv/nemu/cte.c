@@ -18,6 +18,9 @@ Context* __am_irq_handle(Context *c) {
         if (syscall_num == (uintptr_t)(-1)) {
           ev.event = EVENT_YIELD;
           break;
+        } else if (syscall_num >= 0 && syscall_num <= 19) { // navy-apps/libs/libos/src/syscall.h, SYS_exit=0, SYS_gettimeofday=19
+          ev.event = EVENT_SYSCALL;
+          break;
         }
       }
       default: ev.event = EVENT_ERROR; break;

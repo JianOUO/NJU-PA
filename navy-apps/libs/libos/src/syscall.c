@@ -23,6 +23,17 @@
 #define GPR3 _args(3, ARGS_ARRAY)
 #define GPR4 _args(4, ARGS_ARRAY)
 #define GPRx _args(5, ARGS_ARRAY)
+/*
+ARGS_ARRAY = ("ecall", "a7", "a0", "a1", "a2", "a0")
+
+宏展开：
+  SYSCALL  = _args(0, ARGS_ARRAY) = _arg0("ecall", "a7", "a0", "a1", "a2", "a0") = "ecall"
+  GPR1     = _args(1, ARGS_ARRAY) = _arg1("ecall", "a7", "a0", "a1", "a2", "a0") = "a7"
+  GPR2     = _args(2, ARGS_ARRAY) = _arg2("ecall", "a7", "a0", "a1", "a2", "a0") = "a0"
+  GPR3     = _args(3, ARGS_ARRAY) = _arg3("ecall", "a7", "a0", "a1", "a2", "a0") = "a1"
+  GPR4     = _args(4, ARGS_ARRAY) = _arg4("ecall", "a7", "a0", "a1", "a2", "a0") = "a2"
+  GPRx     = _args(5, ARGS_ARRAY) = _arg5("ecall", "a7", "a0", "a1", "a2", "a0") = "a0"
+*/
 
 // ISA-depedent definitions
 #if defined(__ISA_X86__)
@@ -46,11 +57,30 @@
 #endif
 
 intptr_t _syscall_(intptr_t type, intptr_t a0, intptr_t a1, intptr_t a2) {
+  /*
+  register：建议编译器将变量放在寄存器中
+  asm (GPR1)：指定使用的寄存器名称, 这里指a7
+  _gpr1 (a7) = type
+  _gpr2 (a0) = a0
+  _gpr3 (a1) = a1
+  _gpr4 (a2) = a2
+  */
   register intptr_t _gpr1 asm (GPR1) = type;
   register intptr_t _gpr2 asm (GPR2) = a0;
   register intptr_t _gpr3 asm (GPR3) = a1;
   register intptr_t _gpr4 asm (GPR4) = a2;
   register intptr_t ret asm (GPRx);
+  /*
+  asm volatile (
+  "ecall" (汇编模版)
+  : "=r" (ret)         // %0 输出操作数：返回值放在 a0 寄存器
+  : "r"(_gpr1),        // %1 输入操作数：系统调用号
+    "r"(_gpr2),        // %2 输入操作数：第一个参数
+    "r"(_gpr3),        // %3 输入操作数：第二个参数
+    "r"(_gpr4)         // %4 输入操作数：第三个参数
+  );
+  在汇编模板中可用 %0, %1 等引用，但这里未使用（因为已通过寄存器变量绑定）。
+  */
   asm volatile (SYSCALL : "=r" (ret) : "r"(_gpr1), "r"(_gpr2), "r"(_gpr3), "r"(_gpr4));
   return ret;
 }

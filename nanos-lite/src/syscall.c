@@ -25,7 +25,7 @@ void do_syscall(Context *c) {
     }
     case SYS_exit: {
       #ifdef CONFIG_STRACE
-      printf("[STRACE] SYS_exit: ret 0x%x\n", a[1]);
+      STRACE("[STRACE] SYS_exit: ret 0x%x", a[1]);
       #endif
       halt(a[1]);
     }

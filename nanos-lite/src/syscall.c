@@ -94,7 +94,7 @@ void do_syscall(Context *c) {
       int whence = (int)a[3];
       c->GPRx = fs_lseek(fd, offset, whence);
       #ifdef CONFIG_STRACE
-      STRACE("[STRACE] lseek(\"%s\", %u, %d) = %u", fs_filename(fd), offset, whence_name[whence], c->GPRx);
+      STRACE("[STRACE] lseek(\"%s\", %u, %s) = %u", fs_filename(fd), offset, whence_name[whence], c->GPRx);
       #endif  
       break;
     }

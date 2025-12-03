@@ -4,9 +4,9 @@
 
 #define CONFIG_STRACE
 
-static const char *whence_name[3] = {"SEEK_SET", "SEEK_CUR", "SEEK_END"};
 
 #ifdef CONFIG_STRACE
+static const char *whence_name[3] = {"SEEK_SET", "SEEK_CUR", "SEEK_END"};
 #define ANSI_FG_BLUE    "\33[1;34m"
 #define ANSI_NONE       "\33[0m"
 #define STRACE(format, ...) \
@@ -40,14 +40,7 @@ void do_syscall(Context *c) {
       int fd = (int)a[1];
       const char *buf = (const char *)a[2];
       size_t count = (size_t)a[3];
-      if (fd == 1 || fd == 2) { // stdout or stderr
-        for (size_t i = 0; i < count; i++) {
-          putch(*(buf + i));
-        }
-        c->GPRx = count;
-      } else {
-        c->GPRx = fs_write(fd, buf, count);
-      }
+      c->GPRx = fs_write(fd, buf, count);
       #ifdef CONFIG_STRACE
       STRACE("[STRACE] write(\"%s\", %p, %u) = %d", fs_filename(fd), buf, count, c->GPRx);
       #endif
@@ -92,6 +85,7 @@ void do_syscall(Context *c) {
       int fd = (int)a[1];
       size_t offset = (size_t)a[2];
       int whence = (int)a[3];
+      assert(whence < 3);
       c->GPRx = fs_lseek(fd, offset, whence);
       #ifdef CONFIG_STRACE
       STRACE("[STRACE] lseek(\"%s\", %u, %s) = %u", fs_filename(fd), offset, whence_name[whence], c->GPRx);

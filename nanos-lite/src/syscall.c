@@ -82,7 +82,7 @@ void do_syscall(Context *c) {
       int fd = (int)a[1];
       c->GPRx = fs_close(fd);
       #ifdef CONFIG_STRACE
-      STRACE("[STRACE] close(\"%s\") = %d", fs_filename(fd), c->GPRx);
+      STRACE("[STRACE] close('%s') = %d", fs_filename(fd), c->GPRx);
       #endif  
       break;
     }
@@ -92,7 +92,7 @@ void do_syscall(Context *c) {
       int whence = (int)a[3];
       c->GPRx = fs_lseek(fd, offset, whence);
       #ifdef CONFIG_STRACE
-      STRACE("[STRACE] lseek(\"%s\", %u, %d) = %u", fs_filename(fd), offset, whence, c->GPRx);
+      STRACE("[STRACE] lseek('%s', %u, %d) = %u", fs_filename(fd), offset, whence, c->GPRx);
       #endif  
       break;
     }

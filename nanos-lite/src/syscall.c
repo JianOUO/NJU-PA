@@ -74,7 +74,7 @@ void do_syscall(Context *c) {
       size_t count = (size_t)a[3];
       c->GPRx = fs_read(fd, buf, count);
       #ifdef CONFIG_STRACE
-      STRACE("[STRACE] read(%d, %s, %u) = %u", fd, buf, count, c->GPRx);
+      STRACE("[STRACE] read(%d, %p, %u) = %d", fd, buf, count, c->GPRx);
       #endif 
       break;
     }

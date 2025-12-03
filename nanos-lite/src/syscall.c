@@ -50,6 +50,13 @@ void do_syscall(Context *c) {
       #endif
       break;
     }
+    case SYS_brk: {
+      c->GPRx = 0;
+      #ifdef CONFIG_STRACE
+      STRACE("[STRACE] brk(%p) = %d", a[0], c->GPRx);
+      #endif
+      break;
+    }
     default: panic("Unhandled syscall ID = %d", a[0]);
   }
 }

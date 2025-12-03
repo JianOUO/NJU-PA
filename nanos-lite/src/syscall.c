@@ -82,7 +82,7 @@ void do_syscall(Context *c) {
       int fd = (int)a[1];
       c->GPRx = fs_close(fd);
       #ifdef CONFIG_STRACE
-      STRACE("[STRACE] close('%s') = %d", fs_filename(fd), c->GPRx);
+      STRACE("[STRACE] close(\"%s\") = %d", fs_filename(fd), c->GPRx);
       #endif  
       break;
     }

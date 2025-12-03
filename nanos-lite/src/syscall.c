@@ -47,7 +47,7 @@ void do_syscall(Context *c) {
         c->GPRx = fs_write(fd, buf, count);
       }
       #ifdef CONFIG_STRACE
-      STRACE("[STRACE] write(%s, %p, %u) = %d", fs_filename(fd), buf, count, c->GPRx);
+      STRACE("[STRACE] write(\"%s\", %p, %u) = %d", fs_filename(fd), buf, count, c->GPRx);
       #endif
       break;
     }
@@ -64,7 +64,7 @@ void do_syscall(Context *c) {
       int mode = (int)a[3];
       c->GPRx = fs_open(filename, flags, mode);
       #ifdef CONFIG_STRACE
-      STRACE("[STRACE] open(%s, %d, %d) = %d", filename, flags, mode, c->GPRx);
+      STRACE("[STRACE] open(\"%s\", %d, %d) = %d", filename, flags, mode, c->GPRx);
       #endif
       break;
     }
@@ -74,7 +74,7 @@ void do_syscall(Context *c) {
       size_t count = (size_t)a[3];
       c->GPRx = fs_read(fd, buf, count);
       #ifdef CONFIG_STRACE
-      STRACE("[STRACE] read(%s, %p, %u) = %d", fs_filename(fd), buf, count, c->GPRx);
+      STRACE("[STRACE] read(\"%s\", %p, %u) = %d", fs_filename(fd), buf, count, c->GPRx);
       #endif 
       break;
     }
@@ -92,7 +92,7 @@ void do_syscall(Context *c) {
       int whence = (int)a[3];
       c->GPRx = fs_lseek(fd, offset, whence);
       #ifdef CONFIG_STRACE
-      STRACE("[STRACE] lseek(%s, %u, %d) = %u", fs_filename(fd), offset, whence, c->GPRx);
+      STRACE("[STRACE] lseek(\"%s\", %u, %d) = %u", fs_filename(fd), offset, whence, c->GPRx);
       #endif  
       break;
     }

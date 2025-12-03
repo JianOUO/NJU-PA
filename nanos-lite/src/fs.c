@@ -37,6 +37,11 @@ static Finfo file_table[] __attribute__((used)) = {
 
 const static int count = LENGTH(file_table);
 
+const char *fs_filename(int fd) {
+  assert(fd < count);
+  return file_table[fd].name;
+}
+
 int fs_open(const char *pathname, int flags, int mode) {
   for (int i = 0; i < count; i++) {
     if (strcmp(pathname, file_table[i].name) == 0) {

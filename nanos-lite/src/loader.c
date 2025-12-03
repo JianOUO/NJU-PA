@@ -35,7 +35,6 @@ static uintptr_t loader(PCB *pcb, const char *filename) {
 
   //assert(ramdisk_read(&ehdr, 0, sizeof(Elf_Ehdr)) == sizeof(Elf_Ehdr));
   assert(fs_read(fd, &ehdr, sizeof(Elf_Ehdr)) == sizeof(Elf_Ehdr));
-  //printf("entry: %p\n", ehdr.e_entry);
   assert(ehdr.e_ident[EI_CLASS] == Elf_Class);
   assert(ehdr.e_ident[EI_MAG0] == ELFMAG0 && ehdr.e_ident[EI_MAG1] == ELFMAG1 && ehdr.e_ident[EI_MAG2] == ELFMAG2 && ehdr.e_ident[EI_MAG3] == ELFMAG3);
   assert(ehdr.e_machine == EXPECT_TYPE);

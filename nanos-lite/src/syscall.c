@@ -1,6 +1,7 @@
 #include <common.h>
 #include "syscall.h"
 #include <fs.h>
+#include <sys/time.h>
 
 #define CONFIG_STRACE
 
@@ -89,6 +90,21 @@ void do_syscall(Context *c) {
       c->GPRx = fs_lseek(fd, offset, whence);
       #ifdef CONFIG_STRACE
       STRACE("[STRACE] lseek(\"%s\", %u, %s) = %u", fs_filename(fd), offset, whence_name[whence], c->GPRx);
+      #endif  
+      break;
+    }
+    case SYS_gettimeofday: {
+      // 使用 AM 的 TIMER_UPTIME 寄存器获取系统运行时间
+      // 而不是gettimeofday()所要求的 "自1970-01-01的秒数和微秒数"
+      struct timeval *tv = (struct timeval *)a[1];
+      if (tv != NULL) {
+        uint64_t us = io_read(AM_TIMER_UPTIME).us;
+        tv->tv_sec = us / 1000000;
+        tv->tv_usec = us % 1000000;
+      }
+      c->GPRx = 0;
+      #ifdef CONFIG_STRACE
+      //STRACE("[STRACE] gettimeofday(%p, %p) = %d", tv, a[2], c->GPRx);
       #endif  
       break;
     }

@@ -44,7 +44,7 @@ void do_syscall(Context *c) {
         }
         c->GPRx = count;
       } else {
-        c->GPRx = -1;
+        c->GPRx = fs_write(fd, buf, count);
       }
       #ifdef CONFIG_STRACE
       STRACE("[STRACE] write(%d, %p, %u) = %d", fd, buf, count, c->GPRx);

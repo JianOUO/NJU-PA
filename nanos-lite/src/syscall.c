@@ -1,5 +1,6 @@
 #include <common.h>
 #include "syscall.h"
+#include <fs.h>
 
 #define CONFIG_STRACE
 
@@ -55,6 +56,44 @@ void do_syscall(Context *c) {
       #ifdef CONFIG_STRACE
       STRACE("[STRACE] brk(%p) = %d", a[0], c->GPRx);
       #endif
+      break;
+    }
+    case SYS_open: {
+      const char *filename = (const char *)a[1];
+      int flags = (int)a[2];
+      int mode = (int)a[3];
+      c->GPRx = fs_open(filename, flags, mode);
+      #ifdef CONFIG_STRACE
+      STRACE("[STRACE] open(%s, %d, %d) = %d", filename, flags, mode, c->GPRx);
+      #endif
+      break;
+    }
+    case SYS_read: {
+      int fd = (int)a[1];
+      void *buf = (void *)a[2];
+      size_t count = (size_t)a[3];
+      c->GPRx = fs_read(fd, buf, count);
+      #ifdef CONFIG_STRACE
+      STRACE("[STRACE] read(%d, %s, %u) = %u", fd, buf, count, c->GPRx);
+      #endif 
+      break;
+    }
+    case SYS_close: {
+      int fd = (int)a[1];
+      c->GPRx = fs_close(fd);
+      #ifdef CONFIG_STRACE
+      STRACE("[STRACE] close(%d) = %d", fd, c->GPRx);
+      #endif  
+      break;
+    }
+    case SYS_lseek: {
+      int fd = (int)a[1];
+      size_t offset = (size_t)a[2];
+      int whence = (int)a[3];
+      c->GPRx = fs_lseek(fd, offset, whence);
+      #ifdef CONFIG_STRACE
+      STRACE("[STRACE] lseek(%d, %u, %d) = %u", fd, offset, whence, c->GPRx);
+      #endif  
       break;
     }
     default: panic("Unhandled syscall ID = %d", a[0]);

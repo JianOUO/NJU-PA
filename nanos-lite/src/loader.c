@@ -1,5 +1,6 @@
 #include <proc.h>
 #include <elf.h>
+#include <fs.h>
 
 #ifdef __LP64__
 # define Elf_Ehdr Elf64_Ehdr
@@ -25,18 +26,23 @@ size_t ramdisk_read(void *buf, size_t offset, size_t len);
 
 static uintptr_t loader(PCB *pcb, const char *filename) {
   //TODO();
+  int fd = fs_open(filename, 0, 0);
+
   Elf_Ehdr ehdr;
   Elf_Shdr shdr;
   Elf_Phdr phdr;
   uint32_t e_phnum;
 
-  assert(ramdisk_read(&ehdr, 0, sizeof(Elf_Ehdr)) == sizeof(Elf_Ehdr));
+  //assert(ramdisk_read(&ehdr, 0, sizeof(Elf_Ehdr)) == sizeof(Elf_Ehdr));
+  assert(fs_read(fd, &ehdr, sizeof(Elf_Ehdr)) == sizeof(Elf_Ehdr));
   assert(ehdr.e_ident[EI_CLASS] == Elf_Class);
   assert(ehdr.e_ident[EI_MAG0] == ELFMAG0 && ehdr.e_ident[EI_MAG1] == ELFMAG1 && ehdr.e_ident[EI_MAG2] == ELFMAG2 && ehdr.e_ident[EI_MAG3] == ELFMAG3);
   assert(ehdr.e_machine == EXPECT_TYPE);
 
   assert(ehdr.e_shoff != 0); 
-  assert(ramdisk_read(&shdr, ehdr.e_shoff, sizeof(Elf_Shdr)) == sizeof(Elf_Shdr));
+  //assert(ramdisk_read(&shdr, ehdr.e_shoff, sizeof(Elf_Shdr)) == sizeof(Elf_Shdr));
+  assert(fs_lseek(fd, ehdr.e_shoff, SEEK_SET) == ehdr.e_shoff);
+  assert(fs_read(fd, &shdr, sizeof(Elf_Shdr)) == sizeof(Elf_Shdr));
 
   assert(ehdr.e_phoff != 0);
   assert(ehdr.e_phnum != 0);
@@ -47,8 +53,10 @@ static uintptr_t loader(PCB *pcb, const char *filename) {
   } else {
     e_phnum = ehdr.e_phnum;
   }
+  assert(fs_lseek(fd, ehdr.e_phoff, SEEK_SET) == ehdr.e_phoff);
   for (uint32_t i = 0; i < e_phnum; i++) {
-    assert(ramdisk_read(&phdr, ehdr.e_phoff + i * ehdr.e_phentsize, sizeof(Elf_Phdr)) == sizeof(Elf_Phdr));
+    //assert(ramdisk_read(&phdr, ehdr.e_phoff + i * ehdr.e_phentsize, sizeof(Elf_Phdr)) == sizeof(Elf_Phdr));
+    assert(fs_read(fd, &phdr, sizeof(Elf_Phdr)) == sizeof(Elf_Phdr));
     if (phdr.p_type == PT_LOAD) {
       assert(ramdisk_read((void *)phdr.p_vaddr, phdr.p_offset, phdr.p_memsz) == phdr.p_memsz);
       memset((void *)(phdr.p_vaddr + phdr.p_filesz), 0, phdr.p_memsz - phdr.p_filesz);

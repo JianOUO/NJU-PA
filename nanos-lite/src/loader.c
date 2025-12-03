@@ -27,7 +27,7 @@ size_t ramdisk_read(void *buf, size_t offset, size_t len);
 static uintptr_t loader(PCB *pcb, const char *filename) {
   //TODO();
   int fd = fs_open(filename, 0, 0);
-  printf("fd: %d\n", fd);
+  //printf("fd: %d\n", fd);
   Elf_Ehdr ehdr;
   Elf_Shdr shdr;
   Elf_Phdr phdr;

@@ -4,6 +4,8 @@
 
 #define CONFIG_STRACE
 
+static const char *whence_name[3] = {"SEEK_SET", "SEEK_CUR", "SEEK_END"};
+
 #ifdef CONFIG_STRACE
 #define ANSI_FG_BLUE    "\33[1;34m"
 #define ANSI_NONE       "\33[0m"
@@ -92,7 +94,7 @@ void do_syscall(Context *c) {
       int whence = (int)a[3];
       c->GPRx = fs_lseek(fd, offset, whence);
       #ifdef CONFIG_STRACE
-      STRACE("[STRACE] lseek(\"%s\", %u, %d) = %u", fs_filename(fd), offset, whence, c->GPRx);
+      STRACE("[STRACE] lseek(\"%s\", %u, %d) = %u", fs_filename(fd), offset, whence_name[whence], c->GPRx);
       #endif  
       break;
     }

@@ -57,8 +57,8 @@ void NDL_OpenCanvas(int *w, int *h) {
   assert(*h > 0 && *h <= screen_h);
   canvas_w = *w;
   canvas_h = *h;
-  printf("screen_w: %d screen_h:%d\n", screen_w, screen_h);
-  printf("canvas_w: %d canvas_h:%d\n", canvas_w, canvas_h);
+  printf("screen_w: %d screen_h: %d\n", screen_w, screen_h);
+  printf("canvas_w: %d canvas_h: %d\n", canvas_w, canvas_h);
 }
 
 void NDL_DrawRect(uint32_t *pixels, int x, int y, int w, int h) {

@@ -58,8 +58,11 @@ void NDL_OpenCanvas(int *w, int *h) {
   assert(*h > 0 && *h <= screen_h);
   canvas_w = *w;
   canvas_h = *h;
+  canvas_x = (screen_w - canvas_w) / 2;
+  canvas_y = (screen_h - canvas_h) / 2;
   assert(canvas_x >= 0 && canvas_y >= 0 && canvas_y + canvas_h <= screen_h && canvas_x + canvas_w <= screen_w);
   printf("screen_w: %d screen_h: %d\n", screen_w, screen_h);
+  printf("canvas_x: %d canvas_y: %d\n", canvas_x, canvas_y);
   printf("canvas_w: %d canvas_h: %d\n", canvas_w, canvas_h);
 }
 

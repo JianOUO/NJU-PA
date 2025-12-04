@@ -10,6 +10,7 @@
 static int evtdev = -1;
 static int fbdev = -1;
 static int screen_w = 0, screen_h = 0;
+static int canvas_w = 0, canvas_h = 0;
 static struct timeval start;
 
 uint32_t NDL_GetTicks() {
@@ -47,6 +48,17 @@ void NDL_OpenCanvas(int *w, int *h) {
     }
     close(fbctl);
   }
+
+  if (*w == 0 && *h == 0) {
+    *w = screen_w;
+    *h = screen_h;
+  }
+  assert(*w > 0 && *w <= screen_w);
+  assert(*h > 0 && *h <= screen_h);
+  canvas_w = *w;
+  canvas_h = *h;
+  printf("screen_w: %d screen_h:%d\n", screen_w, screen_h);
+  printf("canvas_w: %d canvas_h:%d\n", canvas_w, canvas_h);
 }
 
 void NDL_DrawRect(uint32_t *pixels, int x, int y, int w, int h) {
@@ -72,6 +84,14 @@ int NDL_Init(uint32_t flags) {
   }
 
   gettimeofday(&start, 0);
+
+  int fd = open("/proc/dispinfo", O_RDONLY);
+  assert(fd >= 0);
+  char buf[64];
+  ssize_t ret = read(fd, buf, sizeof(buf));
+  assert(ret >= 21);
+  sscanf(buf, "WIDTH : %d\nHEIGHT : %d\n", &screen_w, &screen_h);
+
   return 0;
 }
 

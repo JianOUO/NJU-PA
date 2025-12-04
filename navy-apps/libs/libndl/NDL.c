@@ -102,7 +102,7 @@ int NDL_Init(uint32_t flags) {
   assert(fd >= 0);
   char buf[64];
   ssize_t ret = read(fd, buf, sizeof(buf));
-  //assert(ret >= 21);
+  assert(ret >= 21);
   sscanf(buf, "WIDTH: %d\nHEIGHT: %d\n", &screen_w, &screen_h);
 
   return 0;

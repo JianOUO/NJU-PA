@@ -3,8 +3,7 @@
 #include <fs.h>
 #include <sys/time.h>
 
-#define CONFIG_STRACE
-
+//#define CONFIG_STRACE
 
 #ifdef CONFIG_STRACE
 static const char *whence_name[3] = {"SEEK_SET", "SEEK_CUR", "SEEK_END"};
@@ -104,7 +103,7 @@ void do_syscall(Context *c) {
       }
       c->GPRx = 0;
       #ifdef CONFIG_STRACE
-      //STRACE("[STRACE] gettimeofday(%p, %p) = %d", tv, a[2], c->GPRx);
+      STRACE("[STRACE] gettimeofday(%p, %p) = %d", tv, a[2], c->GPRx);
       #endif  
       break;
     }

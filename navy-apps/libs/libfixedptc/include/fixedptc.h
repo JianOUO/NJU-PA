@@ -146,7 +146,6 @@ static inline fixedpt fixedpt_divi(fixedpt A, int B) {
 	return fixedpt_div(A, fixedpt_fromint(B));
 }
 
-
 static inline fixedpt fixedpt_abs(fixedpt A) {
 	if (A < 0) return -A;
 	return A;

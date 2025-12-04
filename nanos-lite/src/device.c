@@ -33,7 +33,7 @@ size_t events_read(void *buf, size_t offset, size_t len) {
 }
 
 size_t dispinfo_read(void *buf, size_t offset, size_t len) {
-  snprintf(buf, len, "WIDTH : %d\nHEIGHT : %d\n", screen_w, screen_h);
+  snprintf(buf, len, "WIDTH: %d\nHEIGHT: %d\n", screen_w, screen_h);
   return strlen(buf);
 }
 

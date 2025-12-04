@@ -12,9 +12,12 @@ env:
 run: app env
 	@LD_PRELOAD=$(NAVY_HOME)/libs/libos/build/native.so $(APP) $(mainargs)
 
+GDB_ENV = -ex "set environment XDG_RUNTIME_DIR /mnt/wslg/runtime-dir" \
+ -ex "set environment LD_PRELOAD $(NAVY_HOME)/libs/libos/build/native.so"
+
 # -ex "set environment LD_PRELOAD ..."：在 GDB 中设置环境变量
 # --args $(APP) $(mainargs)：指定要调试的程序和参数
 gdb: app env
-	@gdb -ex "set environment LD_PRELOAD $(NAVY_HOME)/libs/libos/build/native.so" --args $(APP) $(mainargs)
-
+#	@gdb -ex "set environment LD_PRELOAD $(NAVY_HOME)/libs/libos/build/native.so" --args $(APP) $(mainargs)
+	@gdb $(GDB_ENV) --args $(APP) $(mainargs)
 .PHONY: env run gdb

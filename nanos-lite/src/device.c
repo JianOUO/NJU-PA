@@ -6,6 +6,8 @@
 # define MULTIPROGRAM_YIELD()
 #endif
 
+int screen_w, screen_h;
+
 #define NAME(key) \
   [AM_KEY_##key] = #key,
 
@@ -31,17 +33,25 @@ size_t events_read(void *buf, size_t offset, size_t len) {
 }
 
 size_t dispinfo_read(void *buf, size_t offset, size_t len) {
-  int width = io_read(AM_GPU_CONFIG).width;
-  int height = io_read(AM_GPU_CONFIG).height;
-  snprintf(buf, len, "WIDTH : %d\nHEIGHT : %d\n", width, height);
+  snprintf(buf, len, "WIDTH : %d\nHEIGHT : %d\n", screen_w, screen_h);
   return strlen(buf);
 }
 
 size_t fb_write(const void *buf, size_t offset, size_t len) {
-  return 0;
+  // offset是字节偏移，len以字节为单位, 都需要除4改为以像素为单位
+  int pixel_offset = offset / 4;
+  int pixel_len = len / 4;
+  int y = pixel_offset / screen_w;
+  int x = pixel_offset % screen_w;
+  assert(x + pixel_len <= screen_w);
+  io_write(AM_GPU_FBDRAW, x, y, (void *)buf, pixel_len, 1, true);
+  return pixel_len * 4;
 }
 
 void init_device() {
   Log("Initializing devices...");
   ioe_init();
+
+  screen_w = io_read(AM_GPU_CONFIG).width;
+  screen_h = io_read(AM_GPU_CONFIG).height;
 }

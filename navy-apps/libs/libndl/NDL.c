@@ -11,6 +11,7 @@ static int evtdev = -1;
 static int fbdev = -1;
 static int screen_w = 0, screen_h = 0;
 static int canvas_w = 0, canvas_h = 0;
+static int canvas_x = 0, canvas_y = 0;
 static struct timeval start;
 
 uint32_t NDL_GetTicks() {
@@ -57,11 +58,19 @@ void NDL_OpenCanvas(int *w, int *h) {
   assert(*h > 0 && *h <= screen_h);
   canvas_w = *w;
   canvas_h = *h;
+  assert(canvas_x >= 0 && canvas_y >= 0 && canvas_y + canvas_h <= screen_h && canvas_x + canvas_w <= screen_w);
   printf("screen_w: %d screen_h: %d\n", screen_w, screen_h);
   printf("canvas_w: %d canvas_h: %d\n", canvas_w, canvas_h);
 }
 
 void NDL_DrawRect(uint32_t *pixels, int x, int y, int w, int h) {
+  assert(x >= 0 && y >= 0 && y + h <= canvas_h && x + w <= canvas_w);;
+  int fd = open("/dev/fb", O_RDWR); 
+  int offset = (canvas_y + y) * screen_w + canvas_x + x;
+  for (int i = 0; i < h; i++) {
+    lseek(fd, (offset + i * screen_w) * 4, SEEK_SET);
+    write(fd, pixels + i * w, w * 4);
+  } 
 }
 
 void NDL_OpenAudio(int freq, int channels, int samples) {

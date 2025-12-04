@@ -5,7 +5,6 @@
 #include <BMP.h>
 
 int main() {
-  printf("Starting BMP test...\n");
   NDL_Init(0);
   int w, h;
   // 加载 BMP 图片文件, 返回图片宽度、高度和像素数据指针

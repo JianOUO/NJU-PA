@@ -37,15 +37,12 @@ void do_syscall(Context *c) {
       #ifdef CONFIG_STRACE
       STRACE("[STRACE] exit(0x%x)", a[1]);
       #endif
-      /*
       c->GPR1 = SYS_execve;
-      c->GPR2 = (uintptr_t)"/bin/nemu";
+      c->GPR2 = (uintptr_t)"/bin/menu";
       c->GPR3 = 0;
       c->GPR4 = 0;
       do_syscall(c);
-      */
       //halt(a[1]);
-      naive_uload(NULL, "/bin/menu");
     }
     case SYS_write: {
       int fd = (int)a[1];

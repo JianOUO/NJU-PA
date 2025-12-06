@@ -1,6 +1,7 @@
 #include <NDL.h>
 #include <SDL.h>
 #include <assert.h>
+#include <string.h>
 
 #define keyname(k) #k,
 
@@ -24,6 +25,30 @@ int SDL_PollEvent(SDL_Event *ev) {
 // 阻塞式等待一个事件 event - 用于存储事件的结构体指针
 int SDL_WaitEvent(SDL_Event *event) {
   //assert(0);
+  assert(event);
+  char buf[32];
+  while (1) {
+    if (NDL_PollEvent(buf, sizeof(buf))) {
+      // kd NONE\n or ku NONE\n
+      assert(buf[0] == 'k');
+      assert(buf[strlen(buf) - 1] == '\n');
+      if (buf[1] == 'd') event->type = SDL_KEYDOWN;
+      else if (buf[1] == 'u') event->type = SDL_KEYUP;
+      else assert(0);
+
+      char name[32];
+      int size = sizeof(keyname) / sizeof(keyname[0]);
+      strcpy(name, buf + 3);
+      name[strlen(name) - 1] = '\0';
+      for (int i = 0; i < size; i++) {
+        if (strcmp(name, keyname[i]) == 0) {
+          event->key.keysym.sym = i;
+          break;
+        }
+      }
+      break;
+    }
+  }
   return 1;
 }
 

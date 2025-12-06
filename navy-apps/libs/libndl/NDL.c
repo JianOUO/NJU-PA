@@ -13,6 +13,9 @@ static int screen_w = 0, screen_h = 0;
 static int canvas_w = 0, canvas_h = 0;
 static int canvas_x = 0, canvas_y = 0;
 static struct timeval start;
+static int dispinfo_fd = -1;
+static int evt_fd = -1;
+static int fb_memfd = -1;
 
 uint32_t NDL_GetTicks() {
   struct timeval current;
@@ -27,7 +30,7 @@ int NDL_PollEvent(char *buf, int len) {
   assert(fd >= 0);
   ssize_t ret = read(fd, buf, len);
   assert(ret != -1);
-  assert(close(fd) != -1);
+  //close(fd); 不需要关闭特殊文件，否则会影响相关的文件操作
   return ret == 0 ? 0 : 1;
 }
 
@@ -77,7 +80,7 @@ void NDL_DrawRect(uint32_t *pixels, int x, int y, int w, int h) {
     assert(lseek(fd, (offset + i * screen_w) * 4, SEEK_SET) != -1);
     assert(write(fd, pixels + i * w, w * 4) != -1);
   }
-  assert(close(fd) != -1);
+  //close(fd);
 }
 
 void NDL_OpenAudio(int freq, int channels, int samples) {
@@ -106,7 +109,7 @@ int NDL_Init(uint32_t flags) {
   char buf[64];
   assert(read(fd, buf, sizeof(buf)) >= 19);
   assert(sscanf(buf, "WIDTH: %d\nHEIGHT: %d\n", &screen_w, &screen_h) == 2);
-  assert(close(fd) != -1);
+  //close(fd);
 
   return 0;
 }

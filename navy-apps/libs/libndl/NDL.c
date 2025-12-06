@@ -73,6 +73,7 @@ void NDL_OpenCanvas(int *w, int *h) {
 
 void NDL_DrawRect(uint32_t *pixels, int x, int y, int w, int h) {
   // 矩形必须在画布内
+  printf("1");
   assert(x >= 0 && y >= 0 && y + h <= canvas_h && x + w <= canvas_w);;
   int fd = open("/dev/fb", O_RDWR); 
   assert(fd != -1);

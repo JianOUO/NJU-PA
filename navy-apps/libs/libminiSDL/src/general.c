@@ -43,5 +43,4 @@ int SDL_ShowCursor(int toggle) {
 // 设置窗口标题和图标标题
 // title：窗口标题字符串 icon：图标标题字符串（通常为 NULL）
 void SDL_WM_SetCaption(const char *title, const char *icon) {
-  assert(0);
 }

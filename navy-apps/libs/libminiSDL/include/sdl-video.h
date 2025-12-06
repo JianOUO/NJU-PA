@@ -38,14 +38,15 @@ typedef struct {
 +------+------+------+------+
 | 0x12 | 0x34 | 0x56 | 0x78 |   // 按字节查看
 +------+------+------+------+
-   r      g      b      a
+   b       g     r      a
 
 作为 uint32_t 查看：
 color.val = 0x78563412
 */
 typedef union {
   struct {
-    uint8_t r, g, b, a;
+    //uint8_t r, g, b, a; 源码中原来的排序, 与上述的颜色掩码不符
+	uint8_t b, g, r, a;
   };
   uint32_t val;
 } SDL_Color;

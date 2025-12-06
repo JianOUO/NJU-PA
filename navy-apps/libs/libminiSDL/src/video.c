@@ -7,6 +7,7 @@
 // 将一张画布中的指定矩形区域复制到另一张画布的指定位置
 void SDL_BlitSurface(SDL_Surface *src, SDL_Rect *srcrect, SDL_Surface *dst, SDL_Rect *dstrect) {
   assert(dst && src);
+  assert(dst->format && src->format);
   assert(dst->format->BitsPerPixel == src->format->BitsPerPixel);
   assert(dst->format->BytesPerPixel == 1 || dst->format->BytesPerPixel == 4);
   assert(src->pixels && dst->pixels);
@@ -40,7 +41,7 @@ void SDL_BlitSurface(SDL_Surface *src, SDL_Rect *srcrect, SDL_Surface *dst, SDL_
 void SDL_FillRect(SDL_Surface *dst, SDL_Rect *dstrect, uint32_t color) {
   //assert(0);
   assert(dst && dst->format && dst->pixels);
-  assert(dst->format->BitsPerPixel == 32);
+  assert(dst->format->BitsPerPixel == 32 || dst->format->BitsPerPixel == 8);
   int x = (dstrect == NULL ? 0 : dstrect->x);
   int y = (dstrect == NULL ? 0 : dstrect->y);
   int w = (dstrect == NULL ? dst->w : dstrect->w);
@@ -51,7 +52,12 @@ void SDL_FillRect(SDL_Surface *dst, SDL_Rect *dstrect, uint32_t color) {
   for (int i = 0; i < h; i++) {
     int rect_offset = i * dst->w;
     for (int j = 0; j < w; j++) {
-      ((uint32_t *)dst->pixels)[offset + rect_offset + j] = color;
+      if (dst->format->BitsPerPixel == 32) {
+        ((uint32_t *)dst->pixels)[offset + rect_offset + j] = color;
+      } else {
+        assert(color < 0x100);
+        dst->pixels[offset + rect_offset + j] = color;
+      }
     }
   }
 }
@@ -60,14 +66,38 @@ void SDL_FillRect(SDL_Surface *dst, SDL_Rect *dstrect, uint32_t color) {
 void SDL_UpdateRect(SDL_Surface *s, int x, int y, int w, int h) {
   //assert(0);
   assert(s && s->format && s->pixels);
-  assert(s->format->BitsPerPixel == 32);
+  assert(s->format->BitsPerPixel == 32 || s->format->BitsPerPixel == 8);
   if (!x && !y && !w && !h) {
     w = s->w;
     h = s->h;
   }
   if (w + x > s->w) w = s->w - x;
   if (h + y > s->h) h = s->h - y;
-  NDL_DrawRect((uint32_t *)s->pixels, x, y, w, h);
+  uint32_t pixels[w * h];
+  if (s->format->BitsPerPixel == 32) {
+    if (x == 0 && y == 0 && w == s->w && h == s->h) {
+      NDL_DrawRect((uint32_t *)s->pixels, x, y, w, h);
+    } else {
+      int offset = y * s->w + x;
+      for (int i = 0; i < h; i++) {
+        int rect_offset = i * s->w;
+        for (int j = 0; j < w; j++) {
+          pixels[i * w + j] = ((uint32_t *)s->pixels)[offset + rect_offset + j];
+        }
+      }
+      NDL_DrawRect(pixels, x, y, w, h);
+    }
+  } else {
+    assert(s->format->palette && s->format->palette->colors);
+    int offset = y * s->w + x;
+    for (int i = 0; i < h; i++) {
+      int rect_offset = i * s->w;
+      for (int j = 0; j < w; j++) {
+        pixels[i * w + j] = (s->format->palette->colors[s->pixels[offset + rect_offset + j]]).val;
+      }
+    }
+    NDL_DrawRect(pixels, x, y, w, h);
+  }
 }
 
 // APIs below are already implemented.

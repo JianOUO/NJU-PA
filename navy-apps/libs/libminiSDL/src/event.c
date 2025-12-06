@@ -5,6 +5,8 @@
 
 #define keyname(k) #k,
 
+static uint8_t keystate[SDLK_KEYNUM] = {0};
+
 static const char *keyname[] = {
   "NONE",
   _KEYS(keyname)
@@ -35,6 +37,7 @@ int SDL_PollEvent(SDL_Event *ev) {
     name[strlen(name) - 1] = '\0';
     for (int i = 0; i < size; i++) {
       if (strcmp(name, keyname[i]) == 0) {
+        keystate[i] = ev->type ? 0 : 1;
         ev->key.keysym.sym = i;
         break;
       }
@@ -63,6 +66,7 @@ int SDL_WaitEvent(SDL_Event *event) {
       name[strlen(name) - 1] = '\0';
       for (int i = 0; i < size; i++) {
         if (strcmp(name, keyname[i]) == 0) {
+          keystate[i] = event->type ? 0 : 1;
           event->key.keysym.sym = i;
           break;
         }
@@ -82,6 +86,6 @@ int SDL_PeepEvents(SDL_Event *ev, int numevents, int action, uint32_t mask) {
 // 获取当前所有按键的状态数组 numkeys - 输出参数，返回数组大小
 // 返回值：按键状态数组指针（每个元素表示对应按键是否按下）
 uint8_t* SDL_GetKeyState(int *numkeys) {
-  assert(0);
-  return NULL;
+  if (numkeys != NULL) *numkeys = SDLK_KEYNUM;
+  return keystate;
 }

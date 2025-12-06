@@ -38,7 +38,22 @@ void SDL_BlitSurface(SDL_Surface *src, SDL_Rect *srcrect, SDL_Surface *dst, SDL_
 
 // 用指定颜色填充表面的矩形区域
 void SDL_FillRect(SDL_Surface *dst, SDL_Rect *dstrect, uint32_t color) {
-  assert(0);
+  //assert(0);
+  assert(dst && dst->format && dst->pixels);
+  assert(dst->format->BitsPerPixel == 32);
+  int x = (dstrect == NULL ? 0 : dstrect->x);
+  int y = (dstrect == NULL ? 0 : dstrect->y);
+  int w = (dstrect == NULL ? dst->w : dstrect->w);
+  int h = (dstrect == NULL ? dst->h : dstrect->h);
+  if (x + w > dst->w) w = dst->w - x;
+  if (y + h > dst->h) h = dst->h - y;
+  int offset = y * dst->w + x;
+  for (int i = 0; i < h; i++) {
+    int rect_offset = i * dst->w;
+    for (int j = 0; j < w; j++) {
+      ((uint32_t *)dst->pixels)[offset + rect_offset + j] = color;
+    }
+  }
 }
 
 // 将画布中的指定矩形区域同步到屏幕上

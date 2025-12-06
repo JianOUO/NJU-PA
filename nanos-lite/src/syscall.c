@@ -44,7 +44,8 @@ void do_syscall(Context *c) {
       c->GPR4 = 0;
       do_syscall(c);
       */
-      halt(a[1]);
+      //halt(a[1]);
+      naive_uload(NULL, "/bin/menu");
     }
     case SYS_write: {
       int fd = (int)a[1];

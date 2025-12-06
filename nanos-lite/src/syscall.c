@@ -4,7 +4,7 @@
 #include <sys/time.h>
 #include <proc.h>
 
-#define CONFIG_STRACE
+//#define CONFIG_STRACE
 
 #ifdef CONFIG_STRACE
 static const char *whence_name[3] = {"SEEK_SET", "SEEK_CUR", "SEEK_END"};

@@ -15,6 +15,12 @@ static const char *whence_name[3] = {"SEEK_SET", "SEEK_CUR", "SEEK_END"};
     printf(ANSI_FG_BLUE format ANSI_NONE "\n", ## __VA_ARGS__); \
   } while (0)
 #endif
+#define ANSI_FG_BLUE    "\33[1;34m"
+#define ANSI_NONE       "\33[0m"
+#define STRACE(format, ...) \
+  do { \
+    printf(ANSI_FG_BLUE format ANSI_NONE "\n", ## __VA_ARGS__); \
+  } while (0)
 
 void naive_uload(PCB *pcb, const char *filename);
 
@@ -118,14 +124,14 @@ void do_syscall(Context *c) {
     case SYS_execve: {
       const char *pathname = (const char *)a[1];
       assert(pathname);
-      #ifdef CONFIG_STRACE
+      //#ifdef CONFIG_STRACE
       STRACE("[STRACE] execve(%s, %p, %p)", pathname, a[2], a[3]);
-      #endif
+      //#endif
       naive_uload(NULL, pathname);
       c->GPRx = -1;
-      #ifdef CONFIG_STRACE
+      //#ifdef CONFIG_STRACE
       STRACE("[STRACE] execve(%s, %p, %p) = %d", pathname, a[2], a[3], c->GPRx);
-      #endif
+      //#endif
     }
     default: panic("Unhandled syscall ID = %d", a[0]);
   }

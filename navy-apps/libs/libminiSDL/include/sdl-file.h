@@ -7,14 +7,17 @@ enum { RW_TYPE_FILE, RW_TYPE_MEM };
 #define RW_SEEK_CUR SEEK_CUR
 #define RW_SEEK_END SEEK_END
 
+// SDL_RWops（Read/Write Operations）是一个抽象的文件 I/O 接口，通过函数指针实现多态，可支持文件或内存两种数据源
 typedef struct SDL_RWops {
   int64_t (*size) (struct SDL_RWops *f);
   int64_t (*seek) (struct SDL_RWops *f, int64_t offset, int whence);
+  // size：每个元素大小 nmemb：元素数量 返回成功读取的元素数量
   size_t  (*read) (struct SDL_RWops *f, void *buf, size_t size, size_t nmemb);
+  // 参数同 read，返回成功写入的元素数量
   size_t  (*write)(struct SDL_RWops *f, const void *buf, size_t size, size_t nmemb);
   int     (*close)(struct SDL_RWops *f);
   uint32_t type;
-  FILE *fp;
+  FILE *fp; // 当 type == RW_TYPE_FILE 时使用, 指向标准 C 库的 FILE 结构
 
   // mem.base is only defined when type == RW_TYPE_MEM
   struct { void *base; ssize_t size; } mem;

@@ -16,7 +16,7 @@ static struct timeval start;
 
 uint32_t NDL_GetTicks() {
   struct timeval current;
-  gettimeofday(&current, 0);
+  assert(gettimeofday(&current, 0) != -1);
   uint32_t elapsed_ms = (current.tv_sec - start.tv_sec) * 1000 + 
                         (current.tv_usec - start.tv_usec) / 1000;
   return elapsed_ms;
@@ -27,7 +27,7 @@ int NDL_PollEvent(char *buf, int len) {
   assert(fd >= 0);
   ssize_t ret = read(fd, buf, len);
   assert(ret != -1);
-  close(fd);
+  assert(close(fd) != -1);
   return ret == 0 ? 0 : 1;
 }
 
@@ -60,6 +60,7 @@ void NDL_OpenCanvas(int *w, int *h) {
   canvas_h = *h;
   canvas_x = (screen_w - canvas_w) / 2;
   canvas_y = (screen_h - canvas_h) / 2;
+  // 画布必须在屏幕内
   assert(canvas_x >= 0 && canvas_y >= 0 && canvas_y + canvas_h <= screen_h && canvas_x + canvas_w <= screen_w);
   printf("screen_w: %d screen_h: %d\n", screen_w, screen_h);
   printf("canvas_x: %d canvas_y: %d\n", canvas_x, canvas_y);
@@ -67,14 +68,16 @@ void NDL_OpenCanvas(int *w, int *h) {
 }
 
 void NDL_DrawRect(uint32_t *pixels, int x, int y, int w, int h) {
+  // 矩形必须在画布内
   assert(x >= 0 && y >= 0 && y + h <= canvas_h && x + w <= canvas_w);;
   int fd = open("/dev/fb", O_RDWR); 
+  assert(fd != -1);
   int offset = (canvas_y + y) * screen_w + canvas_x + x;
   for (int i = 0; i < h; i++) {
-    lseek(fd, (offset + i * screen_w) * 4, SEEK_SET);
-    write(fd, pixels + i * w, w * 4);
+    assert(lseek(fd, (offset + i * screen_w) * 4, SEEK_SET) != -1);
+    assert(write(fd, pixels + i * w, w * 4) != -1);
   }
-  close(fd);
+  assert(close(fd) != -1);
 }
 
 void NDL_OpenAudio(int freq, int channels, int samples) {
@@ -96,15 +99,15 @@ int NDL_Init(uint32_t flags) {
     evtdev = 3;
   }
 
-  gettimeofday(&start, 0);
+  assert(gettimeofday(&start, 0) != -1);
 
   int fd = open("/proc/dispinfo", O_RDONLY);
   assert(fd >= 0);
   char buf[64];
-  ssize_t ret = read(fd, buf, sizeof(buf));
-  assert(ret >= 19);
-  sscanf(buf, "WIDTH: %d\nHEIGHT: %d\n", &screen_w, &screen_h);
-  close(fd);
+  assert(read(fd, buf, sizeof(buf)) >= 19);
+  assert(sscanf(buf, "WIDTH: %d\nHEIGHT: %d\n", &screen_w, &screen_h) == 2);
+  assert(close(fd) != -1);
+
   return 0;
 }
 

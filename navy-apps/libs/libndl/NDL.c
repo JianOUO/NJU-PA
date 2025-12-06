@@ -30,6 +30,7 @@ int NDL_PollEvent(char *buf, int len) {
   assert(fd >= 0);
   ssize_t ret = read(fd, buf, len);
   assert(ret != -1);
+  printf("%s\n", buf);
   //close(fd); 不需要关闭特殊文件，否则会影响相关的文件操作
   return ret == 0 ? 0 : 1;
 }

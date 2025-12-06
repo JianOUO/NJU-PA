@@ -17,9 +17,30 @@ int SDL_PushEvent(SDL_Event *ev) {
 }
 
 // 非阻塞地检查并获取一个事件 ev - 用于存储事件的结构体指针
+// 如果当前没有任何事件, 就会立即返回
 int SDL_PollEvent(SDL_Event *ev) {
-  assert(0);
-  return 0;
+  char buf[32];
+  int ret = NDL_PollEvent(buf, sizeof(buf));
+  if (ret && ev != NULL) {
+    // kd NONE\n or ku NONE\n
+    assert(buf[0] == 'k');
+    assert(buf[strlen(buf) - 1] == '\n');
+    if (buf[1] == 'd') ev->type = SDL_KEYDOWN;
+    else if (buf[1] == 'u') ev->type = SDL_KEYUP;
+    else assert(0);
+
+    char name[32];
+    int size = sizeof(keyname) / sizeof(keyname[0]);
+    strcpy(name, buf + 3);
+    name[strlen(name) - 1] = '\0';
+    for (int i = 0; i < size; i++) {
+      if (strcmp(name, keyname[i]) == 0) {
+        ev->key.keysym.sym = i;
+        break;
+      }
+    }
+  }
+  return ret;
 }
 
 // 阻塞式等待一个事件 event - 用于存储事件的结构体指针

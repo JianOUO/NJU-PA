@@ -2,9 +2,13 @@
 #include <stdio.h>
 #include <assert.h>
 
+uint32_t sdl_init_time;
+
 // 初始化指定的 SDL 子系统
 int SDL_Init(uint32_t flags) {
-  return NDL_Init(flags);
+  int ret = NDL_Init(flags);
+  sdl_init_time = NDL_GetTicks(); 
+  return ret;
 }
 
 // 清理所有已初始化的 SDL 子系统，释放资源

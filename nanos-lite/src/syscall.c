@@ -7,7 +7,7 @@
 #define CONFIG_STRACE
 
 #ifdef CONFIG_STRACE
-static const char *whence_name[3] = {"SEEK_SET", "SEEK_CUR", "SEEK_END"};
+//static const char *whence_name[3] = {"SEEK_SET", "SEEK_CUR", "SEEK_END"};
 #define ANSI_FG_BLUE    "\33[1;34m"
 #define ANSI_NONE       "\33[0m"
 #define STRACE(format, ...) \
@@ -52,7 +52,7 @@ void do_syscall(Context *c) {
       size_t count = (size_t)a[3];
       c->GPRx = fs_write(fd, buf, count);
       #ifdef CONFIG_STRACE
-      STRACE("[STRACE] write(\"%s\", %p, %u) = %d", fs_filename(fd), buf, count, c->GPRx);
+      //STRACE("[STRACE] write(\"%s\", %p, %u) = %d", fs_filename(fd), buf, count, c->GPRx);
       #endif
       break;
     }
@@ -98,7 +98,7 @@ void do_syscall(Context *c) {
       assert(whence < 3);
       c->GPRx = fs_lseek(fd, offset, whence);
       #ifdef CONFIG_STRACE
-      STRACE("[STRACE] lseek(\"%s\", %u, %s) = %u", fs_filename(fd), offset, whence_name[whence], c->GPRx);
+      //STRACE("[STRACE] lseek(\"%s\", %u, %s) = %u", fs_filename(fd), offset, whence_name[whence], c->GPRx);
       #endif  
       break;
     }

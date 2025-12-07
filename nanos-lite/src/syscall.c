@@ -44,7 +44,7 @@ void do_syscall(Context *c) {
       STRACE("[STRACE] exit(0x%x)", a[1]);
       #endif
       c->GPR1 = SYS_execve;
-      c->GPR2 = (uintptr_t)"/bin/menu";
+      c->GPR2 = (uintptr_t)"/bin/nterm";
       c->GPR3 = 0;
       c->GPR4 = 0;
       do_syscall(c);

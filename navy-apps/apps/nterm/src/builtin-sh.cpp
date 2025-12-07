@@ -2,6 +2,7 @@
 #include <stdarg.h>
 #include <unistd.h>
 #include <SDL.h>
+#include <string.h>
 
 char handle_key(SDL_Event *ev);
 
@@ -24,8 +25,11 @@ static void sh_prompt() {
 
 static void sh_handle_cmd(const char *cmd) {
   assert(cmd);
-  cmd[strlen(cmd) - 1] = '\0';
-  execve(cmd, 0, 0);
+  int len = strlen(cmd);
+  char command[len + 1];
+  strcpy(command, cmd);
+  command[len - 1] = '\0';
+  execve(command, 0, 0);
 }
 
 void builtin_sh_run() {

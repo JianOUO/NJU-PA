@@ -115,6 +115,7 @@ static int cmd_x(char *args) {
     printf("x: no EXPR\n");
     return 0;
   } else {
+    printf("%s\n", arg);
     if (sscanf(arg, MUXDEF(PMEM64, "0x%" PRIx64, "0x%" PRIx32), &EXPR) != 1) {
       printf("x: sscanf failed\n");
       return 0;

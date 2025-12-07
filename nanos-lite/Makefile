@@ -63,11 +63,15 @@ endif
 # ramdisk.img → /path/to/navy-apps/build/ramdisk.img  (符号链接)
 # files.h → /path/to/navy-apps/build/ramdisk.h (符号链接)
 # syscall.h → /path/to/navy-apps/libs/libos/src/syscall.h (符号链接)
+# 步骤 3: 自动生成已安装程序的反汇编代码
 update:
 	$(MAKE) -s -C $(NAVY_HOME) ISA=$(ISA) ramdisk
 	@ln -sf $(NAVY_HOME)/build/ramdisk.img $(RAMDISK_FILE)
 	@ln -sf $(NAVY_HOME)/build/ramdisk.h src/files.h
 	@ln -sf $(NAVY_HOME)/libs/libos/src/syscall.h src/syscall.h
+	@echo ""
+	@echo "Generating disassembly for installed programs..."
+	@bash scripts/disasm-user-programs.sh $(ISA) all
 
 .PHONY: update
 

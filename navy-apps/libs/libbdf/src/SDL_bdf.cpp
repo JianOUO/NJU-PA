@@ -10,7 +10,6 @@ SDL_Surface* BDF_CreateSurface(BDF_Font *font, char ch, uint32_t fg, uint32_t bg
   // bm[j] 表示第 j 行的位图数据
   //printf("ch:%d %c\n", ch, ch);
   uint32_t *bm = font->font[ch];
-  assert(bm);
   if (!bm) return NULL;
   // w, h: 字符的统一尺寸（宽度和高度）
   int w = font->w, h = font->h;

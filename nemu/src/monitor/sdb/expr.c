@@ -101,8 +101,8 @@ static bool make_token(char *e) {
         // 限制输出的字符数量
         // 如果精度大于字符串长度，输出整个字符串
         // 如果精度小于字符串长度，只输出前 N 个字符
-        Log("match rules[%d] = \"%s\" at position %d with len %d: %.*s",
-            i, rules[i].regex, position, substr_len, substr_len, substr_start);
+        //Log("match rules[%d] = \"%s\" at position %d with len %d: %.*s",
+        //    i, rules[i].regex, position, substr_len, substr_len, substr_start);
 
         position += substr_len;
 

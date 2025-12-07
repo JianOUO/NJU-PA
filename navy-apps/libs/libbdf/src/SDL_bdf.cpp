@@ -8,7 +8,7 @@
 SDL_Surface* BDF_CreateSurface(BDF_Font *font, char ch, uint32_t fg, uint32_t bg) {
   // 获取字符 ch 的位图数组（uint32_t[h]）
   // bm[j] 表示第 j 行的位图数据
-  printf("ch:%d %c\n", ch, ch);
+  //printf("ch:%d %c\n", ch, ch);
   uint32_t *bm = font->font[ch];
   assert(bm);
   if (!bm) return NULL;

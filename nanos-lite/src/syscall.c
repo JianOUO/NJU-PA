@@ -69,7 +69,7 @@ void do_syscall(Context *c) {
       int mode = (int)a[3];
       c->GPRx = fs_open(filename, flags, mode);
       #ifdef CONFIG_STRACE
-      STRACE("[STRACE] open(\"%s\", %d, %d) = %d", filename, flags, mode, c->GPRx);
+      //STRACE("[STRACE] open(\"%s\", %d, %d) = %d", filename, flags, mode, c->GPRx);
       #endif
       break;
     }

@@ -70,4 +70,19 @@ update:
 	@ln -sf $(NAVY_HOME)/libs/libos/src/syscall.h src/syscall.h
 
 .PHONY: update
+
+# 生成用户程序的反汇编代码
+# 用法: make ARCH=riscv32-nemu disasm program=menu
+#      make ARCH=riscv32-nemu disasm program=nterm
+#      make ARCH=riscv32-nemu disasm program=all  # 批量处理所有程序
+disasm:
+	@if [ -z "$(program)" ]; then \
+		echo "Error: Please specify program=xxx"; \
+		echo "Usage: make ARCH=xxx disasm program=xxx"; \
+		echo "       make ARCH=xxx disasm program=all  # for all programs"; \
+		exit 1; \
+	fi
+	@bash scripts/disasm-user-programs.sh $(ISA) $(program)
+
+.PHONY: disasm
 endif

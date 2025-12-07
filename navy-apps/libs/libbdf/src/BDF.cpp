@@ -70,6 +70,7 @@ BDF_Font::BDF_Font(const char *fname) {
     // 格式：STARTCHAR 0020（十六进制字符编码）
     // ch 存储字符编码（如 0x20 = 空格）
     if (strcmp(cmd, "STARTCHAR") == 0) {
+      printf("%d\n", ch);
       sscanf(buf, "%*s %x", &ch);
     }
     // BBX: 解析字符边界框
@@ -84,7 +85,6 @@ BDF_Font::BDF_Font(const char *fname) {
     // ENDCHAR: 字符定义结束
     if (strcmp(cmd, "ENDCHAR") == 0) {
       // 如果 ch < 256，调用 create() 将位图转换为统一格式
-      printf("%d\n", ch);
       if (ch < 256) {
         create(ch, bm_bbx, bm, bm_idx);
       }

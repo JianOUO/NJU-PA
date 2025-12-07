@@ -26,22 +26,24 @@ static void sh_prompt() {
 
 static void sh_handle_cmd(const char *cmd) {
   assert(cmd);
-  /*
   int len = strlen(cmd);
   char command[len + 1];
   strcpy(command, cmd);
   command[len - 1] = '\0';
-  */
+  char *args[] = {command, NULL};
+  assert(execve(command, args, NULL) != -1);
+  /*
   char command[5] = "menu";
   char *args[] = {command, NULL};
   assert(execvp(command, args) != -1);
+  */
 }
 
 void builtin_sh_run() {
   sh_banner();
   sh_prompt();
 
-  assert(setenv("PATH", "/bin", 0) != -1);
+  //assert(setenv("PATH", "/bin", 0) != -1);
   while (1) {
     SDL_Event ev;
     if (SDL_PollEvent(&ev)) {

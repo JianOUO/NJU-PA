@@ -24,6 +24,7 @@ static void sh_prompt() {
 
 static void sh_handle_cmd(const char *cmd) {
   assert(cmd);
+  cmd[strlen(cmd) - 1] = '\0';
   execve(cmd, 0, 0);
 }
 

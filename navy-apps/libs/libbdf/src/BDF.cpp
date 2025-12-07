@@ -84,7 +84,7 @@ BDF_Font::BDF_Font(const char *fname) {
     // ENDCHAR: 字符定义结束
     if (strcmp(cmd, "ENDCHAR") == 0) {
       // 如果 ch < 256，调用 create() 将位图转换为统一格式
-      if (ch == 85) printf("%c\n", ch);
+      printf("%d\n", ch);
       if (ch < 256) {
         create(ch, bm_bbx, bm, bm_idx);
       }

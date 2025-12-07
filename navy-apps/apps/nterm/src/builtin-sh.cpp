@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <SDL.h>
 #include <string.h>
+#include <stdlib.h>
 
 char handle_key(SDL_Event *ev);
 
@@ -29,13 +30,15 @@ static void sh_handle_cmd(const char *cmd) {
   char command[len + 1];
   strcpy(command, cmd);
   command[len - 1] = '\0';
-  execve(command, 0, 0);
+  char *args[] = {command, NULL};
+  assert(execvp(command, args) != -1);
 }
 
 void builtin_sh_run() {
   sh_banner();
   sh_prompt();
 
+  assert(setenv("PATH", "/bin", 0) != -1);
   while (1) {
     SDL_Event ev;
     if (SDL_PollEvent(&ev)) {

@@ -75,7 +75,7 @@ update:
 
 .PHONY: update
 
-# 生成用户程序的反汇编代码
+# 生成用户程序的反汇编代码（从 ELF 文件）
 # 用法: make ARCH=riscv32-nemu disasm program=menu
 #      make ARCH=riscv32-nemu disasm program=nterm
 #      make ARCH=riscv32-nemu disasm program=all  # 批量处理所有程序

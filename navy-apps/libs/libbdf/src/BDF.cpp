@@ -70,8 +70,8 @@ BDF_Font::BDF_Font(const char *fname) {
     // 格式：STARTCHAR 0020（十六进制字符编码）
     // ch 存储字符编码（如 0x20 = 空格）
     if (strcmp(cmd, "STARTCHAR") == 0) {
-      printf("%d\n", ch);
       sscanf(buf, "%*s %x", &ch);
+      printf("%d\n", ch);
     }
     // BBX: 解析字符边界框
     // 格式：BBX 2 8 3 0

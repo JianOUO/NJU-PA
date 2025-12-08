@@ -144,6 +144,7 @@ do {                                              \
 // 只对dstp不对齐进行了处理
 void *memcpy(void *out, const void *in, size_t n) {
   //panic("Not implemented");
+  /*
   uintptr_t dstp = (uintptr_t)out;
   uintptr_t srcp = (uintptr_t)in;
   if (n >= OP_T_THRES) {
@@ -152,6 +153,13 @@ void *memcpy(void *out, const void *in, size_t n) {
     WORD_COPY_FWD(dstp, srcp, n);
   }
   BYTE_COPY_FWD(dstp, srcp, n);
+  return out;
+  */
+  const char *src = in;
+  char *dst = out;
+  for (size_t i = 0; i < n; i++) {
+    *(dst + i) = *(src + i);
+  }
   printf("%s", out);
   return out;
 }

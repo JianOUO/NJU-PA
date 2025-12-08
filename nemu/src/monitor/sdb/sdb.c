@@ -115,11 +115,9 @@ static int cmd_x(char *args) {
     printf("x: no EXPR\n");
     return 0;
   } else {
-    printf("%s\n", arg);
-    if (sscanf(arg, MUXDEF(PMEM64, "0x%" PRIx64, "0x%" PRIx32), &EXPR) != 1) {
-      printf("x: sscanf failed\n");
-      return 0;
-    }
+    bool success;
+    EXPR = expr(args, &success);
+    if (!success)  printf("x: Expr computing failed\n");
   }
   uint32_t *byte = (uint32_t *)guest_to_host(EXPR);
   for (int i = 0; i < N; i++) {
@@ -154,7 +152,7 @@ static int cmd_p(char *args) {
       printf(FMT_WORD_U "\n", val);
       printf(FMT_WORD "\n", val);
     } else {
-      printf("Expr computing failed\n");
+      printf("p: Expr computing failed\n");
     }
   }
   return 0;

@@ -166,3 +166,12 @@ void dtrace_write(paddr_t addr, int len, IOMap *map, word_t data) {
 }
 
 #endif
+
+#ifdef CONFIG_ETRACE
+
+void etrace(word_t mcause, word_t mstatus, word_t mepc) {
+  printf(ANSI_FMT("[ETRACE] mcause: " FMT_WORD " mstatus: " FMT_WORD " mepc: " FMT_WORD, ANSI_FG_GREEN), mcause, mstatus, mepc); 
+  printf("\n");
+}
+
+#endif

@@ -23,12 +23,23 @@ const char *regs[] = {
   "s8", "s9", "s10", "s11", "t3", "t4", "t5", "t6"
 };
 
+const char *csrs[] = {
+  "mstatus", "mtvec", "mepc", "mcause"
+};
+
 void isa_reg_display() {
   for (int i = 0; i < MUXDEF(CONFIG_RVE, 16, 32); i++) {
     printf("%-3s = " FMT_WORD " " 
     MUXDEF(CONFIG_ISA64, "%20" PRId64, "%10" PRId32) " "
     MUXDEF(CONFIG_ISA64, "%20" PRIu64, "%10" PRIu32) "\n", 
     reg_name(i), gpr(i), gpr(i), gpr(i));
+  }
+  
+  for (int i = 0; i < CSR_LEN; i++) {
+    printf("%-7s = " FMT_WORD " " 
+    MUXDEF(CONFIG_ISA64, "%20" PRId64, "%10" PRId32) " "
+    MUXDEF(CONFIG_ISA64, "%20" PRIu64, "%10" PRIu32) "\n", 
+    csr_name(i), csr(i), csr(i), csr(i));
   }
 }
 

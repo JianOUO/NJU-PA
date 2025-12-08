@@ -8,6 +8,21 @@ Context* __am_irq_handle(Context *c) {
   if (user_handler) {
     Event ev = {0};
     switch (c->mcause) {
+      case 11: { // System Call From M-Mode
+        #ifdef __riscv_e
+        uintptr_t syscall_num = c->gpr[15]; // $a5
+        #else
+        uintptr_t syscall_num = c->gpr[17]; // $a7
+        #endif
+
+        if (syscall_num == (uintptr_t)(-1)) {
+          ev.event = EVENT_YIELD;
+          break;
+        } else if (syscall_num >= 0 && syscall_num <= 19) { // navy-apps/libs/libos/src/syscall.h, SYS_exit=0, SYS_gettimeofday=19
+          ev.event = EVENT_SYSCALL;
+          break;
+        }
+      }
       default: ev.event = EVENT_ERROR; break;
     }
 

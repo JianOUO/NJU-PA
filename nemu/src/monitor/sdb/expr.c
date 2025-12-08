@@ -54,7 +54,7 @@ static struct rule {
 };
 
 #define NR_REGEX ARRLEN(rules)
-#define EXPR_DEBUG 0
+//#define EXPR_DEBUG
 
 // 编译后的正则表示式
 static regex_t re[NR_REGEX] = {};
@@ -101,8 +101,8 @@ static bool make_token(char *e) {
         // 限制输出的字符数量
         // 如果精度大于字符串长度，输出整个字符串
         // 如果精度小于字符串长度，只输出前 N 个字符
-        Log("match rules[%d] = \"%s\" at position %d with len %d: %.*s",
-            i, rules[i].regex, position, substr_len, substr_len, substr_start);
+        //Log("match rules[%d] = \"%s\" at position %d with len %d: %.*s",
+        //    i, rules[i].regex, position, substr_len, substr_len, substr_start);
 
         position += substr_len;
 
@@ -392,6 +392,7 @@ static word_t eval(int p, int q) {
       IFDEF(EXPR_DEBUG, Log("val1: %u", val1));
       if (error) return 0;
     }
+    if (tokens[op].type == TK_LogicalAnd && !val1) return val1;
     word_t val2 = eval(op + 1, q);
     IFDEF(EXPR_DEBUG, Log("val2: %u", val2));
     if (error) return 0;

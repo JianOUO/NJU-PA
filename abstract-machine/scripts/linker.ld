@@ -16,8 +16,8 @@ SECTIONS {
   . = _pmem_start + _entry_offset;
   /* 
   定义 .text 段（代码段）的布局规则
-  *(entry):通配符模式，匹配所有输入文件中的 entry 段
   *：通配符，匹配所有输入文件(.o 和 .a); (entry)：段名，匹配名为 entry 的段
+  *(entry):通配符模式，匹配所有输入文件中的 entry 段
   *(.text*):通配符模式，匹配所有输入文件中以 .text 开头的段
   使用 -ffunction-sections 时，每个函数可能被放入独立段：.text.main .text._trm_init ...
   ": text":将 .text 输出段关联到 text 程序头(第四行定义),告诉链接器该段需要加载到内存,在 ELF 文件的程序头表中创建对应条目

@@ -54,7 +54,7 @@ static void pmem_write(paddr_t addr, int len, word_t data) {
   host_write(guest_to_host(addr), len, data);
   #ifdef CONFIG_MTRACE
   if (addr >= 0x81c0898c && addr <= 0x81c08b1c) {
-    mtrace_write(addr, len, data);
+    //mtrace_write(addr, len, data);
   }
   #endif
 }

@@ -18,6 +18,11 @@
 #include <device/mmio.h>
 #include <isa.h>
 
+#define RAMDISK_START 0x800041d0U
+#define DISK_OFFSET 29372692U
+#define ADDR_LEFT RAMDISK_START + DISK_OFFSET + 5744U
+#define ADDR_RIGHT RAMDISK_START + DISK_OFFSET + 7190U
+
 #if   defined(CONFIG_PMEM_MALLOC)
 static uint8_t *pmem = NULL;
 #else // CONFIG_PMEM_GARRAY
@@ -38,7 +43,9 @@ paddr_t host_to_guest(uint8_t *haddr) { return haddr - pmem + CONFIG_MBASE; }
 static word_t pmem_read(paddr_t addr, int len) {
   word_t ret = host_read(guest_to_host(addr), len);
   #ifdef CONFIG_MTRACE
-  //mtrace_read(addr, ret);
+  if (addr >= ADDR_LEFT && addr <= ADDR_RIGHT) {
+    //mtrace_read(addr, ret);
+  }
   #endif
   return ret;
 }
@@ -46,7 +53,9 @@ static word_t pmem_read(paddr_t addr, int len) {
 static void pmem_write(paddr_t addr, int len, word_t data) {
   host_write(guest_to_host(addr), len, data);
   #ifdef CONFIG_MTRACE
-  //mtrace_write(addr, len, data);
+  if (addr >= ADDR_LEFT && addr <= ADDR_RIGHT) {
+    //mtrace_write(addr, len, data);
+  }
   #endif
 }
 

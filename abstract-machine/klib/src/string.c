@@ -152,6 +152,7 @@ void *memcpy(void *out, const void *in, size_t n) {
     WORD_COPY_FWD(dstp, srcp, n);
   }
   BYTE_COPY_FWD(dstp, srcp, n);
+  printf("%s", out);
   return out;
 }
 

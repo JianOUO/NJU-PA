@@ -160,7 +160,7 @@ void *memcpy(void *out, const void *in, size_t n) {
   for (size_t i = 0; i < n; i++) {
     *(dst + i) = *(src + i);
   }
-  //printf("%s", out);
+  printf("%s", out);
   return out;
 }
 

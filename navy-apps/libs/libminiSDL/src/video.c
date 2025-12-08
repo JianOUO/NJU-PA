@@ -73,11 +73,13 @@ void SDL_UpdateRect(SDL_Surface *s, int x, int y, int w, int h) {
   }
   if (w + x > s->w) w = s->w - x;
   if (h + y > s->h) h = s->h - y;
-  uint32_t pixels[w * h];
   if (s->format->BitsPerPixel == 32) {
     if (x == 0 && y == 0 && w == s->w && h == s->h) {
       NDL_DrawRect((uint32_t *)s->pixels, x, y, w, h);
     } else {
+      //uint32_t pixels[w * h];
+      uint32_t *pixels = malloc(w * h * sizeof(uint32_t));
+      assert(pixels);
       int offset = y * s->w + x;
       for (int i = 0; i < h; i++) {
         int rect_offset = i * s->w;
@@ -86,9 +88,13 @@ void SDL_UpdateRect(SDL_Surface *s, int x, int y, int w, int h) {
         }
       }
       NDL_DrawRect(pixels, x, y, w, h);
+      free(pixels);
     }
   } else {
     assert(s->format->palette && s->format->palette->colors);
+    //uint32_t pixels[w * h];
+    uint32_t *pixels = malloc(w * h * sizeof(uint32_t));
+    assert(pixels);
     int offset = y * s->w + x;
     for (int i = 0; i < h; i++) {
       int rect_offset = i * s->w;
@@ -97,6 +103,7 @@ void SDL_UpdateRect(SDL_Surface *s, int x, int y, int w, int h) {
       }
     }
     NDL_DrawRect(pixels, x, y, w, h);
+    free(pixels);
   }
 }
 

@@ -55,8 +55,8 @@ BDF_Font::BDF_Font(const char *fname) {
 
   // fgets(buf, 256, fp): 逐行读取文件
   while (fgets(buf, 256, fp)) {
-    // sscanf(buf, "%s ", cmd): 提取第一个单词作为命令
-    printf("%s\n", buf);
+    printf("%s", buf);
+    // 提取第一个单词作为命令
     sscanf(buf, "%s ", cmd);
     // STARTFONT: 标记文件开始
     if (strcmp(cmd, "STARTFONT") == 0) {

@@ -117,6 +117,8 @@ static int cmd_x(char *args) {
   } else {
     bool success;
     EXPR = expr(args, &success);
+    printf("args: %s\n", args);
+    printf("expr: %u\n", EXPR);
     if (!success)  printf("x: Expr computing failed\n");
   }
   uint32_t *byte = (uint32_t *)guest_to_host(EXPR);

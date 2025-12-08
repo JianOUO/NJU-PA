@@ -55,7 +55,6 @@ BDF_Font::BDF_Font(const char *fname) {
 
   // fgets(buf, 256, fp): 逐行读取文件
   while (fgets(buf, 256, fp)) {
-  //while (fgets(buf, 16, fp)) {
     printf("%s", buf);
     // 提取第一个单词作为命令
     sscanf(buf, "%s ", cmd);

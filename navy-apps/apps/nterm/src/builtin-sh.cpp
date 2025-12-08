@@ -26,17 +26,12 @@ static void sh_prompt() {
 
 static void sh_handle_cmd(const char *cmd) {
   assert(cmd);
-  /*
   int len = strlen(cmd);
   char command[len + 1];
   strcpy(command, cmd);
   command[len - 1] = '\0';
   char *args[] = {command, NULL};
-  execve(command, args, NULL);
-  */
-  char command[5] = "menu";
-  char *args[] = {command, NULL};
-  assert(execvp(command, args) != -1);
+  execvp(command, args);
 }
 
 void builtin_sh_run() {

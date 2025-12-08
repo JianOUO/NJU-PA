@@ -116,10 +116,13 @@ static int cmd_x(char *args) {
     return 0;
   } else {
     bool success;
-    EXPR = expr(args, &success);
-    printf("args: %s\n", args);
+    EXPR = expr(arg, &success);
+    printf("arg: %s\n", arg);
     printf("expr: %u\n", EXPR);
-    if (!success)  printf("x: Expr computing failed\n");
+    if (!success)  {
+      printf("x: Expr computing failed\n");
+      return 0;
+    }
   }
   uint32_t *byte = (uint32_t *)guest_to_host(EXPR);
   for (int i = 0; i < N; i++) {

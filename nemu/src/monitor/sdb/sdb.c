@@ -117,8 +117,6 @@ static int cmd_x(char *args) {
   } else {
     bool success;
     EXPR = expr(arg, &success);
-    printf("arg: %s\n", arg);
-    printf("expr: %u\n", EXPR);
     if (!success)  {
       printf("x: Expr computing failed\n");
       return 0;

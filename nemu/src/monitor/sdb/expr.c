@@ -392,6 +392,7 @@ static word_t eval(int p, int q) {
       IFDEF(EXPR_DEBUG, Log("val1: %u", val1));
       if (error) return 0;
     }
+    if (tokens[op].type == TK_LogicalAnd && !val1) return val1;
     word_t val2 = eval(op + 1, q);
     IFDEF(EXPR_DEBUG, Log("val2: %u", val2));
     if (error) return 0;

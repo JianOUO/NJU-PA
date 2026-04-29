@@ -363,8 +363,9 @@ static int find_mainop(int p, int q) {
 }
 
 static word_t deref(word_t addr) {
-  uint32_t *val = (uint32_t *)guest_to_host((paddr_t)addr);
-  return *val;
+  //uint32_t *val = (uint32_t *)guest_to_host((paddr_t)addr);
+  word_t val = paddr_read(addr, sizeof(word_t));
+  return val;
 }
 
 static word_t eval(int p, int q) {

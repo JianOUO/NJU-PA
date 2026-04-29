@@ -1,6 +1,7 @@
 #include <am.h>
 #include <SDL.h>
 #include <fenv.h>
+#include <stdlib.h>
 
 //#define MODE_800x600
 #define WINDOW_W 800
@@ -27,6 +28,22 @@ AMASK = 0x00000000  →  无Alpha（不透明）
 
 static SDL_Window *window = NULL;
 static SDL_Surface *surface = NULL;
+static SDL_TimerID texture_timer = 0;
+
+static void __am_gpu_quit() {
+  if (texture_timer != 0) {
+    SDL_RemoveTimer(texture_timer);
+    texture_timer = 0;
+  }
+  if (surface != NULL) {
+    SDL_FreeSurface(surface);
+    surface = NULL;
+  }
+  if (window != NULL) {
+    SDL_DestroyWindow(window);
+    window = NULL;
+  }
+}
 
 // 定期将后备缓冲区的内容刷新到窗口显示（双缓冲刷新）
 // 参数 1：Uint32 interval - 当前定时器间隔（毫秒）
@@ -50,16 +67,20 @@ static Uint32 texture_sync(Uint32 interval, void *param) {
 }
 
 void __am_gpu_init() {
+  static int cleanup_registered = 0;
   // SDL_Init() - 初始化 SDL 库
   // SDL_INIT_VIDEO - 视频子系统, SDL_INIT_TIMER - 定时器子系统
   SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER);
+  if (!cleanup_registered) {
+    atexit(__am_gpu_quit);
+    cleanup_registered = 1;
+  }
   // "Native Application" - 窗口标题
   // SDL_WINDOWPOS_UNDEFINED - 窗口位置, 让操作系统自动决定窗口位置,通常是屏幕中心或默认位置
   // WINDOW_W, WINDOW_H - 窗口尺寸
-  // SDL_WINDOW_OPENGL - 窗口标志,创建支持 OpenGL 的窗口
   window = SDL_CreateWindow("Native Application",
       SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-      WINDOW_W, WINDOW_H, SDL_WINDOW_OPENGL);
+      WINDOW_W, WINDOW_H, 0);
   // SDL_SWSURFACE - 软件表面标志,表面存储在系统内存（RAM）中,使用 CPU 进行渲染（软件渲染）
   // 对比：SDL_HWSURFACE（硬件表面，在显存中）
   // disp_w, disp_h - 显示分辨率 默认：400 × 300 像素,这可能与窗口尺寸不同！
@@ -69,7 +90,7 @@ void __am_gpu_init() {
   // 1000 / FPS - 定时器间隔(毫秒),每隔 1000/FPS 毫秒刷新一次
   // texture_sync - 回调函数指针
   // NULL - 用户自定义数据（本例中未使用）
-  SDL_AddTimer(1000 / FPS, texture_sync, NULL);
+  texture_timer = SDL_AddTimer(1000 / FPS, texture_sync, NULL);
 }
 
 // 作用：返回 GPU 设备的配置信息

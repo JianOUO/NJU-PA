@@ -40,6 +40,8 @@ static int (*glibc_execve)(const char *filename, char *const argv[], char *const
 
 static SDL_Window *window = NULL;
 static SDL_Surface *surface = NULL;
+static SDL_TimerID texture_timer = 0;
+static SDL_Thread *event_thread_handle = NULL;
 static int dummy_fd = -1;
 static int dispinfo_fd = -1;
 static int fb_memfd = -1;
@@ -135,16 +137,14 @@ static void open_display() {
   lseek(fb_memfd, 0, SEEK_SET);
 
   SDL_InitSubSystem(SDL_INIT_VIDEO | SDL_INIT_TIMER);
-  // 创建窗口，标题为"Simulated Nanos Application"，位置为屏幕中心，尺寸为WINDOW_W × WINDOW_H，OpenGL窗口标志
+  // 创建普通 SDL 窗口；这里只使用窗口表面做软件 blit，不需要 OpenGL 上下文
   window = SDL_CreateWindow("Simulated Nanos Application",
-      SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WINDOW_W, WINDOW_H, SDL_WINDOW_OPENGL);
+      SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WINDOW_W, WINDOW_H, 0);
   // 创建RGB表面，从fb指向的内存中创建，尺寸为disp_w × disp_h，32位深度，每行字节数为disp_w × sizeof(uint32_t)，掩码为RMASK, GMASK, BMASK, AMASK
   surface = SDL_CreateRGBSurfaceFrom(fb, disp_w, disp_h, 32, disp_w * sizeof(uint32_t),
       RMASK, GMASK, BMASK, AMASK);
-  // 创建事件处理线程，处理键盘事件
-  SDL_CreateThread(event_thread, "event thread", nullptr);
   // 添加定时器，每隔 1000/FPS 毫秒调用一次 texture_sync 函数
-  SDL_AddTimer(1000 / FPS, texture_sync, NULL);
+  texture_timer = SDL_AddTimer(1000 / FPS, texture_sync, NULL);
 }
 
 static void open_event() {
@@ -163,6 +163,8 @@ open("/dev/events", O_RDONLY)
         "ku A\n"       (松开A键)
 */
   evt_fd = dup(dummy_fd);
+  // 互斥锁准备好后再启动事件线程，避免线程先收到按键事件时访问空锁
+  event_thread_handle = SDL_CreateThread(event_thread, "event thread", nullptr);
 }
 
 static void open_audio() {
@@ -406,6 +408,62 @@ struct Init {
     open_audio();
   }
   ~Init() {
+    if (texture_timer != 0) {
+      SDL_RemoveTimer(texture_timer);
+      texture_timer = 0;
+    }
+    if (event_thread_handle != NULL) {
+      SDL_Event quit = {};
+      quit.type = SDL_QUIT;
+      SDL_PushEvent(&quit);
+      SDL_WaitThread(event_thread_handle, NULL);
+      event_thread_handle = NULL;
+    }
+    if (surface != NULL) {
+      SDL_FreeSurface(surface);
+      surface = NULL;
+    }
+    if (window != NULL) {
+      SDL_DestroyWindow(window);
+      window = NULL;
+    }
+    if (key_queue_lock != NULL) {
+      SDL_DestroyMutex(key_queue_lock);
+      key_queue_lock = NULL;
+    }
+    if (fb != NULL) {
+      munmap(fb, FB_SIZE);
+      fb = NULL;
+    }
+    if (sb_fifo[0] != -1) {
+      close(sb_fifo[0]);
+      sb_fifo[0] = -1;
+    }
+    if (sb_fifo[1] != -1) {
+      close(sb_fifo[1]);
+      sb_fifo[1] = -1;
+    }
+    if (sbctl_fd != -1) {
+      close(sbctl_fd);
+      sbctl_fd = -1;
+    }
+    if (evt_fd != -1) {
+      close(evt_fd);
+      evt_fd = -1;
+    }
+    if (fb_memfd != -1) {
+      close(fb_memfd);
+      fb_memfd = -1;
+    }
+    if (dummy_fd != -1) {
+      close(dummy_fd);
+      dummy_fd = -1;
+      dispinfo_fd = -1;
+    }
+    if (SDL_WasInit(SDL_INIT_AUDIO)) {
+      SDL_CloseAudio();
+    }
+    SDL_Quit();
   }
 };
 

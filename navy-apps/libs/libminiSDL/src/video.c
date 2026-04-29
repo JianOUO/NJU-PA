@@ -77,8 +77,8 @@ void SDL_UpdateRect(SDL_Surface *s, int x, int y, int w, int h) {
     if (x == 0 && y == 0 && w == s->w && h == s->h) {
       NDL_DrawRect((uint32_t *)s->pixels, x, y, w, h);
     } else {
-      uint32_t pixels[w * h];
-      //uint32_t *pixels = malloc(w * h * sizeof(uint32_t));
+      //uint32_t pixels[w * h];
+      uint32_t *pixels = malloc(w * h * sizeof(uint32_t));
       assert(pixels);
       int offset = y * s->w + x;
       for (int i = 0; i < h; i++) {

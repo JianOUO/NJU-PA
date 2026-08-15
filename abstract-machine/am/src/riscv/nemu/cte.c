@@ -45,10 +45,24 @@ bool cte_init(Context*(*handler)(Event, Context*)) {
   return true;
 }
 
+#if __riscv_xlen == 32
+#define XLEN  4
+#else
+#define XLEN  8
+#endif
+
+#ifndef __riscv_e
+#define NR_REGS 32
+#else
+#define NR_REGS 16
+#endif
+
+#define CONTEXT_SIZE ((NR_REGS + 3) * XLEN)
+
 Context *kcontext(Area kstack, void (*entry)(void *), void *arg) {
   //return NULL;
 
-  Context *context = kstack.end - sizeof(Context);
+  Context *context = (Context *)((uintptr_t)kstack.end - CONTEXT_SIZE);
   /*
   初始化上下文
   先全部置零
@@ -57,7 +71,7 @@ Context *kcontext(Area kstack, void (*entry)(void *), void *arg) {
   fp设置为kstack.end
   a0设置为arg
   */
-  memset((void *)context, 0, sizeof(Context));
+  memset((void *)context, 0, CONTEXT_SIZE);
   context->mepc = (uintptr_t)entry - 4;
   context->mstatus = 0x1800;
   context->gpr[8] = (uintptr_t)kstack.end;

@@ -21,15 +21,24 @@ void hello_fun(void *arg) {
   }
 }
 
+void context_kload(PCB *pcb, void (*entry)(void *), void *arg) {
+  pcb->cp = kcontext((Area) { pcb, pcb + 1 }, entry, arg);
+}
+
 void init_proc() {
+  context_kload(&pcb[0], hello_fun, (void *)0);
+  context_kload(&pcb[1], hello_fun, (void *)1);
+
   switch_boot_pcb();
 
   Log("Initializing processes...");
 
   // load program here
-  naive_uload(NULL, "/bin/nterm");
+  // naive_uload(NULL, "/bin/nterm");
 }
 
 Context* schedule(Context *prev) {
-  return NULL;
+  current->cp = prev;
+  current = (current == &pcb[0] ? &pcb[1] : &pcb[0]);
+  return current->cp;
 }

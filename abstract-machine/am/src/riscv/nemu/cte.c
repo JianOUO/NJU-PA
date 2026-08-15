@@ -50,13 +50,18 @@ Context *kcontext(Area kstack, void (*entry)(void *), void *arg) {
 
   Context *context = kstack.end - sizeof(Context);
   /*
-  初始化上下文为0
+  初始化上下文
+  先全部置零
   epc设置为entry-4，因为后续在__am_asm_trap要+4
+  为了保证DiffTest的正确运行，mstatus设置为0x1800
   fp设置为kstack.end
+  a0设置为arg
   */
   memset((void *)context, 0, sizeof(Context));
   context->mepc = (uintptr_t)entry - 4;
+  context->mstatus = 0x1800;
   context->gpr[8] = (uintptr_t)kstack.end;
+  context->gpr[10] = (uintptr_t)arg;
   return context;
 }
 

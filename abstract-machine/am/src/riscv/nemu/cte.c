@@ -46,7 +46,18 @@ bool cte_init(Context*(*handler)(Event, Context*)) {
 }
 
 Context *kcontext(Area kstack, void (*entry)(void *), void *arg) {
-  return NULL;
+  //return NULL;
+
+  Context *context = kstack.end - sizeof(Context);
+  /*
+  初始化上下文为0
+  epc设置为entry-4，因为后续在__am_asm_trap要+4
+  fp设置为kstack.end
+  */
+  memset((void *)context, 0, sizeof(Context));
+  context->mepc = (uintptr_t)entry - 4;
+  context->gpr[8] = (uintptr_t)kstack.end;
+  return context;
 }
 
 void yield() {

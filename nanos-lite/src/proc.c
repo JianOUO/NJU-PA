@@ -34,14 +34,18 @@ void context_uload(PCB *pcb, const char *filename, char *const argv[], char *con
   char *end = (char *)new_page(8) + 8 * PGSIZE;
   int argc = 0, envc = 0;
   assert(argv && envp);
-  while (argv[argc] != NULL) argc++;
-  while (envp[envc] != NULL) envc++;
+  while (argv[argc] != NULL) {
+    printf("argv[%d]: %s\n", argc, argv[argc]);
+    argc++;
+  }
+  while (envp[envc] != NULL) {
+    printf("envp[%d]: %s\n", envc, envp[envc]);
+    envc++;
+  }
   uintptr_t argv_ptr[argc + 1], envp_ptr[envc + 1];
   envp_ptr[envc] = 0;
   for (int i = envc - 1; i >= 0; i--) {
     if ((uintptr_t)envp[i] == 64) {
-      for (int j = 0; j < argc; j++) printf("argv[%d]: %s\n", j, argv[j]);
-      for (int j = 0; j < i; j++) printf("envp[%d]: %s\n", j, envp[j]);
       printf("envc: %d\n", envc);
       printf("i: %d\n", i);
       assert(0);

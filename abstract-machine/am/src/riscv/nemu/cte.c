@@ -48,7 +48,7 @@ bool cte_init(Context*(*handler)(Event, Context*)) {
 Context *kcontext(Area kstack, void (*entry)(void *), void *arg) {
   //return NULL;
 
-  Context *context = (Context *)((uintptr_t)kstack.end - CONTEXT_SIZE);
+  Context *context = (Context *)kstack.end - 1;
   /*
   初始化上下文
   先全部置零
@@ -56,7 +56,7 @@ Context *kcontext(Area kstack, void (*entry)(void *), void *arg) {
   为了保证DiffTest的正确运行，mstatus设置为0x1800
   a0设置为arg
   */
-  memset((void *)context, 0, CONTEXT_SIZE);
+  memset((void *)context, 0, sizeof(Context));
   context->mepc = (uintptr_t)entry - 4;
   context->mstatus = 0x1800;
   context->GPRx = (uintptr_t)arg;

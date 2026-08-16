@@ -18,6 +18,7 @@ static const char *keyname[256] __attribute__((used)) = {
 };
 
 size_t serial_write(const void *buf, size_t offset, size_t len) {
+  yield();
   for (size_t i = 0; i < len; i++) {
     putch(*((const char *)buf + i));
   }
@@ -25,6 +26,7 @@ size_t serial_write(const void *buf, size_t offset, size_t len) {
 }
 
 size_t events_read(void *buf, size_t offset, size_t len) {
+  yield();
   AM_INPUT_KEYBRD_T ev = io_read(AM_INPUT_KEYBRD);
   if (ev.keycode == AM_KEY_NONE) return 0;
   snprintf(buf, len, "%s %s\n", ev.keydown ? "kd" : "ku", keyname[ev.keycode]);
@@ -38,6 +40,8 @@ size_t dispinfo_read(void *buf, size_t offset, size_t len) {
 }
 
 size_t fb_write(const void *buf, size_t offset, size_t len) {
+  // 模拟设备访问缓慢的情况
+  yield();
   // offset是字节偏移，len以字节为单位, 都需要除4改为以像素为单位
   int pixel_offset = offset / 4;
   int pixel_len = len / 4;

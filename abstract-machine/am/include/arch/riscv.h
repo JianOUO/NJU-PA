@@ -7,13 +7,6 @@
 #define NR_REGS 32
 #endif
 
-#if __riscv_xlen == 32
-#define XLEN  4
-#else
-#define XLEN  8
-#endif
-
-#define CONTEXT_SIZE ((NR_REGS + 3) * XLEN)
 /*
 mepc - Machine Exception Program Counter
 机器模式异常程序计数器,保存发生异常/中断时的 PC 值,从异常返回时，会跳转到这个地址

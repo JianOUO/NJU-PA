@@ -30,12 +30,8 @@ void context_uload(PCB *pcb, const char *filename, char *const argv[], char *con
   char *end = (char *)new_page(8) + 8 * PGSIZE;
   int argc = 0, envc = 0;
   assert(argv && envp);
-  while (argv[argc] != NULL) {
-    argc++;
-  }
-  while (envp[envc] != NULL) {
-    envc++;
-  }
+  while (argv[argc] != NULL) argc++;
+  while (envp[envc] != NULL) envc++;
   uintptr_t argv_ptr[argc + 1], envp_ptr[envc + 1];
   envp_ptr[envc] = 0;
   for (int i = envc - 1; i >= 0; i--) {
@@ -68,9 +64,9 @@ void context_uload(PCB *pcb, const char *filename, char *const argv[], char *con
 
 void init_proc() {
   context_kload(&pcb[0], hello_fun, (void *)0);
-  char *argv[] = {"/bin/nterm", NULL};
+  char *argv[] = {"/bin/menu", NULL};
   char *envp[] = {NULL};
-  context_uload(&pcb[1], "/bin/nterm", argv, envp);
+  context_uload(&pcb[1], "/bin/menu", argv, envp);
   //context_kload(&pcb[1], hello_fun, (void *)1);
 
   switch_boot_pcb();

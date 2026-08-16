@@ -33,6 +33,8 @@ _start:
 
 #elif defined(__riscv)
   mv s0, zero
+// a0中存储的是heap.end
+  mv sp, a0
   jal call_main
 
 #elif defined(__ISA_LOONGARCH32R__)

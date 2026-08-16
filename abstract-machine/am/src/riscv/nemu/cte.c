@@ -45,20 +45,6 @@ bool cte_init(Context*(*handler)(Event, Context*)) {
   return true;
 }
 
-#if __riscv_xlen == 32
-#define XLEN  4
-#else
-#define XLEN  8
-#endif
-
-#ifndef __riscv_e
-#define NR_REGS 32
-#else
-#define NR_REGS 16
-#endif
-
-#define CONTEXT_SIZE ((NR_REGS + 3) * XLEN)
-
 Context *kcontext(Area kstack, void (*entry)(void *), void *arg) {
   //return NULL;
 
@@ -73,7 +59,7 @@ Context *kcontext(Area kstack, void (*entry)(void *), void *arg) {
   memset((void *)context, 0, CONTEXT_SIZE);
   context->mepc = (uintptr_t)entry - 4;
   context->mstatus = 0x1800;
-  context->gpr[10] = (uintptr_t)arg;
+  context->GPRx = (uintptr_t)arg;
   return context;
 }
 

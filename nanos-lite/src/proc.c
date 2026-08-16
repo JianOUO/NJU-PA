@@ -39,11 +39,11 @@ void context_uload(PCB *pcb, const char *filename, char *const argv[], char *con
   uintptr_t argv_ptr[argc + 1], envp_ptr[envc + 1];
   envp_ptr[envc] = 0;
   for (int i = envc - 1; i >= 0; i--) {
-    assert((uintptr_t)envp[i] != 64);
     if ((uintptr_t)envp[i] == 64) {
       for (int i = 0; i < argc; i++) printf("argv[%d]: %s\n", i, argv[i]);
       printf("envc: %d\n", envc);
       printf("i: %d\n", i);
+      assert(0);
     }
     int len = strlen(envp[i]);
     end -= (len + 1);

@@ -29,6 +29,7 @@ void context_kload(PCB *pcb, void (*entry)(void *), void *arg) {
 void context_uload(PCB *pcb, const char *filename) {
   uintptr_t entry = uload(pcb, filename);
   pcb->cp = ucontext(NULL, (Area) { pcb, pcb + 1 }, (void *)entry);
+  pcb->cp->GPRx = (uintptr_t)heap.end;
 }
 
 void init_proc() {

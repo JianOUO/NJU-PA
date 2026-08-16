@@ -76,11 +76,9 @@ Context *ucontext(AddrSpace *as, Area kstack, void *entry) {
   先全部置零
   epc设置为entry-4，因为后续在__am_asm_trap要+4
   为了保证DiffTest的正确运行，mstatus设置为0x1800
-  将GPRx设置为heap.end，后续navy-apps会将GPRx赋给sp
   */
   memset((void *)context, 0, sizeof(Context));
   context->mepc = (uintptr_t)entry - 4;
   context->mstatus = 0x1800;
-  context->GPRx = (uintptr_t)heap.end;
   return context;
 }

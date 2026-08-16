@@ -32,7 +32,6 @@ static void sh_handle_cmd(const char *cmd) {
   strcpy(buf, cmd);
   char *command = strtok(buf, " \t\r\n");
   char *argv[MAXARGS] = {command};
-  char *envp[] = {NULL};
   printf("command:%s\n", argv[0]);
   int argc = 1;
   while (argc < MAXARGS - 1 && (argv[argc] = strtok(NULL, " \t\r\n")) != NULL) {
@@ -40,7 +39,7 @@ static void sh_handle_cmd(const char *cmd) {
     argc++;
   }
   argv[argc] = NULL;
-  execvpe(command, argv, envp);
+  execvp(command, argv);
 }
 
 void builtin_sh_run() {

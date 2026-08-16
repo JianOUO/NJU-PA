@@ -7,7 +7,6 @@ _start:
 #if defined(__ISA_AM_NATIVE__)
 
   movq $0, %rbp
-  // rax中存储的是heap.end, 将栈指针指向用户空间的末尾
   movq %rax, %rsp
   // (rsp + 8) should be multiple of 16 when
   // control is transfered to the function entry point.
@@ -35,7 +34,6 @@ _start:
 
 #elif defined(__riscv)
   mv s0, zero
-// a0中存储的是heap.end
   mv sp, a0
   jal call_main
 

@@ -17,6 +17,8 @@ static const char *whence_name[3] = {"SEEK_SET", "SEEK_CUR", "SEEK_END"};
 #endif
 
 void naive_uload(PCB *pcb, const char *filename);
+void context_uload(PCB *pcb, const char *filename, char *const argv[], char *const envp[]);
+void switch_boot_pcb();
 
 void do_syscall(Context *c) {
   uintptr_t a[4];
@@ -39,8 +41,10 @@ void do_syscall(Context *c) {
       #endif
       c->GPR1 = SYS_execve;
       c->GPR2 = (uintptr_t)"/bin/nterm";
-      c->GPR3 = 0;
-      c->GPR4 = 0;
+      char *const argv[] = {NULL};
+      char *const envp[] = {NULL};
+      c->GPR3 = (uintptr_t)argv;
+      c->GPR4 = (uintptr_t)envp;
       do_syscall(c);
       //halt(a[1]);
     }
@@ -118,10 +122,15 @@ void do_syscall(Context *c) {
     case SYS_execve: {
       const char *pathname = (const char *)a[1];
       assert(pathname);
+      char * const *argv = (char * const *)a[2];
+      char * const *envp = (char * const *)a[3];
       #ifdef CONFIG_STRACE
       STRACE("[STRACE] execve(%s, %p, %p)", pathname, a[2], a[3]);
       #endif
-      naive_uload(NULL, pathname);
+      //naive_uload(NULL, pathname);
+      context_uload(current, pathname, argv, envp);
+      switch_boot_pcb();
+      yield();
       c->GPRx = -1;
       #ifdef CONFIG_STRACE
       STRACE("[STRACE] execve(%s, %p, %p) = %d", pathname, a[2], a[3], c->GPRx);

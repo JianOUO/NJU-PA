@@ -31,12 +31,12 @@ void context_uload(PCB *pcb, const char *filename, char *const argv[], char *con
   // 在riscv-nemu下，as可以传NULL，在native环境下会触发段错误，暂且不管，不在native下运行
   pcb->cp = ucontext(NULL, (Area) { pcb, pcb + 1 }, (void *)entry);
 
+  char *end = (char *)new_page(8) + 8 * PGSIZE;
   int argc = 0, envc = 0;
   assert(argv && envp);
   while (argv[argc] != NULL) argc++;
   while (envp[envc] != NULL) envc++;
   uintptr_t argv_ptr[argc + 1], envp_ptr[envc + 1];
-  char *end = (char *)heap.end;
   envp_ptr[envc] = 0;
   for (int i = envc - 1; i >= 0; i--) {
     int len = strlen(envp[i]);
@@ -65,9 +65,9 @@ void context_uload(PCB *pcb, const char *filename, char *const argv[], char *con
 
 void init_proc() {
   context_kload(&pcb[0], hello_fun, (void *)0);
-  char *argv[] = {"/bin/pal", "--skip", NULL};
+  char *argv[] = {NULL};
   char *envp[] = {NULL};
-  context_uload(&pcb[1], "/bin/pal", argv, envp);
+  context_uload(&pcb[1], "/bin/exec-test", argv, envp);
   //context_kload(&pcb[1], hello_fun, (void *)1);
 
   switch_boot_pcb();

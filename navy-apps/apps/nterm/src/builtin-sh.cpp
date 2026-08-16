@@ -26,7 +26,6 @@ static void sh_prompt() {
 
 #define MAXARGS 10
 static void sh_handle_cmd(const char *cmd) {
-  assert((uintptr_t)cmd != 64);
   int len = strlen(cmd);
   char buf[len + 1];
   strcpy(buf, cmd);

@@ -31,14 +31,15 @@ static void sh_handle_cmd(const char *cmd) {
   char buf[len + 1];
   strcpy(buf, cmd);
   char *command = strtok(buf, " \t\r\n");
-  char *args[MAXARGS];
-  args[0] = command;
-  printf("command:%s\n", command);
+  char *args[MAXARGS] = {command};
+  printf("command:%s\n", args[0]);
   int argc = 1;
-  char *p;
-  while (argc < MAXARGS - 1 && (args[argc] = strtok(NULL, " \t\r\n")) != NULL) {
-    printf("args[%d]:%s\n", argc, args[argc]);
+  char *p = strtok(NULL, " \t\r\n");
+  while (argc < MAXARGS - 1 && p != NULL) {
+    printf("args[%d]:%s\n", argc, p);
+    args[argc] = p;
     argc++;
+    p = strtok(NULL, " \t\n\r");
   }
   args[argc] = NULL;
   execvp(command, args);

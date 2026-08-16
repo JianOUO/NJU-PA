@@ -124,6 +124,9 @@ void do_syscall(Context *c) {
       assert(pathname);
       char * const *argv = (char * const *)a[2];
       char * const *envp = (char * const *)a[3];
+      int i = 0;
+      while (envp[i] != NULL) i++;
+      printf("i:%d\n", i);
       #ifdef CONFIG_STRACE
       STRACE("[STRACE] execve(%s, %p, %p)", pathname, a[2], a[3]);
       #endif

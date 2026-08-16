@@ -27,46 +27,18 @@ void context_kload(PCB *pcb, void (*entry)(void *), void *arg) {
 }
 
 void context_uload(PCB *pcb, const char *filename, char *const argv[], char *const envp[]) {
-  int num = 0;
-  printf("envp:%p\n", envp);
-  while (envp[num] != NULL) {
-    num++;
-  }
-  printf("num0:%d\n", num);
-  uintptr_t entry = uload(pcb, filename);
-  num = 0;
-  while (envp[num] != NULL) {
-    num++;
-  }
-  printf("num1:%d\n", num);
-  // 在riscv-nemu下，as可以传NULL，在native环境下会触发段错误，暂且不管，不在native下运行
-  pcb->cp = ucontext(NULL, (Area) { pcb, pcb + 1 }, (void *)entry);
-  num = 0;
-  while (envp[num] != NULL) {
-    num++;
-  }
-  printf("num3:%d\n", num);
-
   char *end = (char *)new_page(8) + 8 * PGSIZE;
   int argc = 0, envc = 0;
   assert(argv && envp);
   while (argv[argc] != NULL) {
-    printf("argv[%d]: %s\n", argc, argv[argc]);
     argc++;
   }
-  printf("envp:%p\n", envp);
   while (envp[envc] != NULL) {
-    //if (envc == 0) printf("envp[0]: %s\n", envp[envc]);
     envc++;
   }
   uintptr_t argv_ptr[argc + 1], envp_ptr[envc + 1];
   envp_ptr[envc] = 0;
   for (int i = envc - 1; i >= 0; i--) {
-    if ((uintptr_t)envp[i] == 64) {
-      printf("envc: %d\n", envc);
-      printf("i: %d\n", i);
-      assert(0);
-    }
     int len = strlen(envp[i]);
     end -= (len + 1);
     strcpy(end, envp[i]);
@@ -74,7 +46,6 @@ void context_uload(PCB *pcb, const char *filename, char *const argv[], char *con
   }
   argv_ptr[argc] = 0; 
   for (int i = argc - 1; i >= 0; i--) {
-    assert((uintptr_t)argv[i] != 64);
     int len = strlen(argv[i]);
     end -= (len + 1);
     strcpy(end, argv[i]);
@@ -89,6 +60,9 @@ void context_uload(PCB *pcb, const char *filename, char *const argv[], char *con
   }
   *(--new_end) = (uintptr_t)argc;
 
+  uintptr_t entry = uload(pcb, filename);
+  // 在riscv-nemu下，as可以传NULL，在native环境下会触发段错误，暂且不管，不在native下运行
+  pcb->cp = ucontext(NULL, (Area) { pcb, pcb + 1 }, (void *)entry);
   pcb->cp->GPRx = (uintptr_t)new_end;
 }
 

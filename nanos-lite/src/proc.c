@@ -28,14 +28,15 @@ void context_kload(PCB *pcb, void (*entry)(void *), void *arg) {
 
 void context_uload(PCB *pcb, const char *filename) {
   uintptr_t entry = uload(pcb, filename);
+  // 在riscv-nemu下，as可以传NULL，在native环境下会触发段错误，暂且不管，不在native下运行
   pcb->cp = ucontext(NULL, (Area) { pcb, pcb + 1 }, (void *)entry);
   pcb->cp->GPRx = (uintptr_t)heap.end;
 }
 
 void init_proc() {
   context_kload(&pcb[0], hello_fun, (void *)0);
-  //context_kload(&pcb[1], hello_fun, (void *)1);
   context_uload(&pcb[1], "/bin/pal");
+  //context_kload(&pcb[1], hello_fun, (void *)1);
 
   switch_boot_pcb();
 

@@ -8,7 +8,7 @@ _start:
 
   movq $0, %rbp
   // rax中存储的是heap.end, 将栈指针指向用户空间的末尾
-  movq %rax, $rsp
+  movq %rax, %rsp
   // (rsp + 8) should be multiple of 16 when
   // control is transfered to the function entry point.
   // See amd64 ABI manual for more details

@@ -41,7 +41,7 @@ void do_syscall(Context *c) {
       #endif
       c->GPR1 = SYS_execve;
       c->GPR2 = (uintptr_t)"/bin/nterm";
-      char *const argv[] = {NULL};
+      char *const argv[] = {"/bin/nterm", NULL};
       char *const envp[] = {NULL};
       c->GPR3 = (uintptr_t)argv;
       c->GPR4 = (uintptr_t)envp;

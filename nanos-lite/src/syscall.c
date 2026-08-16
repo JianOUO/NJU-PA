@@ -128,6 +128,7 @@ void do_syscall(Context *c) {
       while (envp[i] != NULL) i++;
       printf("i:%d\n", i);
       printf("envp:%p\n", envp);
+      printf("envp[0]:%s\n", envp[0]);
       #ifdef CONFIG_STRACE
       STRACE("[STRACE] execve(%s, %p, %p)", pathname, a[2], a[3]);
       #endif

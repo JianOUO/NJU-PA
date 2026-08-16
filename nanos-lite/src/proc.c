@@ -30,13 +30,22 @@ void context_uload(PCB *pcb, const char *filename, char *const argv[], char *con
   int num = 0;
   printf("envp:%p\n", envp);
   while (envp[num] != NULL) {
-    //if (envc == 0) printf("envp[0]: %s\n", envp[envc]);
     num++;
   }
-  printf("num:%d\n", num);
+  printf("num0:%d\n", num);
   uintptr_t entry = uload(pcb, filename);
+  num = 0;
+  while (envp[num] != NULL) {
+    num++;
+  }
+  printf("num1:%d\n", num);
   // 在riscv-nemu下，as可以传NULL，在native环境下会触发段错误，暂且不管，不在native下运行
   pcb->cp = ucontext(NULL, (Area) { pcb, pcb + 1 }, (void *)entry);
+  num = 0;
+  while (envp[num] != NULL) {
+    num++;
+  }
+  printf("num3:%d\n", num);
 
   char *end = (char *)new_page(8) + 8 * PGSIZE;
   int argc = 0, envc = 0;

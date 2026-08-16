@@ -24,13 +24,21 @@ static void sh_prompt() {
   sh_printf("sh> ");
 }
 
+#define MAXARGS 10
 static void sh_handle_cmd(const char *cmd) {
   assert(cmd);
   int len = strlen(cmd);
-  char command[len + 1];
-  strcpy(command, cmd);
-  command[len - 1] = '\0';
-  char *args[] = {command, NULL};
+  char buf[len + 1];
+  strcpy(buf, cmd);
+  char *command = strtok(buf, " \t\r\n");
+  char *args[MAXARGS];
+  args[0] = command;
+  int argc = 1;
+  char *p;
+  while (argc < MAXARGS - 1 && (args[argc] = strtok(NULL, " \t\r\n")) != NULL) {
+    argc++;
+  }
+  args[argc] = NULL;
   execvp(command, args);
 }
 

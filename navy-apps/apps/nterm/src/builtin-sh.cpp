@@ -33,9 +33,11 @@ static void sh_handle_cmd(const char *cmd) {
   char *command = strtok(buf, " \t\r\n");
   char *args[MAXARGS];
   args[0] = command;
+  printf("command:%s\n", command);
   int argc = 1;
   char *p;
   while (argc < MAXARGS - 1 && (args[argc] = strtok(NULL, " \t\r\n")) != NULL) {
+    printf("args[%d]:%s\n", argc, args[argc]);
     argc++;
   }
   args[argc] = NULL;

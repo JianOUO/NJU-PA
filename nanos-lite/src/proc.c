@@ -39,18 +39,13 @@ void context_uload(PCB *pcb, const char *filename, char *const argv[], char *con
   char *end = (char *)heap.end;
   envp_ptr[envc] = 0;
   for (int i = envc - 1; i >= 0; i--) {
-    assert(envp[i] != NULL);
     int len = strlen(envp[i]);
     end -= (len + 1);
     strcpy(end, envp[i]);
     envp_ptr[i] = (uintptr_t)end;
   }
   argv_ptr[argc] = 0; 
-  for (int i = argc - 1; argc >= 0; i--) {
-    if (argv[i] == NULL) {
-      printf("%d %d\n", argc, i);
-    }
-    assert(argv[i] != NULL);
+  for (int i = argc - 1; i >= 0; i--) {
     int len = strlen(argv[i]);
     end -= (len + 1);
     strcpy(end, argv[i]);

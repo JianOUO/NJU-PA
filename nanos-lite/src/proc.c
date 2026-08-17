@@ -56,6 +56,7 @@ void context_uload(PCB *pcb, const char *filename, char *const argv[], char *con
   }
   *(--new_end) = (uintptr_t)argc;
 
+  // 这里的加载操作要放在后面，不然新加载的代码段可能覆盖argv和envp指向的内存
   uintptr_t entry = uload(pcb, filename);
   // 在riscv-nemu下，as可以传NULL，在native环境下会触发段错误，暂且不管，不在native下运行
   pcb->cp = ucontext(NULL, (Area) { pcb, pcb + 1 }, (void *)entry);

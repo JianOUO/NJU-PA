@@ -61,9 +61,14 @@ static uintptr_t loader(PCB *pcb, const char *filename) {
     if (phdr.p_type == PT_LOAD) {
       //assert(ramdisk_read((void *)phdr.p_vaddr, phdr.p_offset, phdr.p_memsz) == phdr.p_memsz);
       assert(fs_lseek(fd, phdr.p_offset, SEEK_SET) == phdr.p_offset);
-      //assert(fs_read(fd, (void *)phdr.p_vaddr, phdr.p_filesz) == phdr.p_filesz);
-      int ret = fs_read(fd, (void *)phdr.p_vaddr, phdr.p_memsz);
-      printf("ret: %d memsz:%d\n", ret, phdr.p_memsz);
+      /*
+      assert(fs_read(fd, (void *)phdr.p_vaddr, phdr.p_memsz) == phdr.p_memsz);
+      p_filesz：这个段在 ELF 文件里实际有多少字节, p_memsz ：这个段加载到内存后应该占多少字节 
+      通常应该从文件里读取 p_filesz 字节，而不是 p_memsz 字节；然后再把 p_memsz - p_filesz 的部分清零。
+      因为 fs_read() 最多只能读到当前文件剩余的字节数，如果我请求读phdr.p_memsz，但从 phdr.p_offset 到文件结尾已经没有这么多字节了，
+      fs_read() 会把 len 缩短，只返回实际还能读到的长度，最终导致assert失败。
+      */
+      assert(fs_read(fd, (void *)phdr.p_vaddr, phdr.p_filesz) == phdr.p_filesz);
       memset((void *)(phdr.p_vaddr + phdr.p_filesz), 0, phdr.p_memsz - phdr.p_filesz);
     }
   }

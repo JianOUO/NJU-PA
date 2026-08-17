@@ -56,7 +56,8 @@ int fs_open(const char *pathname, int flags, int mode) {
       return i;
     }
   }
-  assert(0);
+  return -1; // 文件不存在
+  //assert(0);
 }
 
 size_t fs_read(int fd, void *buf, size_t len) {

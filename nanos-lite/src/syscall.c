@@ -122,6 +122,10 @@ void do_syscall(Context *c) {
     case SYS_execve: {
       const char *pathname = (const char *)a[1];
       assert(pathname);
+      if (fs_open(pathname, 0, 0) == -1) {
+        c->GPRx = -2;
+        break;
+      }
       char * const *argv = (char * const *)a[2];
       char * const *envp = (char * const *)a[3];
       #ifdef CONFIG_STRACE

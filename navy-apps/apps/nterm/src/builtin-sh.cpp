@@ -45,7 +45,7 @@ void builtin_sh_run() {
   sh_banner();
   sh_prompt();
 
-  assert(setenv("PATH", "/bin", 0) != -1);
+  assert(setenv("PATH", "/bin:/usr/bin", 0) != -1);
   while (1) {
     SDL_Event ev;
     if (SDL_PollEvent(&ev)) {

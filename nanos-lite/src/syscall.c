@@ -40,8 +40,8 @@ void do_syscall(Context *c) {
       STRACE("[STRACE] exit(0x%x)", a[1]);
       #endif
       c->GPR1 = SYS_execve;
-      c->GPR2 = (uintptr_t)"/bin/menu";
-      char *const argv[] = {"/bin/menu", NULL};
+      c->GPR2 = (uintptr_t)"/bin/nterm";
+      char *const argv[] = {"/bin/nterm", NULL};
       char *const envp[] = {NULL};
       c->GPR3 = (uintptr_t)argv;
       c->GPR4 = (uintptr_t)envp;

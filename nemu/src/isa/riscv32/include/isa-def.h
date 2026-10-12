@@ -18,7 +18,7 @@
 
 #include <common.h>
 
-enum { MSTATUS, MTVEC, MEPC, MCAUSE, CSR_LEN };
+enum { MSTATUS, MTVEC, MEPC, MCAUSE, SATP, CSR_LEN };
 
 // 这里变量的顺序必须先是gpr和pc，然后才是其他变量，不然difftest会出错
 typedef struct {
@@ -32,6 +32,6 @@ typedef struct {
   uint32_t inst;
 } MUXDEF(CONFIG_RV64, riscv64_ISADecodeInfo, riscv32_ISADecodeInfo);
 
-#define isa_mmu_check(vaddr, len, type) (MMU_DIRECT)
+//#define isa_mmu_check(vaddr, len, type) (MMU_DIRECT)
 
 #endif

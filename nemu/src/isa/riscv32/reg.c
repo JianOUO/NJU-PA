@@ -24,7 +24,7 @@ const char *regs[] = {
 };
 
 const char *csrs[] = {
-  "mstatus", "mtvec", "mepc", "mcause"
+  "mstatus", "mtvec", "mepc", "mcause", "satp"
 };
 
 void isa_reg_display() {

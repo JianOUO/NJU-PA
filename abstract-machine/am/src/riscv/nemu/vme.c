@@ -66,7 +66,32 @@ void __am_switch(Context *c) {
   }
 }
 
+#define VPN1(va) ((va) >> 22)
+#define VPN0(va) (((va) << 10) >> 22)
+#define PA2PPN(pa) ((pa) >> 12)
+#define PTE2PPN(pte) ((pte) >> 10)
+
 void map(AddrSpace *as, void *va, void *pa, int prot) {
+  assert(as->ptr != NULL);
+  PTE *lv1_pg = as->ptr;
+  uintptr_t va_ = (uintptr_t)va;
+  uintptr_t pa_ = (uintptr_t)pa;
+  uintptr_t vpn1 = VPN1(va_);
+  PTE lv1_pte = *(lv1_pg + vpn1);
+  if ((lv1_pte & PTE_V) == 0) {
+    uintptr_t new_pg = (uintptr_t)pgalloc_usr(PGSIZE);
+    lv1_pte = PA2PPN(new_pg) << 10;
+    lv1_pte |= PTE_V;
+    *(lv1_pg + vpn1) = lv1_pte;
+  }
+
+  PTE *lv0_pg = (PTE *)(PTE2PPN(lv1_pte) << 12);
+  uintptr_t vpn0 = VPN0(va_);
+  PTE lv0_pte = *(lv0_pg + vpn0);
+  assert((lv0_pte & PTE_V) == 0);
+  lv0_pte = PA2PPN(pa_) << 10;
+  lv0_pte |= PTE_V;
+  *(lv0_pg + vpn0) = lv0_pte;
 }
 
 Context *ucontext(AddrSpace *as, Area kstack, void *entry) {

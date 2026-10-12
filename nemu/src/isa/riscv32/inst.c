@@ -13,6 +13,7 @@
 * See the Mulan PSL v2 for more details.
 ***************************************************************************************/
 
+#include "isa-def.h"
 #include "local-include/reg.h"
 #include <cpu/cpu.h>
 #include <cpu/ifetch.h>
@@ -20,6 +21,7 @@
 
 static inline int map_csr_idx(word_t idx) {
   switch (idx) {
+    case 0x180: return SATP;
     case 0x300: return MSTATUS;
     case 0x305: return MTVEC;
     case 0x341: return MEPC;

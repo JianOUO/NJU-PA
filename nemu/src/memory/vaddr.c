@@ -22,8 +22,10 @@ word_t vaddr_ifetch(vaddr_t addr, int len) {
     paddr_t pg_pa = isa_mmu_translate(addr, len, MEM_TYPE_IFETCH);
     paddr_t pa = pg_pa | (addr & 0xfff);
     assert(pa == addr);
+    assert(pa != 0x40000000);
     return paddr_read(pa, len);
   } else {
+    assert(addr != 0x40000000);
     return paddr_read(addr, len);
   }
 }
@@ -33,8 +35,10 @@ word_t vaddr_read(vaddr_t addr, int len) {
     paddr_t pg_pa = isa_mmu_translate(addr, len, MEM_TYPE_READ);
     paddr_t pa = pg_pa | (addr & 0xfff);
     assert(pa == addr);
+    assert(pa != 0x4000000);
     return paddr_read(pa, len);
   } else {
+    assert(addr != 0x40000000);
     return paddr_read(addr, len);
   }
 }
@@ -44,8 +48,10 @@ void vaddr_write(vaddr_t addr, int len, word_t data) {
     paddr_t pg_pa = isa_mmu_translate(addr, len, MEM_TYPE_WRITE);
     paddr_t pa = pg_pa | (addr & 0xfff);
     assert(pa == addr);
+    assert(pa != 0x4000000);
     paddr_write(pa, len, data);
   } else {
+    assert(addr != 0x40000000);
     paddr_write(addr, len, data); 
   }
 }

@@ -1,4 +1,7 @@
+#include "am.h"
+#include "memory.h"
 #include <proc.h>
+#include <stdint.h>
 
 #define MAX_NR_PROC 4
 
@@ -27,7 +30,14 @@ void context_kload(PCB *pcb, void (*entry)(void *), void *arg) {
 }
 
 void context_uload(PCB *pcb, const char *filename, char *const argv[], char *const envp[]) {
-  char *end = (char *)new_page(8) + 8 * PGSIZE;
+  protect(&(pcb->as));
+  void *va_end = pcb->as.area.end;
+  void *pa_end = new_page(8) + 8 * PGSIZE;
+  int prot = MMAP_READ | MMAP_WRITE;
+  for (int i = 0; i < 8; i++) {
+    map(&(pcb->as), va_end - (i + 1) * PGSIZE, pa_end - (i + 1) * PGSIZE, prot);
+  }
+
   int argc = 0, envc = 0;
   assert(argv && envp);
   while (argv[argc] != NULL) argc++;
@@ -36,18 +46,20 @@ void context_uload(PCB *pcb, const char *filename, char *const argv[], char *con
   envp_ptr[envc] = 0;
   for (int i = envc - 1; i >= 0; i--) {
     int len = strlen(envp[i]);
-    end -= (len + 1);
-    strcpy(end, envp[i]);
-    envp_ptr[i] = (uintptr_t)end;
+    pa_end -= (len + 1);
+    va_end -= (len + 1);
+    strcpy(pa_end, envp[i]);
+    envp_ptr[i] = (uintptr_t)va_end;
   }
   argv_ptr[argc] = 0; 
   for (int i = argc - 1; i >= 0; i--) {
     int len = strlen(argv[i]);
-    end -= (len + 1);
-    strcpy(end, argv[i]);
-    argv_ptr[i] = (uintptr_t)end;
+    pa_end -= (len + 1);
+    va_end -= (len + 1);
+    strcpy(pa_end, argv[i]);
+    argv_ptr[i] = (uintptr_t)va_end;
   }
-  uintptr_t *new_end = (uintptr_t *)((uintptr_t)end & ~((uintptr_t)(sizeof(uintptr_t)) - 1));
+  uintptr_t *new_end = (uintptr_t *)((uintptr_t)pa_end & ~((uintptr_t)(sizeof(uintptr_t)) - 1));
   for (int i = envc; i >= 0; i--) {
     *(--new_end) = envp_ptr[i];
   }
@@ -67,9 +79,8 @@ void init_proc() {
   context_kload(&pcb[0], hello_fun, (void *)0);
   char *argv[] = {"/bin/pal", NULL};
   char *envp[] = {NULL};
-  context_uload(&pcb[1], "/bin/pal", argv, envp);
+  context_uload(&pcb[1], "bin/pal", argv, envp);
   //context_kload(&pcb[1], hello_fun, (void *)1);
-
   switch_boot_pcb();
 
   Log("Initializing processes...");

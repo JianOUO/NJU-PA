@@ -65,7 +65,7 @@ endif
 # syscall.h → /path/to/navy-apps/libs/libos/src/syscall.h (符号链接)
 # 步骤 3: 自动生成已安装程序的反汇编代码
 update:
-	$(MAKE) -s -C $(NAVY_HOME) ISA=$(ISA) ramdisk
+	$(MAKE) -s -C $(NAVY_HOME) ISA=$(ISA) VME=1 ramdisk
 	@ln -sf $(NAVY_HOME)/build/ramdisk.img $(RAMDISK_FILE)
 	@ln -sf $(NAVY_HOME)/build/ramdisk.h src/files.h
 	@ln -sf $(NAVY_HOME)/libs/libos/src/syscall.h src/syscall.h

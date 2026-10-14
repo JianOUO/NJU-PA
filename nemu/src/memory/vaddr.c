@@ -19,6 +19,7 @@
 
 word_t vaddr_ifetch(vaddr_t addr, int len) {
   if (isa_mmu_check(addr, len, MEM_TYPE_IFETCH) == MMU_TRANSLATE) {
+    printf("translate\n");
     paddr_t pg_pa = isa_mmu_translate(addr, len, MEM_TYPE_IFETCH);
     paddr_t pa = pg_pa | (addr & 0xfff);
     assert(pa == addr);

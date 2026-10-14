@@ -62,6 +62,8 @@ static uintptr_t loader(PCB *pcb, const char *filename) {
   uint32_t e_phnum;
 
   //assert(ramdisk_read(&ehdr, 0, sizeof(Elf_Ehdr)) == sizeof(Elf_Ehdr));
+  size_t ret = fs_read(fd, &ehdr, sizeof(Elf_Ehdr));
+  printf("ret: %u, sizeof(Elf_Ehdr): %u\n", ret, sizeof(Elf_Ehdr));
   assert(fs_read(fd, &ehdr, sizeof(Elf_Ehdr)) == sizeof(Elf_Ehdr));
   assert(ehdr.e_ident[EI_CLASS] == Elf_Class);
   assert(ehdr.e_ident[EI_MAG0] == ELFMAG0 && ehdr.e_ident[EI_MAG1] == ELFMAG1 && ehdr.e_ident[EI_MAG2] == ELFMAG2 && ehdr.e_ident[EI_MAG3] == ELFMAG3);

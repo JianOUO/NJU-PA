@@ -94,5 +94,7 @@ Context* schedule(Context *prev) {
   current = (current == &pcb[0] ? &pcb[1] : &pcb[0]);
   return current->cp;
   */
-  return prev;
+  current->cp = prev;
+  if (current == &pcb_boot) current = &pcb[1];
+  return current->cp;
 }

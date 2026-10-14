@@ -48,6 +48,6 @@ paddr_t isa_mmu_translate(vaddr_t vaddr, int len, int type) {
 }
 
 int isa_mmu_check(vaddr_t vaddr, int len, int type) {
-  if (csr(SATP) & 0x10000000) return MMU_TRANSLATE;
-  else return MMU_DIRECT;
+  if (vaddr >= 0x80000000) return MMU_DIRECT;
+  else return MMU_TRANSLATE;
 }

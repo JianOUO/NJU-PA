@@ -31,13 +31,14 @@ void context_kload(PCB *pcb, void (*entry)(void *), void *arg) {
 
 void context_uload(PCB *pcb, const char *filename, char *const argv[], char *const envp[]) {
   protect(&(pcb->as));
-  void *va_end = pcb->as.area.end;
-  void *pa_end = new_page(8) + 8 * PGSIZE;
-  int prot = MMAP_READ | MMAP_WRITE;
-  for (int i = 0; i < 8; i++) {
-    map(&(pcb->as), va_end - (i + 1) * PGSIZE, pa_end - (i + 1) * PGSIZE, prot);
+  void *stack_va = pcb->as.area.end - STACK_SIZE;
+  void *stack = new_page(STACK_SIZE / PGSIZE);
+  memset(stack, 0, STACK_SIZE);
+  for (uintptr_t offset = 0; offset < STACK_SIZE; offset += PGSIZE) {
+    map(&(pcb->as), stack_va + offset, stack + offset, MMAP_READ | MMAP_WRITE);
   }
 
+  char *end = (char *)stack + 8 * PGSIZE;
   int argc = 0, envc = 0;
   assert(argv && envp);
   while (argv[argc] != NULL) argc++;
@@ -46,20 +47,18 @@ void context_uload(PCB *pcb, const char *filename, char *const argv[], char *con
   envp_ptr[envc] = 0;
   for (int i = envc - 1; i >= 0; i--) {
     int len = strlen(envp[i]);
-    pa_end -= (len + 1);
-    va_end -= (len + 1);
-    strcpy(pa_end, envp[i]);
-    envp_ptr[i] = (uintptr_t)va_end;
+    end -= (len + 1);
+    strcpy(end, envp[i]);
+    envp_ptr[i] = (uintptr_t)((void *)end - stack + stack_va);
   }
   argv_ptr[argc] = 0; 
   for (int i = argc - 1; i >= 0; i--) {
     int len = strlen(argv[i]);
-    pa_end -= (len + 1);
-    va_end -= (len + 1);
-    strcpy(pa_end, argv[i]);
-    argv_ptr[i] = (uintptr_t)va_end;
+    end -= (len + 1);
+    strcpy(end, argv[i]);
+    argv_ptr[i] = (uintptr_t)((void *)end - stack + stack_va);
   }
-  uintptr_t *new_end = (uintptr_t *)((uintptr_t)pa_end & ~((uintptr_t)(sizeof(uintptr_t)) - 1));
+  uintptr_t *new_end = (uintptr_t *)((uintptr_t)end & ~((uintptr_t)(sizeof(uintptr_t)) - 1));
   for (int i = envc; i >= 0; i--) {
     *(--new_end) = envp_ptr[i];
   }
@@ -71,15 +70,15 @@ void context_uload(PCB *pcb, const char *filename, char *const argv[], char *con
   // 这里的加载操作要放在后面，不然新加载的代码段可能覆盖argv和envp指向的内存
   uintptr_t entry = uload(pcb, filename);
   // 在riscv-nemu下，as可以传NULL，在native环境下会触发段错误，暂且不管，不在native下运行
-  pcb->cp = ucontext(NULL, (Area) { pcb, pcb + 1 }, (void *)entry);
-  pcb->cp->GPRx = (uintptr_t)new_end;
+  pcb->cp = ucontext(&(pcb->as), (Area) { pcb, pcb + 1 }, (void *)entry);
+  pcb->cp->GPRx = (uintptr_t)((void *)new_end - stack + stack_va);
 }
 
 void init_proc() {
-  context_kload(&pcb[0], hello_fun, (void *)0);
-  char *argv[] = {"/bin/pal", NULL};
+  //context_kload(&pcb[0], hello_fun, (void *)0);
+  char *argv[] = {"/bin/dummy", NULL};
   char *envp[] = {NULL};
-  context_uload(&pcb[1], "bin/pal", argv, envp);
+  context_uload(&pcb[1], "bin/dummy", argv, envp);
   //context_kload(&pcb[1], hello_fun, (void *)1);
   switch_boot_pcb();
 
@@ -90,7 +89,10 @@ void init_proc() {
 }
 
 Context* schedule(Context *prev) {
+  /*
   current->cp = prev;
   current = (current == &pcb[0] ? &pcb[1] : &pcb[0]);
   return current->cp;
+  */
+  return prev;
 }

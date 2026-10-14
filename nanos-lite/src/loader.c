@@ -1,6 +1,10 @@
+#include "am.h"
+#include "klib-macros.h"
+#include "memory.h"
 #include <proc.h>
 #include <elf.h>
 #include <fs.h>
+#include <stdint.h>
 
 #ifdef __LP64__
 # define Elf_Ehdr Elf64_Ehdr
@@ -17,7 +21,31 @@
 #if defined(__ISA_AM_NATIVE__)
 # define EXPECT_TYPE EM_X86_64
 #elif defined(__ISA_RISCV32__)
+
 # define EXPECT_TYPE EM_RISCV
+# define VPN1(va) ((va) >> 22)
+# define VPN0(va) (((va) << 10) >> 22)
+# define PTE2PPN(pte) ((pte) >> 10)
+# define PTE_V 0x1
+
+typedef uintptr_t PTE;
+
+void *look_up_pa(AddrSpace *as, uintptr_t va) {
+  assert(as != NULL);
+  assert(as->ptr != NULL);
+  PTE *lv1_pg = as->ptr;
+  uintptr_t vpn1 = VPN1(va);
+  PTE lv1_pte = *(lv1_pg + vpn1);
+  if ((lv1_pte & PTE_V) == 0) return NULL;
+
+  PTE *lv0_pg = (PTE *)(PTE2PPN(lv1_pte) << 12);
+  uintptr_t vpn0 = VPN0(va);
+  PTE lv0_pte = *(lv0_pg + vpn0);
+  if ((lv0_pte & PTE_V) == 0) return NULL;
+
+  return (void *)(PTE2PPN(lv0_pte) << 12);
+}
+
 #else
 # error Unsupported ISA
 #endif
@@ -59,8 +87,7 @@ static uintptr_t loader(PCB *pcb, const char *filename) {
     assert(fs_lseek(fd, offset, SEEK_SET) == offset);
     assert(fs_read(fd, &phdr, sizeof(Elf_Phdr)) == sizeof(Elf_Phdr));
     if (phdr.p_type == PT_LOAD) {
-      //assert(ramdisk_read((void *)phdr.p_vaddr, phdr.p_offset, phdr.p_memsz) == phdr.p_memsz);
-      assert(fs_lseek(fd, phdr.p_offset, SEEK_SET) == phdr.p_offset);
+      //assert(fs_lseek(fd, phdr.p_offset, SEEK_SET) == phdr.p_offset);
       /*
       assert(fs_read(fd, (void *)phdr.p_vaddr, phdr.p_memsz) == phdr.p_memsz);
       p_filesz：这个段在 ELF 文件里实际有多少字节, p_memsz ：这个段加载到内存后应该占多少字节 
@@ -68,8 +95,25 @@ static uintptr_t loader(PCB *pcb, const char *filename) {
       因为 fs_read() 最多只能读到当前文件剩余的字节数，如果我请求读phdr.p_memsz，但从 phdr.p_offset 到文件结尾已经没有这么多字节了，
       fs_read() 会把 len 缩短，只返回实际还能读到的长度，最终导致assert失败。
       */
-      assert(fs_read(fd, (void *)phdr.p_vaddr, phdr.p_filesz) == phdr.p_filesz);
-      memset((void *)(phdr.p_vaddr + phdr.p_filesz), 0, phdr.p_memsz - phdr.p_filesz);
+      //assert(fs_read(fd, (void *)phdr.p_vaddr, phdr.p_filesz) == phdr.p_filesz);
+      //memset((void *)(phdr.p_vaddr + phdr.p_filesz), 0, phdr.p_memsz - phdr.p_filesz);
+      uintptr_t start = phdr.p_vaddr;
+      uintptr_t end = start + phdr.p_filesz;
+      uintptr_t va_start = ROUNDDOWN(start, PGSIZE);
+      uintptr_t va_end = ROUNDUP(start + phdr.p_memsz, PGSIZE); 
+      assert(fs_lseek(fd, phdr.p_offset, SEEK_SET) == phdr.p_offset);
+      for (uintptr_t va = va_start; va < va_end; va += PGSIZE) {
+          void *pa = look_up_pa(&(pcb->as), va);
+          if (pa == NULL) {
+            pa = new_page(1);
+            memset(pa, 0, PGSIZE);
+            map(&(pcb->as), (void *)va, pa, MMAP_READ | MMAP_WRITE);
+          }
+          uintptr_t left = va > start ? va : start;
+          uintptr_t right = (va + PGSIZE) < end ? (va + PGSIZE) : end;
+          //assert(left < right);
+          if (left < right) fs_read(fd, (left - va) + pa, right - left);
+      }
     }
   }
   assert(fs_close(fd) == 0);

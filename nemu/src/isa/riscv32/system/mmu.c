@@ -21,7 +21,7 @@
 #include <memory/paddr.h>
 #include <stdint.h>
 
-#define PTE uintptr_t
+typedef uintptr_t PTE;
 #define SATP2PPN(satp) ((satp) & 0x003fffff)
 #define VPN1(va) ((va) >> 22)
 #define VPN0(va) (((va) << 10) >> 22)
@@ -48,6 +48,6 @@ paddr_t isa_mmu_translate(vaddr_t vaddr, int len, int type) {
 }
 
 int isa_mmu_check(vaddr_t vaddr, int len, int type) {
-  if (vaddr >= 0xa0000000 || (csr(SATP) & 0X10000000) == 0) return MMU_DIRECT;
-  else return MMU_TRANSLATE;
+  if (csr(SATP) & 0X10000000) return MMU_TRANSLATE;
+  else return MMU_DIRECT;
 }

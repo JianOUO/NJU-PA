@@ -129,6 +129,7 @@ void naive_uload(PCB *pcb, const char *filename) {
 
 uintptr_t uload(PCB *pcb, const char *filename) {
   uintptr_t entry = loader(pcb, filename);
+  printf("entry: 0x%x\n", entry);
   return entry;
 }
 

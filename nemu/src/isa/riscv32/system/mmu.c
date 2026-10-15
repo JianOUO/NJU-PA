@@ -35,7 +35,7 @@ paddr_t isa_mmu_translate(vaddr_t vaddr, int len, int type) {
   printf("satp: 0x%x, lv0_pg_pa: 0x%x, ", csr(SATP), lv1_pg_pa);
   PTE *lv1_pg = (PTE *)guest_to_host(lv1_pg_pa);
   uintptr_t vpn1 = VPN1(vaddr);
-  printf("lv1_pg: 0x%x, vpn1: 0x%x, ", (unsigned int)(uintptr_t)lv1_pg, (unsigned int)(uintptr_t)vpn1);
+  printf("va: 0x%x, vpn1: 0x%x, ", vaddr, (unsigned int)(uintptr_t)vpn1);
   PTE lv1_pte = *(lv1_pg + vpn1);
   assert(lv1_pte & PTE_V);
   printf("lv1_pte: 0x%x\n", (unsigned int)lv1_pte);

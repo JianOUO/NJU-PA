@@ -41,7 +41,6 @@ void do_syscall(Context *c) {
       #ifdef CONFIG_STRACE
       STRACE("[STRACE] exit(0x%x)", a[1]);
       #endif
-      /*
       c->GPR1 = SYS_execve;
       c->GPR2 = (uintptr_t)"/bin/nterm";
       char *const argv[] = {"/bin/nterm", NULL};
@@ -49,8 +48,7 @@ void do_syscall(Context *c) {
       c->GPR3 = (uintptr_t)argv;
       c->GPR4 = (uintptr_t)envp;
       do_syscall(c);
-      */
-      halt(a[1]);
+      //halt(a[1]);
     }
     case SYS_write: {
       int fd = (int)a[1];

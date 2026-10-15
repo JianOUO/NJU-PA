@@ -1,3 +1,7 @@
+#include "am.h"
+#include "klib-macros.h"
+#include "proc.h"
+#include "sys/_stdint.h"
 #include <memory.h>
 
 static void *pf = NULL;
@@ -24,6 +28,13 @@ void free_page(void *p) {
 /* The brk() system call handler. */
 // 处理 brk() 系统调用，用于调整程序堆的边界
 int mm_brk(uintptr_t brk) {
+  uintptr_t brk_roundup = ROUNDUP(brk, PGSIZE);
+  while (current->max_brk < brk_roundup) {
+    void *pa = new_page(1);
+    memset(pa, 0, PGSIZE);
+    map(&(current->as), (void *)current->max_brk, pa, MMAP_READ | MMAP_WRITE);
+    current->max_brk += PGSIZE;
+  }
   return 0;
 }
 

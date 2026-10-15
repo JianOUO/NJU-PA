@@ -81,6 +81,7 @@ static uintptr_t loader(PCB *pcb, const char *filename) {
   } else {
     e_phnum = ehdr.e_phnum;
   }
+  uintptr_t max_brk = 0;
   for (uint32_t i = 0; i < e_phnum; i++) {
     //assert(ramdisk_read(&phdr, ehdr.e_phoff + i * ehdr.e_phentsize, sizeof(Elf_Phdr)) == sizeof(Elf_Phdr));
     size_t offset = ehdr.e_phoff + i * ehdr.e_phentsize;
@@ -101,6 +102,7 @@ static uintptr_t loader(PCB *pcb, const char *filename) {
       uintptr_t end = start + phdr.p_filesz;
       uintptr_t va_start = ROUNDDOWN(start, PGSIZE);
       uintptr_t va_end = ROUNDUP(start + phdr.p_memsz, PGSIZE); 
+      if (va_end > max_brk) max_brk = va_end;
       assert(fs_lseek(fd, phdr.p_offset, SEEK_SET) == phdr.p_offset);
       for (uintptr_t va = va_start; va < va_end; va += PGSIZE) {
           void *pa = look_up_pa(&(pcb->as), va);
@@ -116,6 +118,8 @@ static uintptr_t loader(PCB *pcb, const char *filename) {
       }
     }
   }
+  assert(max_brk != 0);
+  pcb->max_brk = max_brk;
   assert(fs_close(fd) == 0);
   assert(ehdr.e_entry != 0);
   return ehdr.e_entry;

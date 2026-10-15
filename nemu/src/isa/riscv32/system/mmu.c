@@ -31,6 +31,7 @@ typedef uintptr_t PTE;
 
 paddr_t isa_mmu_translate(vaddr_t vaddr, int len, int type) {
   //return MEM_RET_FAIL;
+  printf("satp: 0x%x, ", csr(SATP));
   paddr_t lv0_pg_pa = SATP2PPN(csr(SATP)) << 12;
   PTE *lv1_pg = (PTE *)guest_to_host(lv0_pg_pa);
   uintptr_t vpn1 = VPN1(vaddr);

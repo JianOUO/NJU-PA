@@ -20,60 +20,24 @@
 
 #if defined(__ISA_AM_NATIVE__)
 # define EXPECT_TYPE EM_X86_64
-
-typedef struct NativePageMap {
-  void *va;
-  void *pa;
-  struct NativePageMap *next;
-  int prot;
-  int is_mapped;
-  char key[32];
-} NativePageMap;
-
-typedef struct NativeVMHead {
-  NativePageMap *head;
-} NativeVMHead;
-
-void *lookup_pa(AddrSpace *as, uintptr_t va) {
-  assert(as != NULL && as->ptr != NULL);
-  assert((va & (PGSIZE - 1)) == 0);
-
-  NativeVMHead *head = (NativeVMHead *)as->ptr;
-  for (NativePageMap *p = head->head; p != NULL; p = p->next) {
-    if (p->va == (void *)va) return p->pa;
-  }
-  return NULL;
-}
-
 #elif defined(__ISA_RISCV32__)
-
 # define EXPECT_TYPE EM_RISCV
-# define VPN1(va) ((va) >> 22)
-# define VPN0(va) (((va) << 10) >> 22)
-# define PTE2PPN(pte) ((pte) >> 10)
-# define PTE_V 0x1
-
-typedef uintptr_t PTE;
-
-void *lookup_pa(AddrSpace *as, uintptr_t va) {
-  assert(as != NULL);
-  assert(as->ptr != NULL);
-  PTE *lv1_pg = as->ptr;
-  uintptr_t vpn1 = VPN1(va);
-  PTE lv1_pte = *(lv1_pg + vpn1);
-  if ((lv1_pte & PTE_V) == 0) return NULL;
-
-  PTE *lv0_pg = (PTE *)(PTE2PPN(lv1_pte) << 12);
-  uintptr_t vpn0 = VPN0(va);
-  PTE lv0_pte = *(lv0_pg + vpn0);
-  if ((lv0_pte & PTE_V) == 0) return NULL;
-
-  return (void *)(PTE2PPN(lv0_pte) << 12);
-}
-
 #else
 # error Unsupported ISA
 #endif
+
+typedef struct {
+  uintptr_t va;
+  void *pa;
+} LoadedPage;
+
+#define CACHE_CAP ((PGSIZE - sizeof(void *) - sizeof(size_t)) / sizeof(LoadedPage))
+
+typedef struct PageCache {
+  struct PageCache *next;
+  size_t used;
+  LoadedPage pages[CACHE_CAP];
+} PageCache;
 
 size_t ramdisk_read(void *buf, size_t offset, size_t len);
 
@@ -107,6 +71,7 @@ static uintptr_t loader(PCB *pcb, const char *filename) {
     e_phnum = ehdr.e_phnum;
   }
   uintptr_t max_brk = 0;
+  PageCache *cache = NULL;
   for (uint32_t i = 0; i < e_phnum; i++) {
     //assert(ramdisk_read(&phdr, ehdr.e_phoff + i * ehdr.e_phentsize, sizeof(Elf_Phdr)) == sizeof(Elf_Phdr));
     size_t offset = ehdr.e_phoff + i * ehdr.e_phentsize;
@@ -130,15 +95,30 @@ static uintptr_t loader(PCB *pcb, const char *filename) {
       if (va_end > max_brk) max_brk = va_end;
       assert(fs_lseek(fd, phdr.p_offset, SEEK_SET) == phdr.p_offset);
       for (uintptr_t va = va_start; va < va_end; va += PGSIZE) {
-          void *pa = lookup_pa(&(pcb->as), va);
+          void *pa = NULL;
+          for (PageCache *b = cache; b != NULL && pa == NULL; b = b->next) {
+            for (size_t j = 0; j < b->used; j++) {
+              if (b->pages[j].va == va) {
+                pa = b->pages[j].pa;
+                break;
+              }
+            }
+          }
           if (pa == NULL) {
             pa = new_page(1);
             memset(pa, 0, PGSIZE);
             map(&(pcb->as), (void *)va, pa, MMAP_READ | MMAP_WRITE);
+            if (cache == NULL || cache->used == CACHE_CAP) {
+              PageCache *b = new_page(1);
+              b->next = cache;
+              b->used = 0;
+              cache = b;
+            }
+            cache->pages[cache->used++] = (LoadedPage){va, pa};
           }
+
           uintptr_t left = va > start ? va : start;
           uintptr_t right = (va + PGSIZE) < end ? (va + PGSIZE) : end;
-          //assert(left < right);
           if (left < right) assert(fs_read(fd, (left - va) + pa, right - left) == right - left);
       }
     }

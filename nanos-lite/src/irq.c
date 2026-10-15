@@ -17,6 +17,9 @@ static Context* do_event(Event e, Context* c) {
     case EVENT_IRQ_TIMER: {
       break;
     }
+    case EVENT_IRQ_IODEV: {
+      break;
+    }
     default: panic("Unhandled event ID = %d", e.event);
   }
 

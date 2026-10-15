@@ -33,10 +33,12 @@ paddr_t isa_mmu_translate(vaddr_t vaddr, int len, int type) {
   //return MEM_RET_FAIL;
   paddr_t lv1_pg_pa = SATP2PPN(csr(SATP)) << 12;
   printf("satp: 0x%x, lv1_pg_pa: 0x%x, ", csr(SATP), lv1_pg_pa);
-  PTE *lv1_pg = (PTE *)guest_to_host(lv1_pg_pa);
+  //PTE *lv1_pg = (PTE *)guest_to_host(lv1_pg_pa);
   uintptr_t vpn1 = VPN1(vaddr);
   printf("va: 0x%x, vpn1: 0x%x, ", vaddr, (unsigned int)(uintptr_t)vpn1);
-  PTE lv1_pte = *(lv1_pg + vpn1);
+  paddr_t pte_pa = lv1_pg_pa + sizeof(PTE) * vpn1;
+  //PTE lv1_pte = *(lv1_pg + vpn1);
+  PTE lv1_pte = *((PTE *)guest_to_host(pte_pa));
   assert(lv1_pte & PTE_V);
   printf("lv1_pte: 0x%x\n", (unsigned int)lv1_pte);
 

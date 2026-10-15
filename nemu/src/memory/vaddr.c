@@ -18,12 +18,16 @@
 #include <memory/paddr.h>
 
 word_t vaddr_ifetch(vaddr_t addr, int len) {
+  printf("va: 0x%x, len: %d, ", addr, len);
   if (isa_mmu_check(addr, len, MEM_TYPE_IFETCH) == MMU_TRANSLATE) {
     paddr_t pg_pa = isa_mmu_translate(addr, len, MEM_TYPE_IFETCH);
     paddr_t pa = pg_pa | (addr & 0xfff);
-    return paddr_read(pa, len);
+    word_t data = paddr_read(pa, len);
+    return data;
   } else {
-    return paddr_read(addr, len);
+    word_t data = paddr_read(addr, len);
+    printf("data: 0x%x", data);
+    return data;
   }
 }
 

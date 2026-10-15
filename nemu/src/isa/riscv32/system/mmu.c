@@ -21,7 +21,7 @@
 #include <memory/paddr.h>
 #include <stdint.h>
 
-typedef uintptr_t PTE;
+typedef uint32_t PTE;
 #define SATP2PPN(satp) ((satp) & 0x003fffff)
 #define VPN1(va) ((va) >> 22)
 #define VPN0(va) (((va) << 10) >> 22)

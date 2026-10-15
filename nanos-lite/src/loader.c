@@ -99,10 +99,12 @@ static uintptr_t loader(PCB *pcb, const char *filename) {
       //memset((void *)(phdr.p_vaddr + phdr.p_filesz), 0, phdr.p_memsz - phdr.p_filesz);
       uintptr_t start = phdr.p_vaddr;
       uintptr_t end = start + phdr.p_filesz;
+      printf("start: %x, end: %x\n", start, end);
       uintptr_t va_start = ROUNDDOWN(start, PGSIZE);
       uintptr_t va_end = ROUNDUP(start + phdr.p_memsz, PGSIZE); 
       assert(fs_lseek(fd, phdr.p_offset, SEEK_SET) == phdr.p_offset);
       for (uintptr_t va = va_start; va < va_end; va += PGSIZE) {
+          printf("start_0: %x, end_0: %x\n", start, end);
           void *pa = look_up_pa(&(pcb->as), va);
           if (pa == NULL) {
             pa = new_page(1);
@@ -113,7 +115,8 @@ static uintptr_t loader(PCB *pcb, const char *filename) {
           uintptr_t right = (va + PGSIZE) < end ? (va + PGSIZE) : end;
           //assert(left < right);
           if (left < right) fs_read(fd, (left - va) + pa, right - left);
-          printf("left: %x, right: %x, start: %x, end: %x, va: %x, va + PGSIZE: %x, pa: %x\n", left, right, start, end, va, va + PGSIZE, (uintptr_t)pa);
+          printf("start_1: %x, end_1: %x\n", start, end);
+          //printf("left: %x, right: %x, start: %x, end: %x, va: %x, va + PGSIZE: %x, pa: %x\n", left, right, start, end, va, va + PGSIZE, (uintptr_t)pa);
       }
     }
   }

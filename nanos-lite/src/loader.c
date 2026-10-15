@@ -113,7 +113,7 @@ static uintptr_t loader(PCB *pcb, const char *filename) {
           uintptr_t right = (va + PGSIZE) < end ? (va + PGSIZE) : end;
           //assert(left < right);
           if (left < right) fs_read(fd, (left - va) + pa, right - left);
-          printf("left: %u, right: %u, va: %u, va + PGSIZE: %u, pa: %u\n", left, right, va, va + PGSIZE, (uintptr_t)pa);
+          printf("left: %x, right: %x, va: %x, va + PGSIZE: %x, pa: %x\n", left, right, va, va + PGSIZE, (uintptr_t)pa);
       }
     }
   }

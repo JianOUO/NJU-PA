@@ -46,7 +46,6 @@ void vaddr_write(vaddr_t addr, int len, word_t data) {
   if (isa_mmu_check(addr, len, MEM_TYPE_WRITE) == MMU_TRANSLATE) {
     paddr_t pg_pa = isa_mmu_translate(addr, len, MEM_TYPE_WRITE);
     paddr_t pa = pg_pa | (addr & 0xfff);
-    assert(pa == addr);
     paddr_write(pa, len, data);
   } else {
     paddr_write(addr, len, data); 

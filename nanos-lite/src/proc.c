@@ -31,7 +31,6 @@ void context_kload(PCB *pcb, void (*entry)(void *), void *arg) {
 
 void context_uload(PCB *pcb, const char *filename, char *const argv[], char *const envp[]) {
   protect(&(pcb->as));
-  printf("pcb->as.ptr: 0x%x\n", (uintptr_t)pcb->as.ptr);
   void *stack_va = pcb->as.area.end - STACK_SIZE;
   void *stack = new_page(STACK_SIZE / PGSIZE);
   memset(stack, 0, STACK_SIZE);

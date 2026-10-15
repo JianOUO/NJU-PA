@@ -118,7 +118,6 @@ static uintptr_t loader(PCB *pcb, const char *filename) {
   }
   assert(fs_close(fd) == 0);
   assert(ehdr.e_entry != 0);
-  printf("entry: 0x%x\n", ehdr.e_entry);
   return ehdr.e_entry;
 }
 

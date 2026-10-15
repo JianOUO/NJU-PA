@@ -14,20 +14,18 @@
 ***************************************************************************************/
 
 #include "common.h"
+#include "isa-def.h"
 #include <isa.h>
 #include <memory/paddr.h>
 
 word_t vaddr_ifetch(vaddr_t addr, int len) {
   if (isa_mmu_check(addr, len, MEM_TYPE_IFETCH) == MMU_TRANSLATE) {
     paddr_t pg_pa = isa_mmu_translate(addr, len, MEM_TYPE_IFETCH);
-    //printf("pg_pa: 0x%x, ", pg_pa);
     paddr_t pa = pg_pa | (addr & 0xfff);
     word_t data = paddr_read(pa, len);
-    //printf("va: 0x%x, len: %d, pa: 0x%x, data: 0x%x\n", addr, len, pa, data);
     return data;
   } else {
     word_t data = paddr_read(addr, len);
-    //printf("data: 0x%x\n", data);
     return data;
   }
 }

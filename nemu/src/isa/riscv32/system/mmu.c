@@ -38,7 +38,8 @@ paddr_t isa_mmu_translate(vaddr_t vaddr, int len, int type) {
   printf("va: 0x%x, vpn1: 0x%x, ", vaddr, (unsigned int)(uintptr_t)vpn1);
   paddr_t pte_pa = lv1_pg_pa + sizeof(PTE) * vpn1;
   //PTE lv1_pte = *(lv1_pg + vpn1);
-  PTE lv1_pte = *((PTE *)guest_to_host(pte_pa));
+  PTE lv1_pte = paddr_read(pte_pa, sizeof(PTE));
+  //PTE lv1_pte = *((PTE *)guest_to_host(pte_pa));
   assert(lv1_pte & PTE_V);
   printf("lv1_pte: 0x%x\n", (unsigned int)lv1_pte);
 

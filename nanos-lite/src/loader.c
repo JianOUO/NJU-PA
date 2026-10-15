@@ -20,6 +20,31 @@
 
 #if defined(__ISA_AM_NATIVE__)
 # define EXPECT_TYPE EM_X86_64
+
+typedef struct NativePageMap {
+  void *va;
+  void *pa;
+  struct NativePageMap *next;
+  int prot;
+  int is_mapped;
+  char key[32];
+} NativePageMap;
+
+typedef struct NativeVMHead {
+  NativePageMap *head;
+} NativeVMHead;
+
+void *lookup_pa(AddrSpace *as, uintptr_t va) {
+  assert(as != NULL && as->ptr != NULL);
+  assert((va & (PGSIZE - 1)) == 0);
+
+  NativeVMHead *head = (NativeVMHead *)as->ptr;
+  for (NativePageMap *p = head->head; p != NULL; p = p->next) {
+    if (p->va == (void *)va) return p->pa;
+  }
+  return NULL;
+}
+
 #elif defined(__ISA_RISCV32__)
 
 # define EXPECT_TYPE EM_RISCV
@@ -30,7 +55,7 @@
 
 typedef uintptr_t PTE;
 
-void *look_up_pa(AddrSpace *as, uintptr_t va) {
+void *lookup_pa(AddrSpace *as, uintptr_t va) {
   assert(as != NULL);
   assert(as->ptr != NULL);
   PTE *lv1_pg = as->ptr;
@@ -105,7 +130,7 @@ static uintptr_t loader(PCB *pcb, const char *filename) {
       if (va_end > max_brk) max_brk = va_end;
       assert(fs_lseek(fd, phdr.p_offset, SEEK_SET) == phdr.p_offset);
       for (uintptr_t va = va_start; va < va_end; va += PGSIZE) {
-          void *pa = look_up_pa(&(pcb->as), va);
+          void *pa = lookup_pa(&(pcb->as), va);
           if (pa == NULL) {
             pa = new_page(1);
             memset(pa, 0, PGSIZE);

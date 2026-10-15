@@ -1,7 +1,6 @@
 #include "am.h"
 #include "klib-macros.h"
 #include "proc.h"
-#include "sys/_stdint.h"
 #include <memory.h>
 
 static void *pf = NULL;

@@ -1,6 +1,7 @@
 #include <common.h>
 #include "syscall.h"
 #include <fs.h>
+#include <stdint.h>
 #include <sys/time.h>
 #include <proc.h>
 
@@ -19,6 +20,7 @@ static const char *whence_name[3] = {"SEEK_SET", "SEEK_CUR", "SEEK_END"};
 void naive_uload(PCB *pcb, const char *filename);
 void context_uload(PCB *pcb, const char *filename, char *const argv[], char *const envp[]);
 void switch_boot_pcb();
+int mm_brk(uintptr_t brk);
 
 void do_syscall(Context *c) {
   uintptr_t a[4];
@@ -61,7 +63,8 @@ void do_syscall(Context *c) {
       break;
     }
     case SYS_brk: {
-      c->GPRx = 0;
+      uintptr_t brk = (uintptr_t)a[1];
+      c->GPRx = mm_brk(brk);
       #ifdef CONFIG_STRACE
       STRACE("[STRACE] brk(%p) = %d", a[0], c->GPRx);
       #endif

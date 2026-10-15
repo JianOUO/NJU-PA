@@ -75,7 +75,7 @@ void context_uload(PCB *pcb, const char *filename, char *const argv[], char *con
 }
 
 void init_proc() {
-  //context_kload(&pcb[0], hello_fun, (void *)0);
+  context_kload(&pcb[0], hello_fun, (void *)0);
   char *argv[] = {"/bin/pal", NULL};
   char *envp[] = {NULL};
   context_uload(&pcb[1], "/bin/pal", argv, envp);
@@ -89,12 +89,7 @@ void init_proc() {
 }
 
 Context* schedule(Context *prev) {
-  /*
   current->cp = prev;
   current = (current == &pcb[0] ? &pcb[1] : &pcb[0]);
-  return current->cp;
-  */
-  current->cp = prev;
-  if (current == &pcb_boot) current = &pcb[1];
   return current->cp;
 }

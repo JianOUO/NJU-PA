@@ -21,7 +21,7 @@
 #include <memory/paddr.h>
 #include <stdint.h>
 
-typedef uint32_t PTE;
+typedef uint32_t PTE; // NOT uintptr_t !!! 本机上uintptr_t是8字节
 #define SATP2PPN(satp) ((satp) & 0x003fffff)
 #define VPN1(va) ((va) >> 22)
 #define VPN0(va) (((va) << 10) >> 22)
@@ -32,23 +32,17 @@ typedef uint32_t PTE;
 paddr_t isa_mmu_translate(vaddr_t vaddr, int len, int type) {
   //return MEM_RET_FAIL;
   paddr_t lv1_pg_pa = SATP2PPN(csr(SATP)) << 12;
-  //printf("satp: 0x%x, lv1_pg_pa: 0x%x, ", csr(SATP), lv1_pg_pa);
-  //PTE *lv1_pg = (PTE *)guest_to_host(lv1_pg_pa);
   uintptr_t vpn1 = VPN1(vaddr);
-  //printf("va: 0x%x, vpn1: 0x%x, ", vaddr, (unsigned int)(uintptr_t)vpn1);
-  paddr_t pte_pa = lv1_pg_pa + sizeof(PTE) * vpn1;
-  //PTE lv1_pte = *(lv1_pg + vpn1);
-  PTE lv1_pte = paddr_read(pte_pa, sizeof(PTE));
-  //PTE lv1_pte = *((PTE *)guest_to_host(pte_pa));
+  paddr_t lv1_pte_pa = lv1_pg_pa + sizeof(PTE) * vpn1;
+  PTE lv1_pte = paddr_read(lv1_pte_pa, sizeof(PTE));
   assert(lv1_pte & PTE_V);
-  //printf("lv1_pte: 0x%x\n", (unsigned int)lv1_pte);
 
   paddr_t lv0_pg_pa = PTE2PPN(lv1_pte) << 12;
-  PTE *lv0_pg = (PTE *)guest_to_host(lv0_pg_pa);
   uintptr_t vpn0 = VPN0(vaddr);
-  PTE lv0_pte = *(lv0_pg + vpn0);
+  paddr_t lv0_pte_pa = lv0_pg_pa + sizeof(PTE) * vpn0;
+  PTE lv0_pte = paddr_read(lv0_pte_pa, sizeof(PTE));
   assert(lv0_pte & PTE_V);
-  printf("lv0_pg_pa: 0x%x, lv0_pte: 0x%x\n", lv0_pg_pa, (unsigned int)lv0_pte);
+
   paddr_t pg_pa = (PTE2PPN(lv0_pte) << 12);
   return pg_pa | MEM_RET_OK;
 }

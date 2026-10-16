@@ -35,6 +35,9 @@ paddr_t isa_mmu_translate(vaddr_t vaddr, int len, int type) {
   uintptr_t vpn1 = VPN1(vaddr);
   paddr_t lv1_pte_pa = lv1_pg_pa + sizeof(PTE) * vpn1;
   PTE lv1_pte = paddr_read(lv1_pte_pa, sizeof(PTE));
+  if ((lv1_pte & PTE_V) == 0) {
+    printf("vaddr: 0x%x, satp: 0x%x\n", vaddr, csr(SATP));
+  }
   assert(lv1_pte & PTE_V);
 
   paddr_t lv0_pg_pa = PTE2PPN(lv1_pte) << 12;

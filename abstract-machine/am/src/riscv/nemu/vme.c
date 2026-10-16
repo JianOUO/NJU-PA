@@ -106,7 +106,7 @@ Context *ucontext(AddrSpace *as, Area kstack, void *entry) {
   */
   memset((void *)context, 0, sizeof(Context));
   context->pdir = as->ptr;
-  context->mepc = (uintptr_t)entry - 4;
+  context->mepc = (uintptr_t)entry;
   context->mstatus = 0x1880; // MPIE = 1u << 7;
   return context;
 }

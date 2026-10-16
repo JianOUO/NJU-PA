@@ -18,7 +18,7 @@ Context* __am_irq_handle(Context *c) {
         #else
         uintptr_t syscall_num = c->gpr[17]; // $a7
         #endif
-
+        c->mepc += 4; // mepc 指向 ecall，应该 +4 指向下一条指令
         if (syscall_num == (uintptr_t)(-1)) {
           ev.event = EVENT_YIELD;
           break;
@@ -28,6 +28,7 @@ Context* __am_irq_handle(Context *c) {
         }
       }
       case IRQ_TIMER: {
+        // mepc == dnpc, 不需要改
         ev.event = EVENT_IRQ_TIMER;
         break;
       }
@@ -66,7 +67,7 @@ Context *kcontext(Area kstack, void (*entry)(void *), void *arg) {
   a0设置为arg
   */
   memset((void *)context, 0, sizeof(Context));
-  context->mepc = (uintptr_t)entry - 4;
+  context->mepc = (uintptr_t)entry;
   context->mstatus = 0x1880; // MPIE = 1u << 7;
   context->GPRx = (uintptr_t)arg;
   context->pdir = NULL;

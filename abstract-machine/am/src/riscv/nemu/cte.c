@@ -27,6 +27,10 @@ Context* __am_irq_handle(Context *c) {
           break;
         }
       }
+      case IRQ_TIMER: {
+        ev.event = EVENT_IRQ_TIMER;
+        break;
+      }
       default: ev.event = EVENT_ERROR; break;
     }
 
@@ -58,12 +62,12 @@ Context *kcontext(Area kstack, void (*entry)(void *), void *arg) {
   初始化上下文
   先全部置零
   epc设置为entry-4，因为后续在__am_asm_trap要+4
-  为了保证DiffTest的正确运行，mstatus设置为0x1800
+  为了保证DiffTest的正确运行 和 mret之后开中断，mstatus设置为0x1880
   a0设置为arg
   */
   memset((void *)context, 0, sizeof(Context));
   context->mepc = (uintptr_t)entry - 4;
-  context->mstatus = 0x1800;
+  context->mstatus = 0x1880; // MPIE = 1u << 7;
   context->GPRx = (uintptr_t)arg;
   context->pdir = NULL;
   return context;

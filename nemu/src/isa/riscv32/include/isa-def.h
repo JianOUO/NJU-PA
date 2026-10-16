@@ -18,6 +18,10 @@
 
 #include <common.h>
 
+#define MIE (1u << 3)
+#define MPIE (1u << 7)
+#define IRQ_TIMER 0x80000007
+
 enum { MSTATUS, MTVEC, MEPC, MCAUSE, SATP, CSR_LEN };
 
 // 这里变量的顺序必须先是gpr和pc，然后才是其他变量，不然difftest会出错
@@ -25,6 +29,7 @@ typedef struct {
   word_t gpr[MUXDEF(CONFIG_RVE, 16, 32)];
   vaddr_t pc;
   word_t csr[CSR_LEN];
+  bool INTR;
 } MUXDEF(CONFIG_RV64, riscv64_CPU_state, riscv32_CPU_state);
 
 // decode

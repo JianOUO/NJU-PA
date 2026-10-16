@@ -30,9 +30,11 @@ enum { MODE_U, MODE_S, MODE_M = 3 };
 #if __riscv_xlen == 64
 #define MSTATUS_SXL  (2ull << 34) // S-mode 寄存器宽度（64位）
 #define MSTATUS_UXL  (2ull << 32) // U-mode 寄存器宽度（64位）
+#define IRQ_TIMER 0x8000000000000007  // for riscv64
 #else
 #define MSTATUS_SXL  0
 #define MSTATUS_UXL  0
+#define IRQ_TIMER 0x80000007  // for riscv32
 #endif
 
 #endif

@@ -15,6 +15,8 @@ static Context* do_event(Event e, Context* c) {
       break;
     }
     case EVENT_IRQ_TIMER: {
+      printf("EVENT_IRQ_TIMER\n"); 
+      c = schedule(c);
       break;
     }
     case EVENT_IRQ_IODEV: {

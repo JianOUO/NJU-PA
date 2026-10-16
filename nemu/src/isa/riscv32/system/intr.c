@@ -13,6 +13,7 @@
 * See the Mulan PSL v2 for more details.
 ***************************************************************************************/
 
+#include "isa-def.h"
 #include <isa.h>
 
 #ifdef CONFIG_ETRACE
@@ -25,6 +26,12 @@ word_t isa_raise_intr(word_t NO, vaddr_t epc) {
    */
   cpu.csr[MCAUSE] = NO;
   cpu.csr[MEPC] = epc;
+  if (cpu.csr[MSTATUS] & MIE) {
+    cpu.csr[MSTATUS] |= MPIE;
+  } else {
+    cpu.csr[MSTATUS] &= (~MPIE);
+  }
+  cpu.csr[MSTATUS] &= (~MIE);
   #ifdef CONFIG_ETRACE
   etrace(cpu.csr[MCAUSE], cpu.csr[MSTATUS], cpu.csr[MEPC]);
   #endif
@@ -32,5 +39,9 @@ word_t isa_raise_intr(word_t NO, vaddr_t epc) {
 }
 
 word_t isa_query_intr() {
+  if (cpu.csr[MSTATUS] & MIE && cpu.INTR) {
+    cpu.INTR = false;
+    return IRQ_TIMER; 
+  }
   return INTR_EMPTY;
 }

@@ -100,11 +100,11 @@ Context *ucontext(AddrSpace *as, Area kstack, void *entry) {
   初始化上下文
   先全部置零
   epc设置为entry-4，因为后续在__am_asm_trap要+4
-  为了保证DiffTest的正确运行，mstatus设置为0x1800
+  为了保证DiffTest的正确运行 和 mret之后开中断，mstatus设置为0x1880
   */
   memset((void *)context, 0, sizeof(Context));
   context->pdir = as->ptr;
   context->mepc = (uintptr_t)entry - 4;
-  context->mstatus = 0x1800;
+  context->mstatus = 0x1880; // MPIE = 1u << 7;
   return context;
 }

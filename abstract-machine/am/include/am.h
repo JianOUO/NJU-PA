@@ -39,6 +39,9 @@ typedef struct {
   void *ptr;
 } AddrSpace;
 
+#define KERNEL 0
+#define USER   1
+
 #ifdef __cplusplus
 extern "C" {
 #endif

@@ -18,7 +18,7 @@ Context* __am_irq_handle(Context *c) {
         #else
         uintptr_t syscall_num = c->gpr[17]; // $a7
         #endif
-        c->mepc += 4; // mepc 指向 ecall，应该 +4 指向下一条指令
+        c->mepc += 4; // mepc 指向当前指令，应该 +4 指向下一条指令
         if (syscall_num == (uintptr_t)(-1)) {
           ev.event = EVENT_YIELD;
           break;
@@ -49,6 +49,9 @@ bool cte_init(Context*(*handler)(Event, Context*)) {
   // initialize exception entry
   asm volatile("csrw mtvec, %0" : : "r"(__am_asm_trap));
 
+  // 内核态，mscratch(ksp) == 0
+  asm volatile("csrw mscratch, zero");
+
   // register event handler
   user_handler = handler;
 
@@ -71,6 +74,8 @@ Context *kcontext(Area kstack, void (*entry)(void *), void *arg) {
   context->mstatus = 0x1880; // MPIE = 1u << 7;
   context->GPRx = (uintptr_t)arg;
   context->pdir = NULL;
+  context->np = KERNEL;
+  context->gpr[2] = (uintptr_t)kstack.end; // sp
   return context;
 }
 

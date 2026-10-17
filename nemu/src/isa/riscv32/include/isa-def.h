@@ -22,7 +22,7 @@
 #define MPIE (1u << 7)
 #define IRQ_TIMER 0x80000007
 
-enum { MSTATUS, MTVEC, MEPC, MCAUSE, SATP, CSR_LEN };
+enum { MSTATUS, MTVEC, MEPC, MCAUSE, SATP, MSCRATCH, CSR_LEN };
 
 // 这里变量的顺序必须先是gpr和pc，然后才是其他变量，不然difftest会出错
 typedef struct {

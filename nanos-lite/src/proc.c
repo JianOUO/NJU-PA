@@ -74,10 +74,13 @@ void context_uload(PCB *pcb, const char *filename, char *const argv[], char *con
 }
 
 void init_proc() {
-  context_kload(&pcb[0], hello_fun, (void *)0);
-  char *argv[] = {"/bin/pal", NULL};
-  char *envp[] = {NULL};
-  context_uload(&pcb[1], "/bin/pal", argv, envp);
+  //context_kload(&pcb[0], hello_fun, (void *)0);
+  char *argv0[] = {"/bin/nterm", NULL};
+  char *envp0[] = {NULL};
+  context_uload(&pcb[0], "/bin/nterm", argv0, envp0);
+  char *argv1[] = {"/bin/hello", NULL};
+  char *envp1[] = {NULL};
+  context_uload(&pcb[1], "/bin/hello", argv1, envp1);
   //context_kload(&pcb[1], hello_fun, (void *)1);
   switch_boot_pcb();
 
